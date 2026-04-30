@@ -83,7 +83,7 @@ body{background:var(--bg);color:#eee;font-family:'Share Tech Mono',monospace;ove
 #grid2d-container{position:fixed;top:80px;left:260px;right:220px;bottom:290px;z-index:9;background:var(--panel-bg);border:1px solid var(--border);border-radius:8px;backdrop-filter:blur(12px);overflow-x:auto;overflow-y:auto;display:none;padding:12px}
 #grid2d-container.show{display:block}
 #grid2d-container h3{font-family:'Orbitron',sans-serif;font-size:12px;color:var(--neon-green);letter-spacing:2px;margin-bottom:10px;text-shadow:0 0 8px var(--neon-green)}
-#grid2d{display:grid;gap:0;font-size:12px;font-family:'Orbitron',sans-serif}
+#grid2d{display:grid;gap:0;font-size:12px;font-family:'Orbitron',sans-serif;width:max-content;padding-right:12px;padding-bottom:12px}
 .g2d-cell{min-width:48px;height:32px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(57,255,20,0.12);background:rgba(10,10,25,0.6);color:#aaa;font-size:11px;font-weight:700;transition:all 0.3s}
 .g2d-label{min-width:60px;background:rgba(57,255,20,0.06);color:var(--neon-green);font-size:10px;letter-spacing:1px;position:sticky;left:0;z-index:2}
 .g2d-cell.current{border-color:#fff;box-shadow:0 0 8px rgba(255,255,255,0.4)}
