@@ -9,20 +9,33 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--bg-deep:#070B14;--bg-panel:#0D1421;--bg-card:#111827;--border:#1E2D45;--accent-blue:#4FC3F7;--accent-violet:#7C4DFF;--accent-teal:#00E5CC;--fault-red:#FF5252;--text-primary:#E8EAF6;--text-muted:#546E7A}
+:root{--bg-deep:#070B14;--bg-panel:#0D1421;--bg-card:#111827;--border:#1E2D45;--accent-blue:#4FC3F7;--accent-violet:#7C4DFF;--accent-teal:#00E5CC;--fault-red:#FF5252;--text-primary:#E8EAF6;--text-muted:#546E7A;--left-panel-width:240px;--main-offset:260px}
 body{background:var(--bg-deep);color:var(--text-primary);font-family:'Space Grotesk',sans-serif;overflow:hidden;height:100vh;width:100vw;overflow-y:auto}
+body.sidebar-collapsed{--left-panel-width:44px;--main-offset:64px}
 #canvas-container{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0}
 #canvas-vignette{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1;pointer-events:none;background:radial-gradient(ellipse at center, transparent 40%, #070B14 100%)}
 /* PANELS */
 .panel{position:fixed;z-index:10;background:rgba(13,20,33,0.85);border:1px solid var(--border);border-radius:12px;backdrop-filter:blur(12px);padding:16px;font-size:12px;overflow:hidden}
-.panel h3{font-family:'Space Grotesk',sans-serif;font-size:13px;color:var(--text-primary);text-transform:uppercase;letter-spacing:2px;margin-bottom:8px}
-#left-panel{top:10px;left:10px;width:240px;bottom:60px;display:flex;flex-direction:column;gap:12px}
-#page-table-container{flex:1;overflow-y:auto;min-height:80px}
+#left-panel{top:10px;left:10px;width:var(--left-panel-width);bottom:60px;display:flex;flex-direction:column;gap:12px;transition:width 0.3s ease, padding 0.3s ease}
+body.sidebar-collapsed #left-panel{padding:16px 8px}
+
+.collapsible-section{display:flex;flex-direction:column;flex:1;min-height:24px;transition:all 0.3s ease;overflow:hidden}
+.collapsible-section.collapsed{flex:none;height:24px}
+.sect-header{display:flex;justify-content:space-between;align-items:center;min-height:24px}
+body.sidebar-collapsed .sect-header{flex-direction:column;justify-content:flex-start;gap:12px;height:100%}
+.sect-title{font-family:'Space Grotesk',sans-serif;font-size:13px;color:var(--text-primary);text-transform:uppercase;letter-spacing:2px;margin:0;white-space:nowrap;transition:all 0.3s ease}
+body.sidebar-collapsed .sect-title{writing-mode:vertical-rl;transform:rotate(180deg);margin-top:8px}
+
+.collapse-btn{width:20px;height:20px;border-radius:50%;background:rgba(79,195,247,0.1);border:1px solid var(--border);color:var(--accent-blue);font-size:14px;cursor:pointer;display:flex;justify-content:center;align-items:center;transition:all 0.2s;flex-shrink:0}
+.collapse-btn:hover{background:rgba(79,195,247,0.25);border-color:var(--accent-blue)}
+.sect-content{flex:1;overflow-y:auto;opacity:1;transition:opacity 0.3s ease;margin-top:8px}
+.collapsible-section.collapsed .sect-content{opacity:0;pointer-events:none;margin-top:0}
+.collapsible-section + .collapsible-section {border-top:1px solid var(--border);padding-top:12px}
+
 #page-table{width:100%;border-collapse:collapse;font-family:'JetBrains Mono',monospace}
 #page-table th,#page-table td{border:1px solid var(--border);padding:4px 6px;text-align:center;font-size:11px}
 #page-table th{background:var(--bg-card);color:var(--text-muted)}
 #page-table tbody tr:nth-child(even){background:rgba(255,255,255,0.02)}
-#event-log-container{flex:1;overflow-y:auto;min-height:80px;border-top:1px solid var(--border);padding-top:12px}
 #event-log{list-style:none;font-size:11px;font-family:'JetBrains Mono',monospace}
 #event-log li{padding:4px 8px;border-bottom:1px solid rgba(255,255,255,0.05);transition:background 0.2s}
 #event-log li:hover{background:rgba(255,255,255,0.02)}
@@ -35,11 +48,11 @@ body{background:var(--bg-deep);color:var(--text-primary);font-family:'Space Grot
 .stat-label{color:var(--text-muted);text-transform:uppercase;letter-spacing:1px}
 .stat-value{color:var(--accent-blue);font-weight:600}
 
-#bottom-panel{position:fixed;bottom:60px;left:260px;right:10px;z-index:10;background:rgba(13,20,33,0.85);border:1px solid var(--border);border-radius:12px;backdrop-filter:blur(12px);padding:16px;max-height:220px}
+#bottom-panel{position:fixed;bottom:60px;left:var(--main-offset);right:10px;z-index:10;background:rgba(13,20,33,0.85);border:1px solid var(--border);border-radius:12px;backdrop-filter:blur(12px);padding:16px;max-height:220px;transition:left 0.3s ease}
 #chart-container{width:100%;height:160px}
 
 /* REF STRING CHIPS */
-#ref-chips{position:fixed;top:10px;left:260px;right:10px;z-index:12;display:flex;flex-wrap:wrap;gap:6px;padding:12px 16px;background:rgba(13,20,33,0.85);border:1px solid var(--border);border-radius:12px;backdrop-filter:blur(12px);align-items:center}
+#ref-chips{position:fixed;top:10px;left:var(--main-offset);right:10px;z-index:12;display:flex;flex-wrap:wrap;gap:6px;padding:12px 16px;background:rgba(13,20,33,0.85);border:1px solid var(--border);border-radius:12px;backdrop-filter:blur(12px);align-items:center;transition:left 0.3s ease}
 #ref-chips-label{font-family:'Space Grotesk',sans-serif;font-size:12px;color:var(--text-muted);letter-spacing:1px;margin-right:8px}
 .ref-chip{display:inline-flex;align-items:center;justify-content:center;width:32px;height:28px;border-radius:999px;border:1px solid var(--border);background:var(--bg-card);color:var(--text-muted);font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;transition:all 0.3s}
 .ref-chip.done{background:var(--bg-panel);color:var(--text-primary);border-color:var(--border)}
@@ -48,7 +61,7 @@ body{background:var(--bg-deep);color:var(--text-primary);font-family:'Space Grot
 @keyframes pulse-ring{0%{box-shadow:0 0 0 0 rgba(79,195,247,0.4)}70%{box-shadow:0 0 0 6px rgba(79,195,247,0)}100%{box-shadow:0 0 0 0 rgba(79,195,247,0)}}
 
 /* HISTORY TABLE */
-#history-panel{position:fixed;bottom:60px;left:260px;right:10px;z-index:11;background:rgba(13,20,33,0.85);border:1px solid var(--border);border-radius:12px;backdrop-filter:blur(12px);padding:12px 16px;max-height:180px;overflow:auto;display:none}
+#history-panel{position:fixed;bottom:60px;left:var(--main-offset);right:10px;z-index:11;background:rgba(13,20,33,0.85);border:1px solid var(--border);border-radius:12px;backdrop-filter:blur(12px);padding:12px 16px;max-height:180px;overflow:auto;display:none;transition:left 0.3s ease}
 #history-panel.show{display:block}
 #history-panel h3{font-family:'Space Grotesk',sans-serif;font-size:12px;color:var(--text-primary);letter-spacing:1px;margin-bottom:8px}
 #history-table{width:100%;border-collapse:collapse;font-size:11px;font-family:'JetBrains Mono',monospace}
@@ -89,7 +102,7 @@ body{background:var(--bg-deep);color:var(--text-primary);font-family:'Space Grot
 .view-btn:hover:not(.active){color:var(--text-primary)}
 
 /* 2D GRID */
-#grid2d-container{position:fixed;top:130px;left:260px;right:10px;bottom:100px;z-index:9;background:var(--bg-panel);border:1px solid var(--border);border-radius:8px;overflow-x:auto;overflow-y:auto;display:none;padding:16px}
+#grid2d-container{position:fixed;top:130px;left:var(--main-offset);right:10px;bottom:100px;z-index:9;background:var(--bg-panel);border:1px solid var(--border);border-radius:8px;overflow-x:auto;overflow-y:auto;display:none;padding:16px;transition:left 0.3s ease}
 #grid2d-container.show{display:block}
 #grid2d-container h3{font-family:'Space Grotesk',sans-serif;font-size:13px;color:var(--text-primary);letter-spacing:1px;margin-bottom:12px}
 #grid2d{display:grid;gap:0;font-size:12px;font-family:'JetBrains Mono',monospace;width:max-content;padding-right:16px;padding-bottom:16px}
@@ -120,13 +133,23 @@ body{background:var(--bg-deep);color:var(--text-primary);font-family:'Space Grot
 <div id="grid2d-container"><h3>2D Frame Grid</h3><div id="grid2d"></div></div>
 
 <div class="panel" id="left-panel">
-  <div id="page-table-container">
-    <h3>Page Table</h3>
-    <table id="page-table"><thead><tr><th>Page</th><th>Frame</th><th>Valid</th></tr></thead><tbody id="page-table-body"></tbody></table>
+  <div class="collapsible-section" id="sect-page-table">
+    <div class="sect-header">
+      <h3 class="sect-title">Page Table</h3>
+      <button class="collapse-btn" onclick="toggleSection('sect-page-table')">−</button>
+    </div>
+    <div class="sect-content" id="page-table-container">
+      <table id="page-table"><thead><tr><th>Page</th><th>Frame</th><th>Valid</th></tr></thead><tbody id="page-table-body"></tbody></table>
+    </div>
   </div>
-  <div id="event-log-container">
-    <h3>Event Log</h3>
-    <ul id="event-log"></ul>
+  <div class="collapsible-section" id="sect-event-log">
+    <div class="sect-header">
+      <h3 class="sect-title">Event Log</h3>
+      <button class="collapse-btn" onclick="toggleSection('sect-event-log')">−</button>
+    </div>
+    <div class="sect-content" id="event-log-container">
+      <ul id="event-log"></ul>
+    </div>
   </div>
 </div>
 
@@ -158,6 +181,22 @@ body{background:var(--bg-deep);color:var(--text-primary);font-family:'Space Grot
 <script type="module">
 import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+window.toggleSection = function(id) {
+  const sect = document.getElementById(id);
+  const isCollapsed = sect.classList.toggle('collapsed');
+  const btn = sect.querySelector('.collapse-btn');
+  btn.textContent = isCollapsed ? '+' : '−';
+  
+  const ptCol = document.getElementById('sect-page-table').classList.contains('collapsed');
+  const elCol = document.getElementById('sect-event-log').classList.contains('collapsed');
+  
+  if(ptCol && elCol) {
+    document.body.classList.add('sidebar-collapsed');
+  } else {
+    document.body.classList.remove('sidebar-collapsed');
+  }
+};
 
 /* ========== STATE ========== */
 const state = {
@@ -310,7 +349,7 @@ function updatePageTable() {
   pageTableBody.innerHTML = '';
   state.pageTable.forEach((frame, page) => {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td style="color:${getPageColor(page)}">P${page}</td><td>F${frame}</td><td style="color:${state.frames[frame]===page?'var(--accent-teal)':'var(--fault-red)'};font-size:14px">${state.frames[frame]===page?'●':'○'}</td>`;
+    tr.innerHTML = `<td style="color:${getPageColor(page)};font-weight:600">P${page}</td><td>F${frame}</td><td style="color:${state.frames[frame]===page?'var(--accent-teal)':'var(--fault-red)'};font-size:14px">${state.frames[frame]===page?'●':'○'}</td>`;
     pageTableBody.appendChild(tr);
   });
 }
@@ -576,7 +615,7 @@ function initChart() {
   const ctx = $('compare-chart').getContext('2d');
   chart = new Chart(ctx, {
     type:'bar',
-    data:{labels:['FIFO','LRU','MRU','Optimal'],datasets:[{label:'Page Faults',data:[0,0,0,0],backgroundColor:['rgba(79,195,247,0.7)','rgba(124,77,255,0.7)','rgba(255,112,67,0.7)','rgba(0,229,204,0.7)'],borderColor:['#4FC3F7','#7C4DFF','#FF7043','#00E5CC'],borderWidth:2}]},
+    data:{labels:['FIFO','LRU','MRU','Optimal'],datasets:[{label:'Page Faults',data:[0,0,0,0],backgroundColor:['#4FC3F7','#7C4DFF','#FF7043','#00E5CC'],borderColor:['#4FC3F7','#7C4DFF','#FF7043','#00E5CC'],borderWidth:0,borderRadius:4}]},
     options:{responsive:true,maintainAspectRatio:false,
       scales:{y:{beginAtZero:true,ticks:{color:'#546E7A',stepSize:1,precision:0},grid:{color:'#1E2D45'}},x:{ticks:{color:'#E8EAF6',font:{family:'Space Grotesk'}},grid:{color:'#1E2D45'}}},
       plugins:{legend:{labels:{color:'#E8EAF6',font:{family:'Space Grotesk'}}},
