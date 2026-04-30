@@ -109,7 +109,7 @@ body{background:var(--bg);color:#eee;font-family:'Share Tech Mono',monospace;ove
 <div id="controls">
   <label>REF STRING</label><input type="text" id="inp-ref" value="1 2 3 4 1 2 5 1 2 3 4 5"/>
   <label>FRAMES</label><input type="number" id="inp-frames" value="3" min="1" max="6"/>
-  <select id="sel-algo"><option value="FIFO">FIFO</option><option value="LRU">LRU</option><option value="OPT">Optimal</option></select>
+  <select id="sel-algo"><option value="FIFO">FIFO</option><option value="LRU">LRU</option><option value="MRU">MRU</option><option value="OPT">Optimal</option></select>
   <select id="sel-speed"><option value="1500">Slow</option><option value="900" selected>Normal</option><option value="400">Fast</option></select>
   <button class="btn" id="btn-run">▶ RUN</button>
   <button class="btn btn-cyan" id="btn-step">⏭ STEP</button>
@@ -127,7 +127,7 @@ import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 const state = {
   refString: [], frames: [], frameCount: 3, algo: 'FIFO',
   speed: 900, running: false, paused: false, stepIndex: 0,
-  faults: 0, hits: 0, fifoQueue: [], lruOrder: [],
+  faults: 0, hits: 0, fifoQueue: [], lruOrder: [], mruOrder: [],
   pageTable: new Map(), animQueue: null,
   stepping: false, stepResolve: null, simStarted: false,
   loadOrder: [], loadCounter: 0
@@ -381,12 +381,16 @@ function processAnims(now) {
 }
 
 /* ========== ALGORITHMS ========== */
-function runAlgoStep(page, index, frames, frameCount, algo, fifoQ, lruOrd, refStr, loadOrd, loadCtr) {
+function runAlgoStep(page, index, frames, frameCount, algo, fifoQ, lruOrd, refStr, loadOrd, loadCtr, mruOrd) {
   const fi = frames.indexOf(page);
   if(fi !== -1) {
     if(algo === 'LRU') {
       lruOrd.splice(lruOrd.indexOf(page), 1);
       lruOrd.push(page);
+    }
+    if(algo === 'MRU') {
+      mruOrd.splice(mruOrd.indexOf(page), 1);
+      mruOrd.push(page);
     }
     return {hit:true, frameIdx:fi, victim:-1, loadCtr};
   }
@@ -397,6 +401,9 @@ function runAlgoStep(page, index, frames, frameCount, algo, fifoQ, lruOrd, refSt
       frameIdx = frames.indexOf(victim);
     } else if(algo === 'LRU') {
       victim = lruOrd.shift();
+      frameIdx = frames.indexOf(victim);
+    } else if(algo === 'MRU') {
+      victim = mruOrd.pop();
       frameIdx = frames.indexOf(victim);
     } else {
       /* OPT with FIFO tie-breaking for Infinity distances */
@@ -413,7 +420,6 @@ function runAlgoStep(page, index, frames, frameCount, algo, fifoQ, lruOrd, refSt
       if(candidates.length === 1) {
         frameIdx = candidates[0];
       } else {
-        /* Tie-break: evict the one loaded earliest (smallest loadOrd value) */
         frameIdx = candidates.reduce((best, f) =>
           (loadOrd[f] < loadOrd[best]) ? f : best
         , candidates[0]);
@@ -425,6 +431,7 @@ function runAlgoStep(page, index, frames, frameCount, algo, fifoQ, lruOrd, refSt
   frames[frameIdx] = page;
   fifoQ.push(page);
   if(algo === 'LRU') lruOrd.push(page);
+  if(algo === 'MRU') mruOrd.push(page);
   if(loadOrd) loadOrd[frameIdx] = loadCtr;
   return {hit:false, frameIdx, victim, loadCtr: loadCtr + 1};
 }
@@ -432,12 +439,12 @@ function runAlgoStep(page, index, frames, frameCount, algo, fifoQ, lruOrd, refSt
 /* Silent run for comparison */
 function silentRun(refStr, frameCount, algo) {
   const frames = Array(frameCount).fill(-1);
-  const fifoQ = [], lruOrd = [];
+  const fifoQ = [], lruOrd = [], mruOrd = [];
   const loadOrd = Array(frameCount).fill(0);
   let loadCtr = 0;
   let faults = 0;
   refStr.forEach((page, idx) => {
-    const r = runAlgoStep(page, idx, frames, frameCount, algo, fifoQ, lruOrd, refStr, loadOrd, loadCtr);
+    const r = runAlgoStep(page, idx, frames, frameCount, algo, fifoQ, lruOrd, refStr, loadOrd, loadCtr, mruOrd);
     loadCtr = r.loadCtr !== undefined ? r.loadCtr : loadCtr;
     if(!r.hit) faults++;
   });
@@ -453,7 +460,7 @@ function initSim() {
   if(!refStr.length) return false;
   state.refString = refStr; state.frameCount = frameCount; state.algo = algo; state.speed = speed;
   state.frames = Array(frameCount).fill(-1);
-  state.fifoQueue = []; state.lruOrder = [];
+  state.fifoQueue = []; state.lruOrder = []; state.mruOrder = [];
   state.loadOrder = Array(frameCount).fill(0); state.loadCounter = 0;
   state.faults = 0; state.hits = 0; state.stepIndex = 0;
   state.pageTable.clear(); state.simStarted = true;
@@ -470,7 +477,7 @@ async function executeStep(i) {
   const page = state.refString[i];
   state.stepIndex = i + 1;
   updateRefChips(state.stepIndex);
-  const result = runAlgoStep(page, i, state.frames, state.frameCount, state.algo, state.fifoQueue, state.lruOrder, state.refString, state.loadOrder, state.loadCounter);
+  const result = runAlgoStep(page, i, state.frames, state.frameCount, state.algo, state.fifoQueue, state.lruOrder, state.refString, state.loadOrder, state.loadCounter, state.mruOrder);
   if(result.loadCtr !== undefined) state.loadCounter = result.loadCtr;
   if(result.hit) {
     state.hits++;
@@ -531,7 +538,7 @@ function initChart() {
   const ctx = $('compare-chart').getContext('2d');
   chart = new Chart(ctx, {
     type:'bar',
-    data:{labels:['FIFO','LRU','Optimal'],datasets:[{label:'Page Faults',data:[0,0,0],backgroundColor:['rgba(255,51,51,0.7)','rgba(0,170,255,0.7)','rgba(170,68,255,0.7)'],borderColor:['#ff3333','#00aaff','#aa44ff'],borderWidth:2}]},
+    data:{labels:['FIFO','LRU','MRU','Optimal'],datasets:[{label:'Page Faults',data:[0,0,0,0],backgroundColor:['rgba(255,51,51,0.7)','rgba(0,170,255,0.7)','rgba(255,136,0,0.7)','rgba(170,68,255,0.7)'],borderColor:['#ff3333','#00aaff','#ff8800','#aa44ff'],borderWidth:2}]},
     options:{responsive:true,maintainAspectRatio:false,
       scales:{y:{beginAtZero:true,ticks:{color:'#888',stepSize:1,precision:0},grid:{color:'rgba(57,255,20,0.1)'}},x:{ticks:{color:'#ccc',font:{family:'Orbitron'}},grid:{color:'rgba(57,255,20,0.05)'}}},
       plugins:{legend:{labels:{color:'#ccc',font:{family:'Share Tech Mono'}}},
@@ -549,8 +556,9 @@ function compareAll() {
   if(!refStr.length) return;
   const f1 = silentRun([...refStr], fc, 'FIFO');
   const f2 = silentRun([...refStr], fc, 'LRU');
-  const f3 = silentRun([...refStr], fc, 'OPT');
-  chart.data.datasets[0].data = [f1, f2, f3];
+  const f3 = silentRun([...refStr], fc, 'MRU');
+  const f4 = silentRun([...refStr], fc, 'OPT');
+  chart.data.datasets[0].data = [f1, f2, f3, f4];
   chart.options.scales.y.max = refStr.length + 1;
   chart.update();
 }
@@ -609,7 +617,7 @@ $('btn-step').addEventListener('click', () => {
 function doReset() {
   state.running = false; state.paused = false; state.simStarted = false;
   state.faults = 0; state.hits = 0; state.stepIndex = 0;
-  state.frames = []; state.fifoQueue = []; state.lruOrder = [];
+  state.frames = []; state.fifoQueue = []; state.lruOrder = []; state.mruOrder = [];
   state.loadOrder = []; state.loadCounter = 0;
   state.pageTable.clear();
   eventLog.innerHTML = '';
