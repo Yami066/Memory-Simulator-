@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Virtual Memory Page Replacement Simulator</title>
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+:root{--neon-green:#39ff14;--neon-magenta:#ff00ff;--neon-red:#ff003c;--neon-cyan:#00fff7;--bg:#0a0a0f;--panel-bg:rgba(10,10,20,0.85);--border:rgba(57,255,20,0.25)}
+body{background:var(--bg);color:#eee;font-family:'Share Tech Mono',monospace;overflow:hidden;height:100vh;width:100vw}
+#canvas-container{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0}
+/* PANELS */
+.panel{position:fixed;z-index:10;background:var(--panel-bg);border:1px solid var(--border);border-radius:8px;backdrop-filter:blur(12px);padding:12px;font-size:12px;overflow:hidden}
+.panel h3{font-family:'Orbitron',sans-serif;font-size:13px;color:var(--neon-green);text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;text-shadow:0 0 8px var(--neon-green)}
+#left-panel{top:10px;left:10px;width:240px;bottom:60px;display:flex;flex-direction:column;gap:8px}
+#page-table-container{flex:1;overflow-y:auto;min-height:80px}
+#page-table{width:100%;border-collapse:collapse}
+#page-table th,#page-table td{border:1px solid var(--border);padding:3px 6px;text-align:center;font-size:11px}
+#page-table th{background:rgba(57,255,20,0.1);color:var(--neon-green)}
+#page-table td{color:#ccc}
+#event-log-container{flex:1;overflow-y:auto;min-height:80px;border-top:1px solid var(--border);padding-top:8px}
+#event-log{list-style:none;font-size:11px}
+#event-log li{padding:2px 0;border-bottom:1px solid rgba(255,255,255,0.05)}
+.log-fault{color:var(--neon-red)}
+.log-hit{color:var(--neon-green)}
+#right-panel{top:10px;right:10px;width:200px}
+.stat-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.05)}
+.stat-label{color:#888}.stat-value{color:var(--neon-cyan);font-weight:bold}
+#bottom-panel{position:fixed;bottom:60px;left:260px;right:210px;z-index:10;background:var(--panel-bg);border:1px solid var(--border);border-radius:8px;backdrop-filter:blur(12px);padding:12px;max-height:220px}
+#chart-container{width:100%;height:180px}
+/* CENTER FLASH */
+#center-flash{position:fixed;top:35%;left:50%;transform:translate(-50%,-50%);z-index:20;font-family:'Orbitron',sans-serif;font-size:48px;font-weight:900;pointer-events:none;opacity:0;transition:opacity 0.15s;text-shadow:0 0 30px currentColor,0 0 60px currentColor}
+/* CONTROLS */
+#controls{position:fixed;bottom:0;left:0;right:0;z-index:15;height:55px;background:rgba(5,5,15,0.95);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:center;gap:10px;padding:0 16px;flex-wrap:wrap}
+#controls label{color:var(--neon-green);font-size:11px;font-family:'Orbitron',sans-serif;letter-spacing:1px}
+#controls input,#controls select{background:rgba(20,20,40,0.9);color:#eee;border:1px solid var(--border);border-radius:4px;padding:5px 8px;font-family:'Share Tech Mono',monospace;font-size:12px}
+#controls input[type=text]{width:220px}
+#controls input[type=number]{width:50px}
+.btn{background:transparent;color:var(--neon-green);border:1px solid var(--neon-green);border-radius:4px;padding:6px 14px;font-family:'Orbitron',sans-serif;font-size:11px;cursor:pointer;letter-spacing:1px;transition:all 0.2s}
+.btn:hover{background:var(--neon-green);color:#000;box-shadow:0 0 15px var(--neon-green)}
+.btn-red{color:var(--neon-red);border-color:var(--neon-red)}
+.btn-red:hover{background:var(--neon-red);color:#fff;box-shadow:0 0 15px var(--neon-red)}
+.btn-magenta{color:var(--neon-magenta);border-color:var(--neon-magenta)}
+.btn-magenta:hover{background:var(--neon-magenta);color:#fff;box-shadow:0 0 15px var(--neon-magenta)}
+/* FRAME LABELS */
+.frame-label{position:absolute;z-index:5;font-family:'Orbitron',sans-serif;font-size:16px;font-weight:900;color:#fff;text-shadow:0 0 10px var(--neon-cyan),0 0 20px var(--neon-cyan);pointer-events:none;transform:translate(-50%,-50%);transition:color 0.3s,text-shadow 0.3s}
+/* Scrollbar */
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--neon-green);border-radius:2px}
+</style>
+</head>
+<body>
+<div id="canvas-container"></div>
+<div id="center-flash"></div>
+
+<div class="panel" id="left-panel">
+  <div id="page-table-container">
+    <h3>Page Table</h3>
+    <table id="page-table"><thead><tr><th>Page</th><th>Frame</th><th>Valid</th></tr></thead><tbody id="page-table-body"></tbody></table>
+  </div>
+  <div id="event-log-container">
+    <h3>Event Log</h3>
+    <ul id="event-log"></ul>
+  </div>
+</div>
+
+<div class="panel" id="right-panel">
+  <h3>Statistics</h3>
+  <div class="stat-row"><span class="stat-label">Accesses</span><span class="stat-value" id="stat-accesses">0</span></div>
+  <div class="stat-row"><span class="stat-label">Page Faults</span><span class="stat-value" id="stat-faults">0</span></div>
+  <div class="stat-row"><span class="stat-label">Page Hits</span><span class="stat-value" id="stat-hits">0</span></div>
+  <div class="stat-row"><span class="stat-label">Fault Rate</span><span class="stat-value" id="stat-rate">0%</span></div>
+  <div class="stat-row"><span class="stat-label">Algorithm</span><span class="stat-value" id="stat-algo">FIFO</span></div>
+  <div class="stat-row"><span class="stat-label">Step</span><span class="stat-value" id="stat-step">0 / 0</span></div>
+</div>
+
+<div id="bottom-panel"><h3>Algorithm Comparison</h3><div id="chart-container"><canvas id="compare-chart"></canvas></div></div>
+
+<div id="controls">
+  <label>REF STRING</label><input type="text" id="inp-ref" value="1 2 3 4 1 2 5 1 2 3 4 5"/>
+  <label>FRAMES</label><input type="number" id="inp-frames" value="3" min="1" max="6"/>
+  <select id="sel-algo"><option value="FIFO">FIFO</option><option value="LRU">LRU</option><option value="OPT">Optimal</option></select>
+  <select id="sel-speed"><option value="1500">Slow</option><option value="900" selected>Normal</option><option value="400">Fast</option></select>
+  <button class="btn" id="btn-run">▶ RUN</button>
+  <button class="btn btn-red" id="btn-reset">⟲ RESET</button>
+  <button class="btn btn-magenta" id="btn-compare">COMPARE ALL</button>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+/* ========== STATE ========== */
+const state = {
+  refString: [], frames: [], frameCount: 3, algo: 'FIFO',
+  speed: 900, running: false, paused: false, stepIndex: 0,
+  faults: 0, hits: 0, fifoQueue: [], lruOrder: [],
+  pageTable: new Map(), animQueue: null
+};
+
+/* ========== THREE.JS SETUP ========== */
+const container = document.getElementById('canvas-container');
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0a0a0f);
+scene.fog = new THREE.FogExp2(0x0a0a0f, 0.035);
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 100);
+camera.position.set(0, 3, 10);
+const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+container.appendChild(renderer.domElement);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; controls.dampingFactor = 0.05;
+controls.autoRotate = true; controls.autoRotateSpeed = 0.5;
+controls.maxDistance = 20; controls.minDistance = 4;
+
+/* Lights */
+const ambLight = new THREE.AmbientLight(0x222233, 0.6);
+scene.add(ambLight);
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+dirLight.position.set(5, 10, 5); scene.add(dirLight);
+const pointLight = new THREE.PointLight(0x39ff14, 1, 20);
+pointLight.position.set(0, 5, 0); scene.add(pointLight);
+const flashLight = new THREE.PointLight(0xff003c, 0, 30);
+flashLight.position.set(0, 3, 0); scene.add(flashLight);
+
+/* Grid */
+const grid = new THREE.GridHelper(20, 20, 0x39ff14, 0x111122);
+grid.position.y = -2; grid.material.opacity = 0.3; grid.material.transparent = true;
+scene.add(grid);
+
+/* Particles */
+const pCount = 600;
+const pGeo = new THREE.BufferGeometry();
+const pPos = new Float32Array(pCount * 3);
+for(let i = 0; i < pCount * 3; i++) pPos[i] = (Math.random() - 0.5) * 30;
+pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+const pMat = new THREE.PointsMaterial({color:0x39ff14, size:0.04, transparent:true, opacity:0.5});
+const particles = new THREE.Points(pGeo, pMat);
+scene.add(particles);
+
+/* ========== CUBES (FRAMES) ========== */
+let cubes = [];
+let labels = [];
+const cubeMat = () => new THREE.MeshStandardMaterial({
+  color:0x1a1a2e, emissive:0x111122, metalness:0.7, roughness:0.3,
+  transparent:true, opacity:0.85
+});
+const edgeMat = new THREE.LineBasicMaterial({color:0x39ff14, transparent:true, opacity:0.6});
+
+function buildCubes(count) {
+  cubes.forEach(c => { scene.remove(c.mesh); scene.remove(c.edges); });
+  labels.forEach(l => l.remove());
+  cubes = []; labels = [];
+  const spacing = 2.2;
+  const startX = -(count - 1) * spacing / 2;
+  for(let i = 0; i < count; i++) {
+    const geo = new THREE.BoxGeometry(1.4, 1.4, 1.4);
+    const mat = cubeMat();
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.set(startX + i * spacing, 0, 0);
+    scene.add(mesh);
+    const edgeGeo = new THREE.EdgesGeometry(geo);
+    const edge = new THREE.LineSegments(edgeGeo, edgeMat.clone());
+    edge.position.copy(mesh.position);
+    scene.add(edge);
+    const lbl = document.createElement('div');
+    lbl.className = 'frame-label';
+    lbl.textContent = '—';
+    document.body.appendChild(lbl);
+    cubes.push({mesh, edges:edge, mat, baseY:0, targetY:0, page:-1});
+    labels.push(lbl);
+  }
+}
+buildCubes(3);
+
+function updateLabelPositions() {
+  cubes.forEach((c, i) => {
+    const v = new THREE.Vector3();
+    c.mesh.getWorldPosition(v);
+    v.project(camera);
+    const x = (v.x * 0.5 + 0.5) * window.innerWidth;
+    const y = (-v.y * 0.5 + 0.5) * window.innerHeight;
+    labels[i].style.left = x + 'px';
+    labels[i].style.top = y + 'px';
+  });
+}
+
+/* ========== UI HELPERS ========== */
+const $ = id => document.getElementById(id);
+const flash = $('center-flash');
+const eventLog = $('event-log');
+const pageTableBody = $('page-table-body');
+
+function showFlash(text, color) {
+  flash.textContent = text;
+  flash.style.color = color;
+  flash.style.opacity = '1';
+  setTimeout(() => flash.style.opacity = '0', 600);
+}
+
+function addLog(msg, type) {
+  const li = document.createElement('li');
+  li.textContent = msg;
+  li.className = type === 'fault' ? 'log-fault' : 'log-hit';
+  eventLog.prepend(li);
+  if(eventLog.children.length > 100) eventLog.lastChild.remove();
+}
+
+function updateStats() {
+  $('stat-accesses').textContent = state.faults + state.hits;
+  $('stat-faults').textContent = state.faults;
+  $('stat-hits').textContent = state.hits;
+  const total = state.faults + state.hits;
+  $('stat-rate').textContent = total ? (state.faults/total*100).toFixed(1)+'%' : '0%';
+  $('stat-algo').textContent = state.algo;
+  $('stat-step').textContent = `${state.stepIndex} / ${state.refString.length}`;
+}
+
+function updatePageTable() {
+  pageTableBody.innerHTML = '';
+  state.pageTable.forEach((frame, page) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>P${page}</td><td>F${frame}</td><td style="color:${state.frames[frame]===page?'var(--neon-green)':'var(--neon-red)'}">${state.frames[frame]===page?1:0}</td>`;
+    pageTableBody.appendChild(tr);
+  });
+}
+
+/* ========== ANIMATIONS ========== */
+const anims = [];
+function animateCube(idx, type) {
+  return new Promise(resolve => {
+    const c = cubes[idx];
+    if(type === 'fault') {
+      c.mat.emissive.set(0xff003c);
+      c.edges.material.color.set(0xff003c);
+      c.targetY = 1.5;
+      flashLight.intensity = 3;
+      labels[idx].style.color = '#ff003c';
+      labels[idx].style.textShadow = '0 0 10px #ff003c, 0 0 20px #ff003c';
+    } else {
+      c.mat.emissive.set(0x39ff14);
+      c.edges.material.color.set(0x39ff14);
+      c.targetY = 0.3;
+      labels[idx].style.color = '#39ff14';
+      labels[idx].style.textShadow = '0 0 10px #39ff14, 0 0 20px #39ff14';
+    }
+    anims.push({cube:c, idx, type, start:performance.now(), duration:500, resolve});
+  });
+}
+
+function processAnims(now) {
+  for(let i = anims.length-1; i >= 0; i--) {
+    const a = anims[i]; const t = Math.min((now - a.start)/a.duration, 1);
+    const ease = t < 0.5 ? 2*t*t : -1+(4-2*t)*t;
+    if(t < 0.5) {
+      a.cube.mesh.position.y = a.cube.baseY + (a.cube.targetY - a.cube.baseY)*ease*2;
+      a.cube.edges.position.y = a.cube.mesh.position.y;
+    } else {
+      a.cube.mesh.position.y = a.cube.targetY - (a.cube.targetY - a.cube.baseY)*(ease-0.5)*2;
+      a.cube.edges.position.y = a.cube.mesh.position.y;
+    }
+    if(t >= 1) {
+      a.cube.mesh.position.y = a.cube.baseY;
+      a.cube.edges.position.y = a.cube.baseY;
+      a.cube.mat.emissive.set(0x111122);
+      a.cube.edges.material.color.set(0x39ff14);
+      flashLight.intensity = 0;
+      labels[a.idx].style.color = '#fff';
+      labels[a.idx].style.textShadow = '0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan)';
+      anims.splice(i, 1);
+      a.resolve();
+    }
+  }
+}
+
+/* ========== ALGORITHMS ========== */
+function runAlgoStep(page, index, frames, frameCount, algo, fifoQ, lruOrd, refStr) {
+  const fi = frames.indexOf(page);
+  if(fi !== -1) {
+    if(algo === 'LRU') {
+      lruOrd.splice(lruOrd.indexOf(page), 1);
+      lruOrd.push(page);
+    }
+    return {hit:true, frameIdx:fi, victim:-1};
+  }
+  let victim = -1, frameIdx = frames.indexOf(-1);
+  if(frameIdx === -1) {
+    if(algo === 'FIFO') {
+      victim = fifoQ.shift();
+      frameIdx = frames.indexOf(victim);
+    } else if(algo === 'LRU') {
+      victim = lruOrd.shift();
+      frameIdx = frames.indexOf(victim);
+    } else {
+      let farthest = -1;
+      for(let f = 0; f < frameCount; f++) {
+        let nextUse = refStr.slice(index+1).indexOf(frames[f]);
+        if(nextUse === -1) { frameIdx = f; victim = frames[f]; break; }
+        if(nextUse > farthest) { farthest = nextUse; frameIdx = f; victim = frames[f]; }
+      }
+    }
+    if(algo === 'LRU' && victim === -1) { /* already shifted */ }
+  }
+  frames[frameIdx] = page;
+  fifoQ.push(page);
+  if(algo === 'LRU') lruOrd.push(page);
+  return {hit:false, frameIdx, victim};
+}
+
+/* Silent run for comparison */
+function silentRun(refStr, frameCount, algo) {
+  const frames = Array(frameCount).fill(-1);
+  const fifoQ = [], lruOrd = [];
+  let faults = 0;
+  refStr.forEach((page, idx) => {
+    const r = runAlgoStep(page, idx, frames, frameCount, algo, fifoQ, lruOrd, refStr);
+    if(!r.hit) faults++;
+  });
+  return faults;
+}
+
+/* ========== SIMULATION RUNNER ========== */
+async function runSimulation() {
+  const refStr = $('inp-ref').value.trim().split(/\s+/).map(Number).filter(n => !isNaN(n));
+  const frameCount = Math.max(1, Math.min(6, parseInt($('inp-frames').value)||3));
+  const algo = $('sel-algo').value;
+  const speed = parseInt($('sel-speed').value);
+  if(!refStr.length) return;
+
+  state.refString = refStr; state.frameCount = frameCount; state.algo = algo; state.speed = speed;
+  state.frames = Array(frameCount).fill(-1);
+  state.fifoQueue = []; state.lruOrder = [];
+  state.faults = 0; state.hits = 0; state.stepIndex = 0;
+  state.pageTable.clear(); state.running = true; state.paused = false;
+  eventLog.innerHTML = '';
+  buildCubes(frameCount);
+  cubes.forEach((c,i) => labels[i].textContent = '—');
+  $('btn-run').textContent = '⏸ PAUSE';
+  updateStats();
+
+  for(let i = 0; i < refStr.length; i++) {
+    if(!state.running) break;
+    while(state.paused) await new Promise(r => setTimeout(r, 100));
+    if(!state.running) break;
+    const page = refStr[i];
+    state.stepIndex = i + 1;
+    const result = runAlgoStep(page, i, state.frames, frameCount, state.algo, state.fifoQueue, state.lruOrder, refStr);
+
+    if(result.hit) {
+      state.hits++;
+      showFlash(`PAGE HIT — P${page}`, 'var(--neon-green)');
+      addLog(`[${i+1}] P${page} → HIT (Frame ${result.frameIdx})`, 'hit');
+      await animateCube(result.frameIdx, 'hit');
+    } else {
+      state.faults++;
+      const vMsg = result.victim >= 0 ? ` | Evicted P${result.victim}` : '';
+      showFlash(`PAGE FAULT — P${page}`, 'var(--neon-red)');
+      addLog(`[${i+1}] P${page} → FAULT (Frame ${result.frameIdx})${vMsg}`, 'fault');
+      labels[result.frameIdx].textContent = `P${page}`;
+      await animateCube(result.frameIdx, 'fault');
+    }
+    cubes[result.frameIdx].page = page;
+    labels[result.frameIdx].textContent = `P${page}`;
+    state.pageTable.set(page, result.frameIdx);
+    updatePageTable();
+    updateStats();
+    await new Promise(r => setTimeout(r, state.speed));
+  }
+  state.running = false;
+  $('btn-run').textContent = '▶ RUN';
+  if(state.stepIndex >= state.refString.length) addLog('— Simulation Complete —', 'hit');
+}
+
+/* ========== CHART ========== */
+let chart = null;
+function initChart() {
+  const ctx = $('compare-chart').getContext('2d');
+  chart = new Chart(ctx, {
+    type:'bar',
+    data:{labels:['FIFO','LRU','Optimal'],datasets:[{label:'Page Faults',data:[0,0,0],backgroundColor:['rgba(255,0,60,0.7)','rgba(57,255,20,0.7)','rgba(0,255,247,0.7)'],borderColor:['#ff003c','#39ff14','#00fff7'],borderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,ticks:{color:'#888'},grid:{color:'rgba(57,255,20,0.1)'}},x:{ticks:{color:'#ccc',font:{family:'Orbitron'}},grid:{color:'rgba(57,255,20,0.05)'}}},plugins:{legend:{labels:{color:'#ccc',font:{family:'Share Tech Mono'}}}}}
+  });
+}
+initChart();
+
+function compareAll() {
+  const refStr = $('inp-ref').value.trim().split(/\s+/).map(Number).filter(n => !isNaN(n));
+  const fc = Math.max(1, Math.min(6, parseInt($('inp-frames').value)||3));
+  if(!refStr.length) return;
+  const f1 = silentRun([...refStr], fc, 'FIFO');
+  const f2 = silentRun([...refStr], fc, 'LRU');
+  const f3 = silentRun([...refStr], fc, 'OPT');
+  chart.data.datasets[0].data = [f1, f2, f3];
+  chart.update();
+}
+
+/* ========== CONTROLS ========== */
+$('btn-run').addEventListener('click', () => {
+  if(state.running && !state.paused) {
+    state.paused = true;
+    $('btn-run').textContent = '▶ RESUME';
+  } else if(state.running && state.paused) {
+    state.paused = false;
+    $('btn-run').textContent = '⏸ PAUSE';
+  } else {
+    runSimulation();
+  }
+});
+
+$('btn-reset').addEventListener('click', () => {
+  state.running = false; state.paused = false;
+  state.faults = 0; state.hits = 0; state.stepIndex = 0;
+  state.frames = []; state.fifoQueue = []; state.lruOrder = [];
+  state.pageTable.clear();
+  eventLog.innerHTML = '';
+  pageTableBody.innerHTML = '';
+  buildCubes(parseInt($('inp-frames').value)||3);
+  cubes.forEach((c,i) => labels[i].textContent = '—');
+  $('btn-run').textContent = '▶ RUN';
+  updateStats();
+});
+
+$('btn-compare').addEventListener('click', compareAll);
+
+/* ========== RENDER LOOP ========== */
+const clock = new THREE.Clock();
+function animate() {
+  requestAnimationFrame(animate);
+  const t = clock.getElapsedTime();
+  cubes.forEach((c, i) => {
+    c.mesh.rotation.y = t * 0.3 + i * 0.5;
+    c.mesh.rotation.x = Math.sin(t * 0.5 + i) * 0.15;
+    c.edges.rotation.copy(c.mesh.rotation);
+  });
+  particles.rotation.y = t * 0.02;
+  const pp = particles.geometry.attributes.position.array;
+  for(let i = 1; i < pp.length; i += 3) pp[i] += Math.sin(t + i) * 0.001;
+  particles.geometry.attributes.position.needsUpdate = true;
+  flashLight.intensity *= 0.92;
+  processAnims(performance.now());
+  controls.update();
+  updateLabelPositions();
+  renderer.render(scene, camera);
+}
+animate();
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+</body>
+</html>
