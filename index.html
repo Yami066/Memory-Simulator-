@@ -74,13 +74,37 @@ body{background:var(--bg);color:#eee;font-family:'Share Tech Mono',monospace;ove
 .frame-label{position:absolute;z-index:5;font-family:'Orbitron',sans-serif;font-size:16px;font-weight:900;color:#fff;text-shadow:0 0 10px var(--neon-cyan),0 0 20px var(--neon-cyan);pointer-events:none;transform:translate(-50%,-50%);transition:color 0.3s,text-shadow 0.3s}
 /* Scrollbar */
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--neon-green);border-radius:2px}
+/* VIEW TOGGLE */
+#view-toggle{position:fixed;top:52px;left:50%;transform:translateX(-50%);z-index:20;display:flex;gap:0;border-radius:6px;overflow:hidden;border:1px solid var(--border)}
+.view-btn{padding:6px 20px;font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:1px;cursor:pointer;background:rgba(10,10,20,0.9);color:#888;border:none;transition:all 0.3s}
+.view-btn.active{background:rgba(57,255,20,0.15);color:var(--neon-green);text-shadow:0 0 8px var(--neon-green)}
+.view-btn:hover:not(.active){color:#ccc}
+/* 2D GRID */
+#grid2d-container{position:fixed;top:80px;left:260px;right:220px;bottom:290px;z-index:9;background:var(--panel-bg);border:1px solid var(--border);border-radius:8px;backdrop-filter:blur(12px);overflow-x:auto;overflow-y:auto;display:none;padding:12px}
+#grid2d-container.show{display:block}
+#grid2d-container h3{font-family:'Orbitron',sans-serif;font-size:12px;color:var(--neon-green);letter-spacing:2px;margin-bottom:10px;text-shadow:0 0 8px var(--neon-green)}
+#grid2d{display:grid;gap:0;font-size:12px;font-family:'Orbitron',sans-serif}
+.g2d-cell{min-width:48px;height:32px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(57,255,20,0.12);background:rgba(10,10,25,0.6);color:#aaa;font-size:11px;font-weight:700;transition:all 0.3s}
+.g2d-label{min-width:60px;background:rgba(57,255,20,0.06);color:var(--neon-green);font-size:10px;letter-spacing:1px;position:sticky;left:0;z-index:2}
+.g2d-cell.current{border-color:#fff;box-shadow:0 0 8px rgba(255,255,255,0.4)}
+.g2d-cell.upcoming{opacity:0.3}
+.g2d-cell.fault-cell{color:#ff3333;font-weight:900}
+.g2d-cell.hit-cell{color:#00ff88;font-weight:900}
+.g2d-cell.empty-frame{background:#112233}
+#canvas-container.hidden{display:none}
+.frame-label.hidden{display:none}
 </style>
 </head>
 <body>
 <div id="canvas-container"></div>
 <div id="center-flash"></div>
+<div id="view-toggle">
+  <button class="view-btn active" id="btn-3d">3D VIEW</button>
+  <button class="view-btn" id="btn-2d">2D VIEW</button>
+</div>
 <div id="ref-chips"><span id="ref-chips-label">REF:</span></div>
 <div id="belady-banner"></div>
+<div id="grid2d-container"><h3>2D Frame Grid</h3><div id="grid2d"></div></div>
 
 <div class="panel" id="left-panel">
   <div id="page-table-container">
@@ -130,7 +154,8 @@ const state = {
   faults: 0, hits: 0, fifoQueue: [], lruOrder: [], mruOrder: [],
   pageTable: new Map(), animQueue: null,
   stepping: false, stepResolve: null, simStarted: false,
-  loadOrder: [], loadCounter: 0
+  loadOrder: [], loadCounter: 0,
+  stepHistory: [], viewMode: '3d'
 };
 
 /* ========== PAGE COLORS ========== */
@@ -464,6 +489,7 @@ function initSim() {
   state.loadOrder = Array(frameCount).fill(0); state.loadCounter = 0;
   state.faults = 0; state.hits = 0; state.stepIndex = 0;
   state.pageTable.clear(); state.simStarted = true;
+  state.stepHistory = [];
   eventLog.innerHTML = '';
   buildCubes(frameCount);
   buildRefChips(refStr);
@@ -496,6 +522,8 @@ async function executeStep(i) {
   colorCubeForPage(result.frameIdx, page);
   state.pageTable.set(page, result.frameIdx);
   addHistoryRow(i+1, page, [...state.frames], result.hit);
+  state.stepHistory.push({step:i+1, page, frames:[...state.frames], hit:result.hit});
+  update2DGrid();
   updatePageTable(); updateStats();
 }
 
@@ -619,6 +647,7 @@ function doReset() {
   state.faults = 0; state.hits = 0; state.stepIndex = 0;
   state.frames = []; state.fifoQueue = []; state.lruOrder = []; state.mruOrder = [];
   state.loadOrder = []; state.loadCounter = 0;
+  state.stepHistory = [];
   state.pageTable.clear();
   eventLog.innerHTML = '';
   pageTableBody.innerHTML = '';
@@ -631,6 +660,7 @@ function doReset() {
   updateStats();
   const refStr = $('inp-ref').value.trim().split(/\s+/).map(Number).filter(n => !isNaN(n));
   buildRefChips(refStr);
+  clear2DGrid();
 }
 
 $('btn-reset').addEventListener('click', doReset);
@@ -640,6 +670,135 @@ $('btn-random').addEventListener('click', generateRandom);
 
 /* Init ref chips on load */
 buildRefChips($('inp-ref').value.trim().split(/\s+/).map(Number).filter(n => !isNaN(n)));
+
+/* ========== 2D GRID VIEW ========== */
+const grid2dContainer = $('grid2d-container');
+const grid2d = $('grid2d');
+const canvasContainer = $('canvas-container');
+
+function switchView(mode) {
+  state.viewMode = mode;
+  $('btn-3d').classList.toggle('active', mode === '3d');
+  $('btn-2d').classList.toggle('active', mode === '2d');
+  if(mode === '2d') {
+    canvasContainer.classList.add('hidden');
+    labels.forEach(l => l.classList.add('hidden'));
+    grid2dContainer.classList.add('show');
+    update2DGrid();
+  } else {
+    canvasContainer.classList.remove('hidden');
+    labels.forEach(l => l.classList.remove('hidden'));
+    grid2dContainer.classList.remove('show');
+  }
+}
+$('btn-3d').addEventListener('click', () => switchView('3d'));
+$('btn-2d').addEventListener('click', () => switchView('2d'));
+
+function clear2DGrid() {
+  grid2d.innerHTML = '';
+}
+
+function update2DGrid() {
+  if(state.viewMode !== '2d') return;
+  grid2d.innerHTML = '';
+  const history = state.stepHistory;
+  const refStr = state.refString;
+  const fc = state.frameCount || parseInt($('inp-frames').value) || 3;
+  const totalSteps = refStr.length;
+  if(!totalSteps) return;
+
+  const cols = totalSteps + 1; /* +1 for label column */
+  const rows = fc + 3; /* label + page + frames + result */
+  grid2d.style.gridTemplateColumns = `60px repeat(${totalSteps}, minmax(48px, 1fr))`;
+  grid2d.style.gridTemplateRows = `repeat(${rows}, 32px)`;
+
+  const currentStep = state.stepIndex;
+
+  /* Row 0: Step numbers */
+  const lblStep = mkCell('Step', true);
+  grid2d.appendChild(lblStep);
+  for(let s = 1; s <= totalSteps; s++) {
+    const c = mkCell(s);
+    applyColClass(c, s, currentStep, totalSteps);
+    grid2d.appendChild(c);
+  }
+
+  /* Row 1: Page accessed */
+  const lblPage = mkCell('Page', true);
+  grid2d.appendChild(lblPage);
+  for(let s = 0; s < totalSteps; s++) {
+    const p = refStr[s];
+    const c = mkCell('P' + p);
+    c.style.color = getPageColor(p);
+    applyColClass(c, s + 1, currentStep, totalSteps);
+    grid2d.appendChild(c);
+  }
+
+  /* Frame rows */
+  for(let f = 0; f < fc; f++) {
+    const lblF = mkCell('F' + f, true);
+    grid2d.appendChild(lblF);
+    for(let s = 0; s < totalSteps; s++) {
+      const stepNum = s + 1;
+      const entry = history.find(h => h.step === stepNum);
+      let c;
+      if(entry) {
+        const pg = entry.frames[f];
+        if(pg < 0) {
+          c = mkCell('—');
+          c.classList.add('empty-frame');
+        } else {
+          c = mkCell('P' + pg);
+          c.style.color = getPageColor(pg);
+        }
+      } else {
+        c = mkCell('');
+        c.classList.add('empty-frame');
+      }
+      applyColClass(c, stepNum, currentStep, totalSteps);
+      grid2d.appendChild(c);
+    }
+  }
+
+  /* Result row */
+  const lblR = mkCell('Result', true);
+  grid2d.appendChild(lblR);
+  for(let s = 0; s < totalSteps; s++) {
+    const stepNum = s + 1;
+    const entry = history.find(h => h.step === stepNum);
+    let c;
+    if(entry) {
+      if(entry.hit) {
+        c = mkCell('✓'); c.classList.add('hit-cell');
+      } else {
+        c = mkCell('✗'); c.classList.add('fault-cell');
+      }
+    } else {
+      c = mkCell('');
+    }
+    applyColClass(c, stepNum, currentStep, totalSteps);
+    grid2d.appendChild(c);
+  }
+
+  /* Auto-scroll to current step */
+  if(currentStep > 0) {
+    const cellW = 50;
+    const scrollTarget = (currentStep - 1) * cellW - grid2dContainer.clientWidth / 2 + cellW;
+    grid2dContainer.scrollLeft = Math.max(0, scrollTarget);
+  }
+}
+
+function mkCell(text, isLabel) {
+  const d = document.createElement('div');
+  d.className = 'g2d-cell' + (isLabel ? ' g2d-label' : '');
+  d.textContent = text;
+  return d;
+}
+
+function applyColClass(cell, stepNum, currentStep, totalSteps) {
+  if(stepNum === currentStep) cell.classList.add('current');
+  else if(stepNum > currentStep) cell.classList.add('upcoming');
+}
 
 /* ========== RENDER LOOP ========== */
 const clock = new THREE.Clock();
