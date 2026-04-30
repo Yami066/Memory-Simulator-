@@ -11,19 +11,23 @@
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--bg-deep:#070B14;--bg-panel:#0D1421;--bg-card:#111827;--border:#1E2D45;--accent-blue:#4FC3F7;--accent-violet:#7C4DFF;--accent-teal:#00E5CC;--fault-red:#FF5252;--text-primary:#E8EAF6;--text-muted:#546E7A}
 body{background:var(--bg-deep);color:var(--text-primary);font-family:'Space Grotesk',sans-serif;overflow:hidden;height:100vh;width:100vw;overflow-y:auto}
-#canvas-container{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0}
+#canvas-container{position:fixed;top:0;left:0;width:100%;height:100%;min-height:420px;z-index:0}
 #canvas-vignette{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1;pointer-events:none;background:radial-gradient(ellipse at center, transparent 40%, #070B14 100%)}
 
-/* PANELS */
-.panel{position:fixed;z-index:10;background:rgba(13,20,33,0.85);border:1px solid var(--border);border-radius:12px;backdrop-filter:blur(12px);padding:16px;font-size:12px;overflow:hidden}
-#left-panel{top:10px;left:10px;width:240px;bottom:60px;display:flex;flex-direction:column;gap:12px;position:fixed;z-index:10}
-
-.side-panel {
+.panel {
   background:rgba(13,20,33,0.85);border:1px solid var(--border);border-radius:12px;backdrop-filter:blur(12px);padding:12px 16px;
-  display: flex; flex-direction: column; transition: all 0.3s ease; overflow: hidden;
+  display: flex; flex-direction: column; transition: all 0.3s ease; overflow: hidden; margin-bottom: 12px;
 }
-.side-panel.expanded { flex: 1; }
-.side-panel.collapsed { flex: 0; }
+.panel.expanded { flex: 1; }
+.panel.collapsed { flex: 0; }
+
+.panel-header { display: flex; justify-content: space-between; align-items: center; height: 36px; cursor: pointer; }
+.panel-title { font-family: 'Space Grotesk', sans-serif; font-size: 13px; color: var(--text-primary); text-transform: uppercase; letter-spacing: 2px; }
+.panel-toggle { width: 20px; height: 20px; border-radius: 50%; background: rgba(79,195,247,0.1); border: 1px solid var(--border); color: var(--accent-blue); font-size: 14px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s; pointer-events: none; }
+.panel-header:hover .panel-toggle { background: rgba(79,195,247,0.25); border-color: var(--accent-blue); }
+
+.panel-body { max-height: 500px; overflow-y: auto; transition: max-height 0.3s ease; margin-top: 8px; }
+.panel.collapsed .panel-body { max-height: 0; overflow: hidden; margin-top: 0; }
 
 .panel-header { display: flex; justify-content: space-between; align-items: center; height: 36px; cursor: pointer; }
 .panel-title { font-family: 'Space Grotesk', sans-serif; font-size: 13px; color: var(--text-primary); text-transform: uppercase; letter-spacing: 2px; }
@@ -79,7 +83,7 @@ body{background:var(--bg-deep);color:var(--text-primary);font-family:'Space Grot
 #controls{position:fixed;bottom:0;left:0;right:0;z-index:15;min-height:55px;background:var(--bg-deep);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:center;gap:12px;padding:8px 16px;flex-wrap:wrap}
 #controls label{color:var(--text-muted);font-size:11px;font-family:'Space Grotesk',sans-serif;letter-spacing:1px}
 #controls input,#controls select{background:var(--bg-panel);color:var(--text-primary);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-family:'JetBrains Mono',monospace;font-size:12px;outline:none}
-#controls input[type=text]{width:220px}
+#controls input[type=text]{background:var(--bg-card);color:var(--text-muted);font-weight:600;width:220px;border-radius:999px;padding:6px 16px}
 #controls input[type=number]{width:50px}
 .btn{background:var(--bg-card);color:var(--text-primary);border:1px solid var(--border);border-radius:999px;padding:6px 18px;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:500;cursor:pointer;letter-spacing:0.5px;transition:all 0.2s}
 .btn:hover{background:var(--border);border-color:var(--accent-blue);color:var(--accent-blue)}
@@ -133,8 +137,8 @@ body{background:var(--bg-deep);color:var(--text-primary);font-family:'Space Grot
 <div id="belady-banner"></div>
 <div id="grid2d-container"><h3>2D Frame Grid</h3><div id="grid2d"></div></div>
 
-<div id="left-panel">
-  <div class="side-panel expanded" id="panel-page-table">
+<div id="left-panel" style="position:fixed;top:10px;left:10px;width:240px;bottom:60px;display:flex;flex-direction:column;z-index:10">
+  <div class="panel expanded" id="panel-page-table">
     <div class="panel-header" onclick="togglePanel('panel-page-table')">
       <span class="panel-title">PAGE TABLE</span>
       <button class="panel-toggle">−</button>
@@ -143,7 +147,7 @@ body{background:var(--bg-deep);color:var(--text-primary);font-family:'Space Grot
       <table id="page-table"><thead><tr><th>Page</th><th>Frame</th><th>Valid</th></tr></thead><tbody id="page-table-body"></tbody></table>
     </div>
   </div>
-  <div class="side-panel expanded" id="panel-event-log">
+  <div class="panel expanded" id="panel-event-log">
     <div class="panel-header" onclick="togglePanel('panel-event-log')">
       <span class="panel-title">EVENT LOG</span>
       <button class="panel-toggle">−</button>
@@ -204,7 +208,7 @@ const state = {
 
 /* ========== PAGE COLORS ========== */
 const PAGE_COLORS = {1:'#4FC3F7',2:'#7C4DFF',3:'#00E5CC',4:'#FF7043',5:'#AB47BC',6:'#26A69A',7:'#FFA726',8:'#EC407A'};
-const EMPTY_COLOR = '#111827';
+const EMPTY_COLOR = '#1E2D45';
 function getPageColor(p) { return PAGE_COLORS[p] || `hsl(${(p*67)%360},80%,60%)`; }
 
 /* ========== THREE.JS SETUP ========== */
@@ -213,7 +217,7 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x070B14);
 scene.fog = new THREE.FogExp2(0x070B14, 0.035);
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 100);
-camera.position.set(0, 3, 10);
+camera.position.set(0, 2, 6);
 const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -224,12 +228,14 @@ controls.autoRotate = true; controls.autoRotateSpeed = 0.5;
 controls.maxDistance = 20; controls.minDistance = 4;
 
 /* Lights */
-const ambLight = new THREE.AmbientLight(0x222233, 0.6);
+const ambLight = new THREE.AmbientLight(0x222233, 3);
 scene.add(ambLight);
-const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+const dirLight = new THREE.DirectionalLight(0xffffff, 2.5);
 dirLight.position.set(5, 10, 5); scene.add(dirLight);
 const pointLight = new THREE.PointLight(0x4FC3F7, 1, 20);
 pointLight.position.set(0, 5, 0); scene.add(pointLight);
+const pointLight2 = new THREE.PointLight(0x4FC3F7, 2, 20);
+pointLight2.position.set(0, 3, 3); scene.add(pointLight2);
 const flashLight = new THREE.PointLight(0xFF5252, 0, 30);
 flashLight.position.set(0, 3, 0); scene.add(flashLight);
 
@@ -261,10 +267,10 @@ function buildCubes(count) {
   cubes.forEach(c => { scene.remove(c.mesh); scene.remove(c.edges); });
   labels.forEach(l => l.remove());
   cubes = []; labels = [];
-  const spacing = 2.2;
+  const spacing = 2.8;
   const startX = -(count - 1) * spacing / 2;
   for(let i = 0; i < count; i++) {
-    const geo = new THREE.BoxGeometry(1.4, 1.4, 1.4);
+    const geo = new THREE.BoxGeometry(2.0, 2.0, 2.0);
     const mat = cubeMat();
     const mesh = new THREE.Mesh(geo, mat);
     mesh.position.set(startX + i * spacing, 0, 0);
@@ -604,15 +610,16 @@ async function stepOnce() {
 
 /* ========== CHART ========== */
 let chart = null;
-function initChart() {
-  const ctx = $('compare-chart').getContext('2d');
+function initChart(data = [0,0,0,0]) {
+  const ctx = document.getElementById('compare-chart').getContext('2d');
+  if(chart) chart.destroy();
   chart = new Chart(ctx, {
     type:'bar',
-    data:{labels:['FIFO','LRU','MRU','Optimal'],datasets:[{label:'Page Faults',data:[0,0,0,0],backgroundColor:['#4FC3F7','#7C4DFF','#FF7043','#00E5CC'],borderColor:['#4FC3F7','#7C4DFF','#FF7043','#00E5CC'],borderWidth:0,borderRadius:4}]},
+    data:{labels:['FIFO','LRU','MRU','Optimal'],datasets:[{label:'Page Faults',data:data,backgroundColor:['#4FC3F7','#7C4DFF','#FF7043','#00E5CC'],borderColor:['#4FC3F7','#7C4DFF','#FF7043','#00E5CC'],borderWidth:0,borderRadius:4}]},
     options:{responsive:true,maintainAspectRatio:false,
       scales:{y:{beginAtZero:true,ticks:{color:'#546E7A',stepSize:1,precision:0},grid:{color:'#1E2D45'}},x:{ticks:{color:'#E8EAF6',font:{family:'Space Grotesk'}},grid:{color:'#1E2D45'}}},
-      plugins:{legend:{labels:{color:'#E8EAF6',font:{family:'Space Grotesk'}}},
-        tooltip:{callbacks:{label:ctx=>`Faults: ${ctx.raw}`}}
+      plugins:{legend:{display:false},
+        tooltip:{callbacks:{label:c=>`Faults: ${c.raw}`}}
       }
     },
     plugins:[{id:'datalabels',afterDatasetsDraw(c){const meta=c.getDatasetMeta(0);const ctx2=c.ctx;ctx2.save();ctx2.font='bold 12px Space Grotesk';ctx2.textAlign='center';ctx2.fillStyle='#E8EAF6';meta.data.forEach((bar,i)=>{ctx2.fillText(c.data.datasets[0].data[i],bar.x,bar.y-8)});ctx2.restore();}}]
@@ -621,14 +628,14 @@ function initChart() {
 initChart();
 
 function compareAll() {
-  const refStr = $('inp-ref').value.trim().split(/\s+/).map(Number).filter(n => !isNaN(n));
-  const fc = Math.max(1, Math.min(6, parseInt($('inp-frames').value)||3));
+  const refStr = document.getElementById('inp-ref').value.trim().split(/\s+/).map(Number).filter(n => !isNaN(n));
+  const fc = Math.max(1, Math.min(6, parseInt(document.getElementById('inp-frames').value)||3));
   if(!refStr.length) return;
   const f1 = silentRun([...refStr], fc, 'FIFO');
   const f2 = silentRun([...refStr], fc, 'LRU');
   const f3 = silentRun([...refStr], fc, 'MRU');
   const f4 = silentRun([...refStr], fc, 'OPT');
-  chart.data.datasets[0].data = [f1, f2, f3, f4];
+  initChart([f1, f2, f3, f4]);
   chart.options.scales.y.max = refStr.length + 1;
   chart.update();
 }
