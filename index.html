@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Virtual Memory Page Replacement Simulator</title>
 <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
 :root{--neon-green:#39ff14;--neon-magenta:#ff00ff;--neon-red:#ff003c;--neon-cyan:#00fff7;--bg:#0a0a0f;--panel-bg:rgba(10,10,20,0.85);--border:rgba(57,255,20,0.25)}
-body{background:var(--bg);color:#eee;font-family:'Share Tech Mono',monospace;overflow:hidden;height:100vh;width:100vw}
+body{background:var(--bg);color:#eee;font-family:'Share Tech Mono',monospace;overflow:hidden;height:100vh;width:100vw;overflow-y:auto}
 #canvas-container{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0}
 /* PANELS */
 .panel{position:fixed;z-index:10;background:var(--panel-bg);border:1px solid var(--border);border-radius:8px;backdrop-filter:blur(12px);padding:12px;font-size:12px;overflow:hidden}
@@ -31,10 +31,35 @@ body{background:var(--bg);color:#eee;font-family:'Share Tech Mono',monospace;ove
 .stat-label{color:#888}.stat-value{color:var(--neon-cyan);font-weight:bold}
 #bottom-panel{position:fixed;bottom:60px;left:260px;right:210px;z-index:10;background:var(--panel-bg);border:1px solid var(--border);border-radius:8px;backdrop-filter:blur(12px);padding:12px;max-height:220px}
 #chart-container{width:100%;height:180px}
+/* REF STRING CHIPS */
+#ref-chips{position:fixed;top:10px;left:260px;right:220px;z-index:12;display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px;background:var(--panel-bg);border:1px solid var(--border);border-radius:8px;backdrop-filter:blur(12px);align-items:center}
+#ref-chips-label{font-family:'Orbitron',sans-serif;font-size:11px;color:var(--neon-green);letter-spacing:1px;margin-right:6px}
+.ref-chip{display:inline-flex;align-items:center;justify-content:center;width:32px;height:28px;border-radius:4px;border:1px solid rgba(255,255,255,0.15);background:rgba(20,20,40,0.8);color:#aaa;font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;transition:all 0.3s}
+.ref-chip.active{color:#fff;border-color:var(--neon-green);background:rgba(57,255,20,0.15);box-shadow:0 0 12px var(--neon-green);transform:scale(1.15)}
+.ref-chip.done{opacity:0.35}
+/* HISTORY TABLE */
+#history-panel{position:fixed;bottom:60px;left:260px;right:210px;z-index:11;background:var(--panel-bg);border:1px solid var(--border);border-radius:8px;backdrop-filter:blur(12px);padding:8px 12px;max-height:160px;overflow:auto;display:none}
+#history-panel.show{display:block}
+#history-panel h3{font-family:'Orbitron',sans-serif;font-size:11px;color:var(--neon-green);letter-spacing:2px;margin-bottom:6px;text-shadow:0 0 8px var(--neon-green)}
+#history-table{width:100%;border-collapse:collapse;font-size:11px}
+#history-table th,#history-table td{border:1px solid var(--border);padding:3px 8px;text-align:center}
+#history-table th{background:rgba(57,255,20,0.08);color:var(--neon-green);position:sticky;top:0}
+.hist-fault{color:var(--neon-red)}
+.hist-hit{color:var(--neon-green)}
+/* BELADY BANNER */
+#belady-banner{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:30;padding:20px 32px;background:rgba(10,0,0,0.95);border:2px solid var(--neon-red);border-radius:12px;font-family:'Orbitron',sans-serif;font-size:15px;color:var(--neon-red);text-shadow:0 0 15px var(--neon-red);box-shadow:0 0 40px rgba(255,0,60,0.4);display:none;text-align:center;max-width:500px;animation:beladyPulse 1s infinite alternate}
+#belady-banner.no-anomaly{border-color:var(--neon-green);color:var(--neon-green);text-shadow:0 0 15px var(--neon-green);box-shadow:0 0 40px rgba(57,255,20,0.3);animation:none}
+@keyframes beladyPulse{from{box-shadow:0 0 20px rgba(255,0,60,0.3)}to{box-shadow:0 0 60px rgba(255,0,60,0.7)}}
+.btn-cyan{color:var(--neon-cyan);border-color:var(--neon-cyan)}
+.btn-cyan:hover{background:var(--neon-cyan);color:#000;box-shadow:0 0 15px var(--neon-cyan)}
+.btn-orange{color:#ffaa00;border-color:#ffaa00}
+.btn-orange:hover{background:#ffaa00;color:#000;box-shadow:0 0 15px #ffaa00}
+.btn-yellow{color:#ffff00;border-color:#ffff00}
+.btn-yellow:hover{background:#ffff00;color:#000;box-shadow:0 0 15px #ffff00}
 /* CENTER FLASH */
 #center-flash{position:fixed;top:35%;left:50%;transform:translate(-50%,-50%);z-index:20;font-family:'Orbitron',sans-serif;font-size:48px;font-weight:900;pointer-events:none;opacity:0;transition:opacity 0.15s;text-shadow:0 0 30px currentColor,0 0 60px currentColor}
 /* CONTROLS */
-#controls{position:fixed;bottom:0;left:0;right:0;z-index:15;height:55px;background:rgba(5,5,15,0.95);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:center;gap:10px;padding:0 16px;flex-wrap:wrap}
+#controls{position:fixed;bottom:0;left:0;right:0;z-index:15;min-height:55px;background:rgba(5,5,15,0.95);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:center;gap:8px;padding:4px 16px;flex-wrap:wrap}
 #controls label{color:var(--neon-green);font-size:11px;font-family:'Orbitron',sans-serif;letter-spacing:1px}
 #controls input,#controls select{background:rgba(20,20,40,0.9);color:#eee;border:1px solid var(--border);border-radius:4px;padding:5px 8px;font-family:'Share Tech Mono',monospace;font-size:12px}
 #controls input[type=text]{width:220px}
@@ -54,6 +79,8 @@ body{background:var(--bg);color:#eee;font-family:'Share Tech Mono',monospace;ove
 <body>
 <div id="canvas-container"></div>
 <div id="center-flash"></div>
+<div id="ref-chips"><span id="ref-chips-label">REF:</span></div>
+<div id="belady-banner"></div>
 
 <div class="panel" id="left-panel">
   <div id="page-table-container">
@@ -76,6 +103,7 @@ body{background:var(--bg);color:#eee;font-family:'Share Tech Mono',monospace;ove
   <div class="stat-row"><span class="stat-label">Step</span><span class="stat-value" id="stat-step">0 / 0</span></div>
 </div>
 
+<div id="history-panel"><h3>Frame State History</h3><table id="history-table"><thead id="history-thead"></thead><tbody id="history-tbody"></tbody></table></div>
 <div id="bottom-panel"><h3>Algorithm Comparison</h3><div id="chart-container"><canvas id="compare-chart"></canvas></div></div>
 
 <div id="controls">
@@ -84,8 +112,11 @@ body{background:var(--bg);color:#eee;font-family:'Share Tech Mono',monospace;ove
   <select id="sel-algo"><option value="FIFO">FIFO</option><option value="LRU">LRU</option><option value="OPT">Optimal</option></select>
   <select id="sel-speed"><option value="1500">Slow</option><option value="900" selected>Normal</option><option value="400">Fast</option></select>
   <button class="btn" id="btn-run">▶ RUN</button>
+  <button class="btn btn-cyan" id="btn-step">⏭ STEP</button>
   <button class="btn btn-red" id="btn-reset">⟲ RESET</button>
+  <button class="btn btn-orange" id="btn-random">🎲 RANDOM</button>
   <button class="btn btn-magenta" id="btn-compare">COMPARE ALL</button>
+  <button class="btn btn-yellow" id="btn-belady">CHECK BELADY'S</button>
 </div>
 
 <script type="module">
@@ -97,8 +128,14 @@ const state = {
   refString: [], frames: [], frameCount: 3, algo: 'FIFO',
   speed: 900, running: false, paused: false, stepIndex: 0,
   faults: 0, hits: 0, fifoQueue: [], lruOrder: [],
-  pageTable: new Map(), animQueue: null
+  pageTable: new Map(), animQueue: null,
+  stepping: false, stepResolve: null, simStarted: false
 };
+
+/* ========== PAGE COLORS ========== */
+const PAGE_COLORS = {1:'#00ff88',2:'#00aaff',3:'#ffaa00',4:'#ff44aa',5:'#aa44ff',6:'#44ffff',7:'#ff6600',8:'#88ff00'};
+const EMPTY_COLOR = '#112233';
+function getPageColor(p) { return PAGE_COLORS[p] || `hsl(${(p*67)%360},80%,60%)`; }
 
 /* ========== THREE.JS SETUP ========== */
 const container = document.getElementById('canvas-container');
@@ -176,6 +213,18 @@ function buildCubes(count) {
 }
 buildCubes(3);
 
+function colorCubeForPage(idx, page) {
+  const c = cubes[idx];
+  if(page < 0) {
+    c.mat.color.set(EMPTY_COLOR); c.edges.material.color.set(0x39ff14);
+  } else {
+    const col = getPageColor(page);
+    c.mat.color.set(col); c.edges.material.color.set(col);
+    labels[idx].style.color = col;
+    labels[idx].style.textShadow = `0 0 10px ${col}, 0 0 20px ${col}`;
+  }
+}
+
 function updateLabelPositions() {
   cubes.forEach((c, i) => {
     const v = new THREE.Vector3();
@@ -223,9 +272,55 @@ function updatePageTable() {
   pageTableBody.innerHTML = '';
   state.pageTable.forEach((frame, page) => {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>P${page}</td><td>F${frame}</td><td style="color:${state.frames[frame]===page?'var(--neon-green)':'var(--neon-red)'}">${state.frames[frame]===page?1:0}</td>`;
+    tr.innerHTML = `<td style="color:${getPageColor(page)}">P${page}</td><td>F${frame}</td><td style="color:${state.frames[frame]===page?'var(--neon-green)':'var(--neon-red)'}">${state.frames[frame]===page?1:0}</td>`;
     pageTableBody.appendChild(tr);
   });
+}
+
+/* ========== REF CHIPS ========== */
+const refChipsContainer = $('ref-chips');
+function buildRefChips(refStr) {
+  refChipsContainer.innerHTML = '<span id="ref-chips-label">REF:</span>';
+  refStr.forEach((p, i) => {
+    const chip = document.createElement('span');
+    chip.className = 'ref-chip';
+    chip.textContent = p;
+    chip.dataset.index = i;
+    refChipsContainer.appendChild(chip);
+  });
+}
+function updateRefChips(stepIndex) {
+  const chips = refChipsContainer.querySelectorAll('.ref-chip');
+  chips.forEach((chip, i) => {
+    chip.classList.remove('active', 'done');
+    if(i < stepIndex - 1) chip.classList.add('done');
+    else if(i === stepIndex - 1) chip.classList.add('active');
+  });
+}
+
+/* ========== HISTORY TABLE ========== */
+const historyThead = $('history-thead');
+const historyTbody = $('history-tbody');
+const historyPanel = $('history-panel');
+function initHistoryTable(fc) {
+  historyThead.innerHTML = '';
+  historyTbody.innerHTML = '';
+  const tr = document.createElement('tr');
+  tr.innerHTML = '<th>Step</th><th>Page</th>';
+  for(let i = 0; i < fc; i++) tr.innerHTML += `<th>F${i}</th>`;
+  tr.innerHTML += '<th>Result</th>';
+  historyThead.appendChild(tr);
+  historyPanel.classList.add('show');
+}
+function addHistoryRow(step, page, frames, hit) {
+  const tr = document.createElement('tr');
+  tr.className = hit ? 'hist-hit' : 'hist-fault';
+  let html = `<td>${step}</td><td style="color:${getPageColor(page)}">P${page}</td>`;
+  frames.forEach(f => { html += `<td>${f < 0 ? '—' : 'P'+f}</td>`; });
+  html += `<td>${hit ? 'HIT ✓' : 'FAULT ✗'}</td>`;
+  tr.innerHTML = html;
+  historyTbody.appendChild(tr);
+  tr.scrollIntoView({behavior:'smooth', block:'nearest'});
 }
 
 /* ========== ANIMATIONS ========== */
@@ -266,10 +361,18 @@ function processAnims(now) {
       a.cube.mesh.position.y = a.cube.baseY;
       a.cube.edges.position.y = a.cube.baseY;
       a.cube.mat.emissive.set(0x111122);
-      a.cube.edges.material.color.set(0x39ff14);
+      const pg = a.cube.page;
+      if(pg >= 0) {
+        const col = getPageColor(pg);
+        a.cube.edges.material.color.set(col);
+        labels[a.idx].style.color = col;
+        labels[a.idx].style.textShadow = `0 0 10px ${col}, 0 0 20px ${col}`;
+      } else {
+        a.cube.edges.material.color.set(0x39ff14);
+        labels[a.idx].style.color = '#fff';
+        labels[a.idx].style.textShadow = '0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan)';
+      }
       flashLight.intensity = 0;
-      labels[a.idx].style.color = '#fff';
-      labels[a.idx].style.textShadow = '0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan)';
       anims.splice(i, 1);
       a.resolve();
     }
@@ -323,55 +426,82 @@ function silentRun(refStr, frameCount, algo) {
 }
 
 /* ========== SIMULATION RUNNER ========== */
-async function runSimulation() {
+function initSim() {
   const refStr = $('inp-ref').value.trim().split(/\s+/).map(Number).filter(n => !isNaN(n));
   const frameCount = Math.max(1, Math.min(6, parseInt($('inp-frames').value)||3));
   const algo = $('sel-algo').value;
   const speed = parseInt($('sel-speed').value);
-  if(!refStr.length) return;
-
+  if(!refStr.length) return false;
   state.refString = refStr; state.frameCount = frameCount; state.algo = algo; state.speed = speed;
   state.frames = Array(frameCount).fill(-1);
   state.fifoQueue = []; state.lruOrder = [];
   state.faults = 0; state.hits = 0; state.stepIndex = 0;
-  state.pageTable.clear(); state.running = true; state.paused = false;
+  state.pageTable.clear(); state.simStarted = true;
   eventLog.innerHTML = '';
   buildCubes(frameCount);
-  cubes.forEach((c,i) => labels[i].textContent = '—');
-  $('btn-run').textContent = '⏸ PAUSE';
+  buildRefChips(refStr);
+  initHistoryTable(frameCount);
+  cubes.forEach((c,i) => { labels[i].textContent = '—'; colorCubeForPage(i, -1); });
   updateStats();
+  return true;
+}
 
-  for(let i = 0; i < refStr.length; i++) {
+async function executeStep(i) {
+  const page = state.refString[i];
+  state.stepIndex = i + 1;
+  updateRefChips(state.stepIndex);
+  const result = runAlgoStep(page, i, state.frames, state.frameCount, state.algo, state.fifoQueue, state.lruOrder, state.refString);
+  if(result.hit) {
+    state.hits++;
+    showFlash(`PAGE HIT — P${page}`, 'var(--neon-green)');
+    addLog(`[${i+1}] P${page} → HIT (Frame ${result.frameIdx})`, 'hit');
+    await animateCube(result.frameIdx, 'hit');
+  } else {
+    state.faults++;
+    const vMsg = result.victim >= 0 ? ` | Evicted P${result.victim}` : '';
+    showFlash(`PAGE FAULT — P${page}`, 'var(--neon-red)');
+    addLog(`[${i+1}] P${page} → FAULT (Frame ${result.frameIdx})${vMsg}`, 'fault');
+    await animateCube(result.frameIdx, 'fault');
+  }
+  cubes[result.frameIdx].page = page;
+  labels[result.frameIdx].textContent = `P${page}`;
+  colorCubeForPage(result.frameIdx, page);
+  state.pageTable.set(page, result.frameIdx);
+  addHistoryRow(i+1, page, [...state.frames], result.hit);
+  updatePageTable(); updateStats();
+}
+
+async function runSimulation() {
+  if(!state.simStarted && !initSim()) return;
+  state.running = true; state.paused = false; state.stepping = false;
+  $('btn-run').textContent = '⏸ PAUSE';
+  $('btn-step').disabled = true;
+  for(let i = state.stepIndex; i < state.refString.length; i++) {
     if(!state.running) break;
     while(state.paused) await new Promise(r => setTimeout(r, 100));
     if(!state.running) break;
-    const page = refStr[i];
-    state.stepIndex = i + 1;
-    const result = runAlgoStep(page, i, state.frames, frameCount, state.algo, state.fifoQueue, state.lruOrder, refStr);
-
-    if(result.hit) {
-      state.hits++;
-      showFlash(`PAGE HIT — P${page}`, 'var(--neon-green)');
-      addLog(`[${i+1}] P${page} → HIT (Frame ${result.frameIdx})`, 'hit');
-      await animateCube(result.frameIdx, 'hit');
-    } else {
-      state.faults++;
-      const vMsg = result.victim >= 0 ? ` | Evicted P${result.victim}` : '';
-      showFlash(`PAGE FAULT — P${page}`, 'var(--neon-red)');
-      addLog(`[${i+1}] P${page} → FAULT (Frame ${result.frameIdx})${vMsg}`, 'fault');
-      labels[result.frameIdx].textContent = `P${page}`;
-      await animateCube(result.frameIdx, 'fault');
-    }
-    cubes[result.frameIdx].page = page;
-    labels[result.frameIdx].textContent = `P${page}`;
-    state.pageTable.set(page, result.frameIdx);
-    updatePageTable();
-    updateStats();
+    await executeStep(i);
     await new Promise(r => setTimeout(r, state.speed));
   }
   state.running = false;
   $('btn-run').textContent = '▶ RUN';
-  if(state.stepIndex >= state.refString.length) addLog('— Simulation Complete —', 'hit');
+  $('btn-step').disabled = (state.stepIndex >= state.refString.length);
+  if(state.stepIndex >= state.refString.length) {
+    addLog('— Simulation Complete —', 'hit');
+    state.simStarted = false;
+  }
+}
+
+async function stepOnce() {
+  if(!state.simStarted && !initSim()) return;
+  if(state.stepIndex >= state.refString.length) { $('btn-step').disabled = true; return; }
+  $('btn-step').disabled = true;
+  await executeStep(state.stepIndex);
+  $('btn-step').disabled = (state.stepIndex >= state.refString.length);
+  if(state.stepIndex >= state.refString.length) {
+    addLog('— Simulation Complete —', 'hit');
+    state.simStarted = false;
+  }
 }
 
 /* ========== CHART ========== */
@@ -380,8 +510,14 @@ function initChart() {
   const ctx = $('compare-chart').getContext('2d');
   chart = new Chart(ctx, {
     type:'bar',
-    data:{labels:['FIFO','LRU','Optimal'],datasets:[{label:'Page Faults',data:[0,0,0],backgroundColor:['rgba(255,0,60,0.7)','rgba(57,255,20,0.7)','rgba(0,255,247,0.7)'],borderColor:['#ff003c','#39ff14','#00fff7'],borderWidth:2}]},
-    options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,ticks:{color:'#888'},grid:{color:'rgba(57,255,20,0.1)'}},x:{ticks:{color:'#ccc',font:{family:'Orbitron'}},grid:{color:'rgba(57,255,20,0.05)'}}},plugins:{legend:{labels:{color:'#ccc',font:{family:'Share Tech Mono'}}}}}
+    data:{labels:['FIFO','LRU','Optimal'],datasets:[{label:'Page Faults',data:[0,0,0],backgroundColor:['rgba(255,51,51,0.7)','rgba(0,170,255,0.7)','rgba(170,68,255,0.7)'],borderColor:['#ff3333','#00aaff','#aa44ff'],borderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      scales:{y:{beginAtZero:true,ticks:{color:'#888',stepSize:1,precision:0},grid:{color:'rgba(57,255,20,0.1)'}},x:{ticks:{color:'#ccc',font:{family:'Orbitron'}},grid:{color:'rgba(57,255,20,0.05)'}}},
+      plugins:{legend:{labels:{color:'#ccc',font:{family:'Share Tech Mono'}}},
+        tooltip:{callbacks:{label:ctx=>`Faults: ${ctx.raw}`}}
+      }
+    },
+    plugins:[{id:'datalabels',afterDatasetsDraw(c){const meta=c.getDatasetMeta(0);const ctx2=c.ctx;ctx2.save();ctx2.font='bold 14px Orbitron';ctx2.textAlign='center';ctx2.fillStyle='#fff';meta.data.forEach((bar,i)=>{ctx2.fillText(c.data.datasets[0].data[i],bar.x,bar.y-8)});ctx2.restore();}}]
   });
 }
 initChart();
@@ -394,7 +530,39 @@ function compareAll() {
   const f2 = silentRun([...refStr], fc, 'LRU');
   const f3 = silentRun([...refStr], fc, 'OPT');
   chart.data.datasets[0].data = [f1, f2, f3];
+  chart.options.scales.y.max = refStr.length + 1;
   chart.update();
+}
+
+/* ========== BELADY'S ANOMALY ========== */
+function checkBelady() {
+  const refStr = $('inp-ref').value.trim().split(/\s+/).map(Number).filter(n => !isNaN(n));
+  const fc = Math.max(1, Math.min(6, parseInt($('inp-frames').value)||3));
+  if(!refStr.length || fc >= 6) return;
+  const fN = silentRun([...refStr], fc, 'FIFO');
+  const fN1 = silentRun([...refStr], fc + 1, 'FIFO');
+  const banner = $('belady-banner');
+  if(fN1 >= fN) {
+    banner.className = '';
+    banner.innerHTML = `⚠ BELADY'S ANOMALY DETECTED!<br><br>FIFO with ${fc} frames = <b>${fN}</b> faults<br>FIFO with ${fc+1} frames = <b>${fN1}</b> faults<br><br>More frames did NOT reduce faults!`;
+  } else {
+    banner.className = 'no-anomaly';
+    banner.innerHTML = `✓ No Belady's Anomaly detected.<br>FIFO: ${fc} frames = ${fN} faults, ${fc+1} frames = ${fN1} faults`;
+  }
+  banner.style.display = 'block';
+  setTimeout(() => banner.style.display = 'none', 5000);
+}
+
+/* ========== RANDOM REF STRING ========== */
+function generateRandom() {
+  const fc = Math.max(1, Math.min(6, parseInt($('inp-frames').value)||3));
+  const len = 12 + Math.floor(Math.random() * 4);
+  const maxPage = fc + 3;
+  const arr = [];
+  for(let i = 0; i < len; i++) arr.push(1 + Math.floor(Math.random() * maxPage));
+  $('inp-ref').value = arr.join(' ');
+  doReset();
+  buildRefChips(arr);
 }
 
 /* ========== CONTROLS ========== */
@@ -402,28 +570,46 @@ $('btn-run').addEventListener('click', () => {
   if(state.running && !state.paused) {
     state.paused = true;
     $('btn-run').textContent = '▶ RESUME';
+    $('btn-step').disabled = false;
   } else if(state.running && state.paused) {
     state.paused = false;
     $('btn-run').textContent = '⏸ PAUSE';
+    $('btn-step').disabled = true;
   } else {
     runSimulation();
   }
 });
 
-$('btn-reset').addEventListener('click', () => {
-  state.running = false; state.paused = false;
+$('btn-step').addEventListener('click', () => {
+  if(state.running) { state.running = false; state.paused = false; }
+  stepOnce();
+});
+
+function doReset() {
+  state.running = false; state.paused = false; state.simStarted = false;
   state.faults = 0; state.hits = 0; state.stepIndex = 0;
   state.frames = []; state.fifoQueue = []; state.lruOrder = [];
   state.pageTable.clear();
   eventLog.innerHTML = '';
   pageTableBody.innerHTML = '';
+  historyTbody.innerHTML = '';
+  historyPanel.classList.remove('show');
   buildCubes(parseInt($('inp-frames').value)||3);
-  cubes.forEach((c,i) => labels[i].textContent = '—');
+  cubes.forEach((c,i) => { labels[i].textContent = '—'; colorCubeForPage(i, -1); });
   $('btn-run').textContent = '▶ RUN';
+  $('btn-step').disabled = false;
   updateStats();
-});
+  const refStr = $('inp-ref').value.trim().split(/\s+/).map(Number).filter(n => !isNaN(n));
+  buildRefChips(refStr);
+}
 
+$('btn-reset').addEventListener('click', doReset);
 $('btn-compare').addEventListener('click', compareAll);
+$('btn-belady').addEventListener('click', checkBelady);
+$('btn-random').addEventListener('click', generateRandom);
+
+/* Init ref chips on load */
+buildRefChips($('inp-ref').value.trim().split(/\s+/).map(Number).filter(n => !isNaN(n)));
 
 /* ========== RENDER LOOP ========== */
 const clock = new THREE.Clock();
