@@ -129,7 +129,8 @@ const state = {
   speed: 900, running: false, paused: false, stepIndex: 0,
   faults: 0, hits: 0, fifoQueue: [], lruOrder: [],
   pageTable: new Map(), animQueue: null,
-  stepping: false, stepResolve: null, simStarted: false
+  stepping: false, stepResolve: null, simStarted: false,
+  loadOrder: [], loadCounter: 0
 };
 
 /* ========== PAGE COLORS ========== */
@@ -380,14 +381,14 @@ function processAnims(now) {
 }
 
 /* ========== ALGORITHMS ========== */
-function runAlgoStep(page, index, frames, frameCount, algo, fifoQ, lruOrd, refStr) {
+function runAlgoStep(page, index, frames, frameCount, algo, fifoQ, lruOrd, refStr, loadOrd, loadCtr) {
   const fi = frames.indexOf(page);
   if(fi !== -1) {
     if(algo === 'LRU') {
       lruOrd.splice(lruOrd.indexOf(page), 1);
       lruOrd.push(page);
     }
-    return {hit:true, frameIdx:fi, victim:-1};
+    return {hit:true, frameIdx:fi, victim:-1, loadCtr};
   }
   let victim = -1, frameIdx = frames.indexOf(-1);
   if(frameIdx === -1) {
@@ -398,28 +399,46 @@ function runAlgoStep(page, index, frames, frameCount, algo, fifoQ, lruOrd, refSt
       victim = lruOrd.shift();
       frameIdx = frames.indexOf(victim);
     } else {
-      let farthest = -1;
+      /* OPT with FIFO tie-breaking for Infinity distances */
+      let distances = [];
       for(let f = 0; f < frameCount; f++) {
         let nextUse = refStr.slice(index+1).indexOf(frames[f]);
-        if(nextUse === -1) { frameIdx = f; victim = frames[f]; break; }
-        if(nextUse > farthest) { farthest = nextUse; frameIdx = f; victim = frames[f]; }
+        distances.push(nextUse === -1 ? Infinity : nextUse);
       }
+      let maxDist = Math.max(...distances);
+      let candidates = [];
+      for(let f = 0; f < frameCount; f++) {
+        if(distances[f] === maxDist) candidates.push(f);
+      }
+      if(candidates.length === 1) {
+        frameIdx = candidates[0];
+      } else {
+        /* Tie-break: evict the one loaded earliest (smallest loadOrd value) */
+        frameIdx = candidates.reduce((best, f) =>
+          (loadOrd[f] < loadOrd[best]) ? f : best
+        , candidates[0]);
+      }
+      victim = frames[frameIdx];
     }
     if(algo === 'LRU' && victim === -1) { /* already shifted */ }
   }
   frames[frameIdx] = page;
   fifoQ.push(page);
   if(algo === 'LRU') lruOrd.push(page);
-  return {hit:false, frameIdx, victim};
+  if(loadOrd) loadOrd[frameIdx] = loadCtr;
+  return {hit:false, frameIdx, victim, loadCtr: loadCtr + 1};
 }
 
 /* Silent run for comparison */
 function silentRun(refStr, frameCount, algo) {
   const frames = Array(frameCount).fill(-1);
   const fifoQ = [], lruOrd = [];
+  const loadOrd = Array(frameCount).fill(0);
+  let loadCtr = 0;
   let faults = 0;
   refStr.forEach((page, idx) => {
-    const r = runAlgoStep(page, idx, frames, frameCount, algo, fifoQ, lruOrd, refStr);
+    const r = runAlgoStep(page, idx, frames, frameCount, algo, fifoQ, lruOrd, refStr, loadOrd, loadCtr);
+    loadCtr = r.loadCtr !== undefined ? r.loadCtr : loadCtr;
     if(!r.hit) faults++;
   });
   return faults;
@@ -435,6 +454,7 @@ function initSim() {
   state.refString = refStr; state.frameCount = frameCount; state.algo = algo; state.speed = speed;
   state.frames = Array(frameCount).fill(-1);
   state.fifoQueue = []; state.lruOrder = [];
+  state.loadOrder = Array(frameCount).fill(0); state.loadCounter = 0;
   state.faults = 0; state.hits = 0; state.stepIndex = 0;
   state.pageTable.clear(); state.simStarted = true;
   eventLog.innerHTML = '';
@@ -450,7 +470,8 @@ async function executeStep(i) {
   const page = state.refString[i];
   state.stepIndex = i + 1;
   updateRefChips(state.stepIndex);
-  const result = runAlgoStep(page, i, state.frames, state.frameCount, state.algo, state.fifoQueue, state.lruOrder, state.refString);
+  const result = runAlgoStep(page, i, state.frames, state.frameCount, state.algo, state.fifoQueue, state.lruOrder, state.refString, state.loadOrder, state.loadCounter);
+  if(result.loadCtr !== undefined) state.loadCounter = result.loadCtr;
   if(result.hit) {
     state.hits++;
     showFlash(`PAGE HIT — P${page}`, 'var(--neon-green)');
@@ -589,6 +610,7 @@ function doReset() {
   state.running = false; state.paused = false; state.simStarted = false;
   state.faults = 0; state.hits = 0; state.stepIndex = 0;
   state.frames = []; state.fifoQueue = []; state.lruOrder = [];
+  state.loadOrder = []; state.loadCounter = 0;
   state.pageTable.clear();
   eventLog.innerHTML = '';
   pageTableBody.innerHTML = '';
