@@ -12,7 +12,6 @@
 :root{--bg-deep:#070B14;--bg-panel:#0D1421;--bg-card:#111827;--border:#1E2D45;--accent-blue:#4FC3F7;--accent-violet:#7C4DFF;--accent-teal:#00E5CC;--fault-red:#FF5252;--text-primary:#E8EAF6;--text-muted:#546E7A}
 body{background:var(--bg-deep);color:var(--text-primary);font-family:'Space Grotesk',sans-serif;overflow:hidden;height:100vh;width:100vw;overflow-y:auto}
 #canvas-container{position:fixed;top:0;left:0;width:100%;height:100%;min-height:420px;z-index:0}
-#canvas-vignette{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1;pointer-events:none;background:radial-gradient(ellipse at center, transparent 40%, #070B14 100%)}
 
 .panel {
   background:rgba(13,20,33,0.85);border:1px solid var(--border);border-radius:12px;backdrop-filter:blur(12px);padding:12px 16px;
@@ -33,11 +32,7 @@ body{background:var(--bg-deep);color:var(--text-primary);font-family:'Space Grot
 #page-table th,#page-table td{border:1px solid var(--border);padding:4px 6px;text-align:center;font-size:11px}
 #page-table th{background:var(--bg-card);color:var(--text-muted)}
 #page-table tbody tr:nth-child(even){background:rgba(255,255,255,0.02)}
-#event-log{list-style:none;font-size:11px;font-family:'JetBrains Mono',monospace}
-#event-log li{padding:4px 8px;border-bottom:1px solid rgba(255,255,255,0.05);transition:background 0.2s}
-#event-log li:hover{background:rgba(255,255,255,0.02)}
-.log-fault{color:var(--fault-red);border-left:3px solid var(--fault-red)}
-.log-hit{color:var(--accent-teal);border-left:3px solid var(--accent-teal)}
+
 
 /* STATS HUD */
 #stats-hud{position:fixed;top:78px;left:50%;transform:translateX(-50%);z-index:15;display:flex;gap:12px;background:transparent}
@@ -45,12 +40,12 @@ body{background:var(--bg-deep);color:var(--text-primary);font-family:'Space Grot
 .stat-label{color:var(--text-muted);text-transform:uppercase;letter-spacing:1px}
 .stat-value{color:var(--accent-blue);font-weight:600}
 
-#bottom-panel{position:fixed;bottom:60px;left:260px;right:10px;z-index:13;background:rgba(13,20,33,0.85);border:1px solid var(--border);border-radius:12px;backdrop-filter:blur(12px);padding:16px;max-height:220px;display:none}
+#bottom-panel{position:fixed;bottom:60px;left:10px;right:10px;z-index:13;background:rgba(13,20,33,0.85);border:1px solid var(--border);border-radius:12px;backdrop-filter:blur(12px);padding:16px;max-height:220px;display:none}
 #bottom-panel.show{display:block}
 #chart-container{width:100%;height:160px}
 
 /* REF STRING CHIPS */
-#ref-chips{position:fixed;top:10px;left:260px;right:10px;z-index:18;display:flex;flex-wrap:wrap;gap:6px;padding:12px 16px;background:rgba(13,20,33,0.85);border:1px solid var(--border);border-radius:12px;backdrop-filter:blur(12px);align-items:center}
+#ref-chips{position:fixed;top:10px;left:10px;right:10px;z-index:18;display:flex;flex-wrap:wrap;gap:6px;padding:12px 16px;background:rgba(13,20,33,0.85);border:1px solid var(--border);border-radius:12px;backdrop-filter:blur(12px);align-items:center}
 #ref-chips-label{font-family:'Space Grotesk',sans-serif;font-size:12px;color:var(--text-muted);letter-spacing:1px;margin-right:8px}
 .ref-chip{display:inline-flex;align-items:center;justify-content:center;width:32px;height:28px;border-radius:999px;border:1px solid var(--border);background:var(--bg-card);color:var(--text-muted);font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;transition:all 0.3s}
 .ref-chip.done{background:var(--bg-panel);color:var(--text-primary);border-color:var(--border)}
@@ -58,15 +53,7 @@ body{background:var(--bg-deep);color:var(--text-primary);font-family:'Space Grot
 .ref-chip.upcoming{opacity:0.35}
 @keyframes pulse-ring{0%{box-shadow:0 0 0 0 rgba(79,195,247,0.4)}70%{box-shadow:0 0 0 6px rgba(79,195,247,0)}100%{box-shadow:0 0 0 0 rgba(79,195,247,0)}}
 
-/* HISTORY TABLE */
-#history-panel{position:fixed;bottom:60px;left:260px;right:10px;z-index:11;background:rgba(13,20,33,0.85);border:1px solid var(--border);border-radius:12px;backdrop-filter:blur(12px);padding:12px 16px;max-height:180px;overflow:auto;display:none}
-#history-panel.show{display:block}
-#history-panel h3{font-family:'Space Grotesk',sans-serif;font-size:12px;color:var(--text-primary);letter-spacing:1px;margin-bottom:8px}
-#history-table{width:100%;border-collapse:collapse;font-size:11px;font-family:'JetBrains Mono',monospace}
-#history-table th,#history-table td{border:1px solid var(--border);padding:4px 8px;text-align:center}
-#history-table th{background:var(--bg-card);color:var(--text-muted);position:sticky;top:0}
-.hist-fault{color:var(--fault-red)}
-.hist-hit{color:var(--accent-teal)}
+
 
 /* BELADY BANNER */
 #belady-banner{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:30;padding:20px 32px;background:rgba(10,0,0,0.95);border:2px solid var(--fault-red);border-radius:12px;font-family:'Space Grotesk',sans-serif;font-size:15px;color:var(--fault-red);box-shadow:0 0 40px rgba(255,82,82,0.4);display:none;text-align:center;max-width:500px}
@@ -100,7 +87,7 @@ body{background:var(--bg-deep);color:var(--text-primary);font-family:'Space Grot
 .view-btn:hover:not(.active){color:var(--text-primary)}
 
 /* 2D GRID */
-#grid2d-container{position:fixed;top:150px;left:260px;right:10px;bottom:100px;z-index:9;background:var(--bg-panel);border:1px solid var(--border);border-radius:8px;overflow-x:auto;overflow-y:auto;display:none;padding:16px}
+#grid2d-container{position:fixed;top:150px;left:10px;right:10px;bottom:100px;z-index:9;background:var(--bg-panel);border:1px solid var(--border);border-radius:8px;overflow-x:auto;overflow-y:auto;display:none;padding:16px}
 #grid2d-container.show{display:block}
 #grid2d-container h3{font-family:'Space Grotesk',sans-serif;font-size:13px;color:var(--text-primary);letter-spacing:1px;margin-bottom:12px}
 #grid2d{display:grid;gap:0;font-size:12px;font-family:'JetBrains Mono',monospace;width:max-content;padding-right:16px;padding-bottom:16px}
@@ -115,12 +102,24 @@ body{background:var(--bg-deep);color:var(--text-primary);font-family:'Space Grot
 .g2d-cell.empty-frame{background:var(--bg-deep)}
 #canvas-container.hidden{display:none}
 .frame-label.hidden{display:none}
-</style>
+
+/* TUTORIAL SYSTEM */
+#tutorial-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.75); z-index: 1000; display: none; }
+#tutorial-overlay.show { display: block; }
+.tutorial-highlight { position: relative; z-index: 1001 !important; box-shadow: 0 0 0 4px #AB47BC, 0 0 30px rgba(171,71,188,0.4) !important; border-radius: 8px; background: var(--bg-deep) !important; }
+#tutorial-tooltip { position: fixed; z-index: 1002; background: var(--bg-card); border: 1px solid #AB47BC; border-radius: 8px; padding: 16px; width: 300px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); display: none; flex-direction: column; gap: 8px; color: var(--text-primary); transition: all 0.3s ease; }
+#tutorial-tooltip.show { display: flex; }
+#tutorial-title { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 14px; color: #AB47BC; text-transform: uppercase; letter-spacing: 1px; }
+#tutorial-text { font-family: 'Space Grotesk', sans-serif; font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+.tutorial-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+.btn-tutorial { background: transparent; color: var(--text-muted); border: 1px solid var(--border); border-radius: 999px; padding: 6px 16px; font-family: 'Space Grotesk', sans-serif; font-size: 11px; cursor: pointer; transition: all 0.2s; }
+.btn-tutorial:hover { border-color: #AB47BC; color: #AB47BC; }
+#btn-tut-next { background: rgba(171,71,188,0.1); border-color: #AB47BC; color: #AB47BC; }
+#btn-tut-next:hover { background: #AB47BC; color: #fff; }
 </style>
 </head>
 <body>
 <div id="canvas-container"></div>
-<div id="canvas-vignette"></div>
 <div id="center-flash"></div>
 <div id="view-toggle">
   <button class="view-btn active" id="btn-3d">3D VIEW</button>
@@ -130,7 +129,7 @@ body{background:var(--bg-deep);color:var(--text-primary);font-family:'Space Grot
 <div id="belady-banner"></div>
 <div id="grid2d-container"><h3>2D Frame Grid</h3><div id="grid2d"></div></div>
 
-<div id="left-panel" style="position:fixed;top:10px;left:10px;width:240px;bottom:60px;display:flex;flex-direction:column;z-index:10">
+<div id="left-panel" style="position:fixed;top:10px;left:10px;width:180px;bottom:60px;display:flex;flex-direction:column;z-index:10;max-height:200px">
   <div class="panel expanded" id="panel-page-table">
     <div class="panel-header" onclick="togglePanel('panel-page-table')">
       <span class="panel-title">PAGE TABLE</span>
@@ -140,15 +139,7 @@ body{background:var(--bg-deep);color:var(--text-primary);font-family:'Space Grot
       <table id="page-table"><thead><tr><th>Page</th><th>Frame</th><th>Valid</th></tr></thead><tbody id="page-table-body"></tbody></table>
     </div>
   </div>
-  <div class="panel expanded" id="panel-event-log">
-    <div class="panel-header" onclick="togglePanel('panel-event-log')">
-      <span class="panel-title">EVENT LOG</span>
-      <button class="panel-toggle">−</button>
-    </div>
-    <div class="panel-body">
-      <ul id="event-log"></ul>
-    </div>
-  </div>
+
 </div>
 
 <div id="stats-hud">
@@ -160,7 +151,7 @@ body{background:var(--bg-deep);color:var(--text-primary);font-family:'Space Grot
   <div class="stat-pill"><span class="stat-label">STEP</span><span class="stat-value" id="stat-step">0 / 0</span></div>
 </div>
 
-<div id="history-panel"><h3>Frame State History</h3><table id="history-table"><thead id="history-thead"></thead><tbody id="history-tbody"></tbody></table></div>
+
 <div id="bottom-panel"><h3>Algorithm Comparison</h3><div id="chart-container"><canvas id="compare-chart"></canvas></div></div>
 
 <div id="controls">
@@ -174,6 +165,17 @@ body{background:var(--bg-deep);color:var(--text-primary);font-family:'Space Grot
   <button class="btn btn-orange" id="btn-random">🎲 RANDOM</button>
   <button class="btn btn-magenta" id="btn-compare">COMPARE ALL</button>
   <button class="btn btn-yellow" id="btn-belady">CHECK BELADY'S</button>
+  <button class="btn btn-magenta" id="btn-learn">🎓 LEARN</button>
+</div>
+
+<div id="tutorial-overlay"></div>
+<div id="tutorial-tooltip">
+  <div id="tutorial-title"></div>
+  <div id="tutorial-text"></div>
+  <div class="tutorial-actions">
+    <button class="btn-tutorial" id="btn-tut-close">Close</button>
+    <button class="btn-tutorial" id="btn-tut-next">Next</button>
+  </div>
 </div>
 
 <script type="module">
@@ -208,75 +210,96 @@ function getPageColor(p) { return PAGE_COLORS[p] || `hsl(${(p*67)%360},80%,60%)`
 const container = document.getElementById('canvas-container');
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x070B14);
-scene.fog = new THREE.FogExp2(0x070B14, 0.035);
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 100);
-camera.position.set(0, 2, 6);
+camera.position.set(0, 4, 12);
 const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 container.appendChild(renderer.domElement);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true; controls.dampingFactor = 0.05;
-controls.autoRotate = true; controls.autoRotateSpeed = 0.5;
-controls.maxDistance = 20; controls.minDistance = 4;
+controls.autoRotate = false;
+controls.maxDistance = 50; controls.minDistance = 3;
 
-/* Lights */
-const ambLight = new THREE.AmbientLight(0x222233, 3);
+/* Lights — clean, bright, minimalist */
+const ambLight = new THREE.AmbientLight(0xdde4f0, 1.8);
 scene.add(ambLight);
-const dirLight = new THREE.DirectionalLight(0xffffff, 2.5);
-dirLight.position.set(5, 10, 5); scene.add(dirLight);
-const pointLight = new THREE.PointLight(0x4FC3F7, 1, 20);
-pointLight.position.set(0, 5, 0); scene.add(pointLight);
-const pointLight2 = new THREE.PointLight(0x4FC3F7, 2, 20);
-pointLight2.position.set(0, 3, 3); scene.add(pointLight2);
-const flashLight = new THREE.PointLight(0xFF5252, 0, 30);
-flashLight.position.set(0, 3, 0); scene.add(flashLight);
+const dirLight = new THREE.DirectionalLight(0xffffff, 2.0);
+dirLight.position.set(8, 12, 6); scene.add(dirLight);
+const fillLight = new THREE.DirectionalLight(0x8899bb, 0.8);
+fillLight.position.set(-6, 4, -4); scene.add(fillLight);
 
 /* Grid */
-const grid = new THREE.GridHelper(20, 20, 0x1E2D45, 0x0D1421);
-grid.position.y = -2; grid.material.opacity = 0.5; grid.material.transparent = true;
+const grid = new THREE.GridHelper(80, 80, 0x1E2D45, 0x0D1421);
+grid.position.y = -2; grid.material.opacity = 0.35; grid.material.transparent = true;
 scene.add(grid);
 
-/* Particles */
-const pCount = 600;
-const pGeo = new THREE.BufferGeometry();
-const pPos = new Float32Array(pCount * 3);
-for(let i = 0; i < pCount * 3; i++) pPos[i] = (Math.random() - 0.5) * 30;
-pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
-const pMat = new THREE.PointsMaterial({color:0x4FC3F7, size:0.04, transparent:true, opacity:0.3});
-const particles = new THREE.Points(pGeo, pMat);
-scene.add(particles);
-
-/* ========== CUBES (FRAMES) ========== */
+/* ========== STANDING PILLARS & PAGE BLOCKS ========== */
 let cubes = [];
 let labels = [];
-const cubeMat = () => new THREE.MeshStandardMaterial({
-  color:0x111827, emissive:0x070B14, metalness:0.5, roughness:0.5,
-  transparent:true, opacity:0.85
+const PILLAR_W = 1.5, PILLAR_H = 4.0, PILLAR_D = 1.5;
+const BLOCK_W = 1.1, BLOCK_H = 1.0, BLOCK_D = 1.1;
+const PILLAR_SPACING = 2.2;
+const anims = [];
+
+const slotMat = () => new THREE.MeshPhysicalMaterial({
+  color:0x4FC3F7, metalness:0.1, roughness:0.05,
+  transparent:true, opacity:0.06, side:THREE.DoubleSide,
+  depthWrite:false
 });
-const edgeMat = new THREE.LineBasicMaterial({color:0x1E2D45, transparent:true, opacity:0.8});
+const slotEdgeMat = () => new THREE.LineBasicMaterial({color:0x4FC3F7, transparent:true, opacity:0.35});
+
+function makeInnerBlock(color) {
+  const col = new THREE.Color(color);
+  const geo = new THREE.BoxGeometry(BLOCK_W, BLOCK_H, BLOCK_D);
+  const mat = new THREE.MeshStandardMaterial({
+    color:col, emissive:col, emissiveIntensity:0.35,
+    metalness:0.4, roughness:0.3, transparent:true, opacity:0.92,
+    depthWrite:true
+  });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.renderOrder = 10;
+  const eGeo = new THREE.EdgesGeometry(geo);
+  const eMat = new THREE.LineBasicMaterial({color:col, transparent:true, opacity:0.8});
+  const edges = new THREE.LineSegments(eGeo, eMat);
+  edges.renderOrder = 11;
+  return {mesh, edges, mat, edgeMat:eMat};
+}
 
 function buildCubes(count) {
-  cubes.forEach(c => { scene.remove(c.mesh); scene.remove(c.edges); });
+  cubes.forEach(c => {
+    scene.remove(c.mesh); scene.remove(c.edges);
+    if(c.innerBlock) { scene.remove(c.innerBlock); scene.remove(c.innerEdges); }
+  });
+  for(let i = anims.length-1; i >= 0; i--) {
+    const a = anims[i];
+    if(a.evictBlock) { scene.remove(a.evictBlock); scene.remove(a.evictEdges); }
+    anims.splice(i,1);
+  }
   labels.forEach(l => l.remove());
   cubes = []; labels = [];
-  const spacing = 2.8;
-  const startX = -(count - 1) * spacing / 2;
+  const startX = -(count - 1) * PILLAR_SPACING / 2;
   for(let i = 0; i < count; i++) {
-    const geo = new THREE.BoxGeometry(2.0, 2.0, 2.0);
-    const mat = cubeMat();
+    const geo = new THREE.BoxGeometry(PILLAR_W, PILLAR_H, PILLAR_D);
+    const mat = slotMat();
     const mesh = new THREE.Mesh(geo, mat);
-    mesh.position.set(startX + i * spacing, 0, 0);
+    mesh.renderOrder = 0;
+    mesh.position.set(startX + i * PILLAR_SPACING, 0, 0);
     scene.add(mesh);
     const edgeGeo = new THREE.EdgesGeometry(geo);
-    const edge = new THREE.LineSegments(edgeGeo, edgeMat.clone());
+    const edge = new THREE.LineSegments(edgeGeo, slotEdgeMat());
+    edge.renderOrder = 1;
     edge.position.copy(mesh.position);
     scene.add(edge);
     const lbl = document.createElement('div');
     lbl.className = 'frame-label';
     lbl.textContent = '—';
     document.body.appendChild(lbl);
-    cubes.push({mesh, edges:edge, mat, baseY:0, targetY:0, page:-1});
+    cubes.push({
+      mesh, edges:edge, mat,
+      baseX:mesh.position.x, baseY:0, page:-1,
+      innerBlock:null, innerEdges:null, innerMat:null, innerEdgeMat:null
+    });
     labels.push(lbl);
   }
 }
@@ -285,19 +308,27 @@ buildCubes(3);
 function colorCubeForPage(idx, page) {
   const c = cubes[idx];
   if(page < 0) {
-    c.mat.color.set(EMPTY_COLOR); c.edges.material.color.set(0x1E2D45);
+    c.edges.material.color.set(0x4FC3F7); c.edges.material.opacity = 0.35;
     labels[idx].style.color = '#546E7A';
+    labels[idx].style.textShadow = 'none';
   } else {
     const col = getPageColor(page);
-    c.mat.color.set(col); c.edges.material.color.set(col);
+    if(c.innerBlock) {
+      c.innerMat.color.set(col); c.innerMat.emissive.set(col);
+      c.innerMat.emissiveIntensity = 0.35;
+      c.innerEdgeMat.color.set(col);
+    }
+    c.edges.material.color.set(col); c.edges.material.opacity = 0.5;
     labels[idx].style.color = col;
+    labels[idx].style.textShadow = `0 0 10px ${col}, 0 0 20px ${col}`;
   }
 }
 
 function updateLabelPositions() {
   cubes.forEach((c, i) => {
+    const target = c.innerBlock || c.mesh;
     const v = new THREE.Vector3();
-    c.mesh.getWorldPosition(v);
+    target.getWorldPosition(v);
     v.project(camera);
     const x = (v.x * 0.5 + 0.5) * window.innerWidth;
     const y = (-v.y * 0.5 + 0.5) * window.innerHeight;
@@ -309,7 +340,6 @@ function updateLabelPositions() {
 /* ========== UI HELPERS ========== */
 const $ = id => document.getElementById(id);
 const flash = $('center-flash');
-const eventLog = $('event-log');
 const pageTableBody = $('page-table-body');
 
 function showFlash(text, color) {
@@ -317,14 +347,6 @@ function showFlash(text, color) {
   flash.style.color = color;
   flash.style.opacity = '1';
   setTimeout(() => flash.style.opacity = '0', 600);
-}
-
-function addLog(msg, type) {
-  const li = document.createElement('li');
-  li.textContent = msg;
-  li.className = type === 'fault' ? 'log-fault' : 'log-hit';
-  eventLog.prepend(li);
-  if(eventLog.children.length > 100) eventLog.lastChild.remove();
 }
 
 function updateStats() {
@@ -367,81 +389,119 @@ function updateRefChips(stepIndex) {
   });
 }
 
-/* ========== HISTORY TABLE ========== */
-const historyThead = $('history-thead');
-const historyTbody = $('history-tbody');
-const historyPanel = $('history-panel');
-function initHistoryTable(fc) {
-  historyThead.innerHTML = '';
-  historyTbody.innerHTML = '';
-  const tr = document.createElement('tr');
-  tr.innerHTML = '<th>Step</th><th>Page</th>';
-  for(let i = 0; i < fc; i++) tr.innerHTML += `<th>F${i}</th>`;
-  tr.innerHTML += '<th>Result</th>';
-  historyThead.appendChild(tr);
-  historyPanel.classList.add('show');
-}
-function addHistoryRow(step, page, frames, hit) {
-  const tr = document.createElement('tr');
-  tr.className = hit ? 'hist-hit' : 'hist-fault';
-  let html = `<td>${step}</td><td style="color:${getPageColor(page)}">P${page}</td>`;
-  frames.forEach(f => { html += `<td>${f < 0 ? '—' : 'P'+f}</td>`; });
-  html += `<td>${hit ? 'HIT ✓' : 'FAULT ✗'}</td>`;
-  tr.innerHTML = html;
-  historyTbody.appendChild(tr);
-  tr.scrollIntoView({behavior:'smooth', block:'nearest'});
-}
+
 
 /* ========== ANIMATIONS ========== */
-const anims = [];
-function animateCube(idx, type) {
+function animateCube(idx, type, newPage) {
   return new Promise(resolve => {
     const c = cubes[idx];
+    const evictDelay = (c.innerBlock && type === 'fault') ? 350 : 0;
+
     if(type === 'fault') {
-      c.mat.emissive.set(0xFF5252);
-      c.edges.material.color.set(0xFF5252);
-      c.targetY = 1.5;
-      flashLight.intensity = 2;
+      /* --- evict old block if present --- */
+      if(c.innerBlock) {
+        anims.push({
+          kind:'evict', cube:c, idx,
+          evictBlock:c.innerBlock, evictEdges:c.innerEdges, evictMat:c.innerMat,
+          startY:c.baseY, targetY:c.baseY - 5,
+          start:performance.now(), duration:350, resolve:null
+        });
+        c.innerBlock = null; c.innerEdges = null; c.innerMat = null; c.innerEdgeMat = null;
+      }
+      /* --- create new inner block --- */
+      const col = getPageColor(newPage !== undefined ? newPage : 1);
+      const ib = makeInnerBlock(col);
+      ib.mesh.position.set(c.baseX, c.baseY + 5, 0);
+      ib.edges.position.copy(ib.mesh.position);
+      scene.add(ib.mesh); scene.add(ib.edges);
+      c.innerBlock = ib.mesh; c.innerEdges = ib.edges;
+      c.innerMat = ib.mat; c.innerEdgeMat = ib.edgeMat;
+
+      c.edges.material.color.set(0xFF5252); c.edges.material.opacity = 0.7;
       labels[idx].style.color = '#FF5252';
+
+      anims.push({
+        kind:'drop', cube:c, idx,
+        startY:c.baseY + 5, targetY:c.baseY,
+        start:performance.now() + evictDelay, duration:500, resolve
+      });
     } else {
-      c.mat.emissive.set(0x00E5CC);
-      c.edges.material.color.set(0x00E5CC);
-      c.targetY = 0.3;
+      /* --- hit: bounce block upward inside pillar --- */
+      if(c.innerBlock) {
+        c.innerMat.emissive.set(0x00E5CC);
+        c.innerMat.emissiveIntensity = 1.0;
+      }
+      c.edges.material.color.set(0x00E5CC); c.edges.material.opacity = 0.7;
       labels[idx].style.color = '#00E5CC';
+      anims.push({
+        kind:'bounce', cube:c, idx,
+        baseY:c.baseY, peakY:c.baseY + 1.0,
+        start:performance.now(), duration:450, resolve
+      });
     }
-    anims.push({cube:c, idx, type, start:performance.now(), duration:500, resolve});
   });
 }
 
 function processAnims(now) {
   for(let i = anims.length-1; i >= 0; i--) {
-    const a = anims[i]; const t = Math.min((now - a.start)/a.duration, 1);
-    const ease = t < 0.5 ? 2*t*t : -1+(4-2*t)*t;
-    if(t < 0.5) {
-      a.cube.mesh.position.y = a.cube.baseY + (a.cube.targetY - a.cube.baseY)*ease*2;
-      a.cube.edges.position.y = a.cube.mesh.position.y;
-    } else {
-      a.cube.mesh.position.y = a.cube.targetY - (a.cube.targetY - a.cube.baseY)*(ease-0.5)*2;
-      a.cube.edges.position.y = a.cube.mesh.position.y;
-    }
-    if(t >= 1) {
-      a.cube.mesh.position.y = a.cube.baseY;
-      a.cube.edges.position.y = a.cube.baseY;
-      a.cube.mat.emissive.set(0x111122);
-      const pg = a.cube.page;
-      if(pg >= 0) {
-        const col = getPageColor(pg);
-        a.cube.edges.material.color.set(col);
-        labels[a.idx].style.color = col;
-        labels[a.idx].style.textShadow = `0 0 10px ${col}, 0 0 20px ${col}`;
-      } else {
-        a.cube.edges.material.color.set(0x39ff14);
-        labels[a.idx].style.color = '#fff';
-        labels[a.idx].style.textShadow = '0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan)';
+    const a = anims[i];
+    if(now < a.start) continue;
+    const t = Math.min((now - a.start)/a.duration, 1);
+    const ease = t < 0.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2;
+
+    if(a.kind === 'drop') {
+      const y = a.startY + (a.targetY - a.startY) * ease;
+      if(a.cube.innerBlock) {
+        a.cube.innerBlock.position.y = y;
+        a.cube.innerEdges.position.y = y;
       }
-      flashLight.intensity = 0;
-      anims.splice(i, 1);
-      a.resolve();
+      if(t >= 1) {
+        if(a.cube.innerBlock) {
+          a.cube.innerBlock.position.y = a.targetY;
+          a.cube.innerEdges.position.y = a.targetY;
+        }
+        a.cube.edges.material.color.set(0x4FC3F7); a.cube.edges.material.opacity = 0.35;
+        anims.splice(i,1);
+        if(a.resolve) a.resolve();
+      }
+    } else if(a.kind === 'evict') {
+      const y = a.startY + (a.targetY - a.startY) * ease;
+      a.evictBlock.position.y = y; a.evictEdges.position.y = y;
+      a.evictMat.opacity = 1 - ease;
+      if(t >= 1) {
+        scene.remove(a.evictBlock); scene.remove(a.evictEdges);
+        a.evictBlock.geometry.dispose(); a.evictMat.dispose();
+        a.evictEdges.geometry.dispose();
+        anims.splice(i,1);
+        if(a.resolve) a.resolve();
+      }
+    } else if(a.kind === 'bounce') {
+      /* jump up then back down using a sine arc */
+      const arc = Math.sin(t * Math.PI);
+      const y = a.baseY + (a.peakY - a.baseY) * arc;
+      if(a.cube.innerBlock) {
+        a.cube.innerBlock.position.y = y;
+        a.cube.innerEdges.position.y = y;
+        a.cube.innerMat.emissiveIntensity = 0.35 + arc * 0.65;
+      }
+      a.cube.edges.material.opacity = 0.35 + arc * 0.5;
+      if(t >= 1) {
+        if(a.cube.innerBlock) {
+          a.cube.innerBlock.position.y = a.baseY;
+          a.cube.innerEdges.position.y = a.baseY;
+          a.cube.innerMat.emissiveIntensity = 0.35;
+          const pg = a.cube.page;
+          if(pg >= 0) {
+            const col = getPageColor(pg);
+            a.cube.innerMat.emissive.set(col);
+            labels[a.idx].style.color = col;
+            labels[a.idx].style.textShadow = `0 0 10px ${col}, 0 0 20px ${col}`;
+          }
+        }
+        a.cube.edges.material.color.set(0x4FC3F7); a.cube.edges.material.opacity = 0.35;
+        anims.splice(i,1);
+        if(a.resolve) a.resolve();
+      }
     }
   }
 }
@@ -531,10 +591,8 @@ function initSim() {
   state.faults = 0; state.hits = 0; state.stepIndex = 0;
   state.pageTable.clear(); state.simStarted = true;
   state.stepHistory = [];
-  eventLog.innerHTML = '';
   buildCubes(frameCount);
   buildRefChips(refStr);
-  initHistoryTable(frameCount);
   cubes.forEach((c,i) => { labels[i].textContent = '—'; colorCubeForPage(i, -1); });
   updateStats();
   return true;
@@ -549,20 +607,16 @@ async function executeStep(i) {
   if(result.hit) {
     state.hits++;
     showFlash(`PAGE HIT — P${page}`, 'var(--neon-green)');
-    addLog(`[${i+1}] P${page} → HIT (Frame ${result.frameIdx})`, 'hit');
-    await animateCube(result.frameIdx, 'hit');
+    await animateCube(result.frameIdx, 'hit', page);
   } else {
     state.faults++;
-    const vMsg = result.victim >= 0 ? ` | Evicted P${result.victim}` : '';
     showFlash(`PAGE FAULT — P${page}`, 'var(--neon-red)');
-    addLog(`[${i+1}] P${page} → FAULT (Frame ${result.frameIdx})${vMsg}`, 'fault');
-    await animateCube(result.frameIdx, 'fault');
+    await animateCube(result.frameIdx, 'fault', page);
   }
   cubes[result.frameIdx].page = page;
   labels[result.frameIdx].textContent = `P${page}`;
   colorCubeForPage(result.frameIdx, page);
   state.pageTable.set(page, result.frameIdx);
-  addHistoryRow(i+1, page, [...state.frames], result.hit);
   state.stepHistory.push({step:i+1, page, frames:[...state.frames], hit:result.hit});
   update2DGrid();
   updatePageTable(); updateStats();
@@ -584,7 +638,6 @@ async function runSimulation() {
   $('btn-run').textContent = '▶ RUN';
   $('btn-step').disabled = (state.stepIndex >= state.refString.length);
   if(state.stepIndex >= state.refString.length) {
-    addLog('— Simulation Complete —', 'hit');
     state.simStarted = false;
   }
 }
@@ -596,7 +649,6 @@ async function stepOnce() {
   await executeStep(state.stepIndex);
   $('btn-step').disabled = (state.stepIndex >= state.refString.length);
   if(state.stepIndex >= state.refString.length) {
-    addLog('— Simulation Complete —', 'hit');
     state.simStarted = false;
   }
 }
@@ -692,10 +744,7 @@ function doReset() {
   state.loadOrder = []; state.loadCounter = 0;
   state.stepHistory = [];
   state.pageTable.clear();
-  eventLog.innerHTML = '';
   pageTableBody.innerHTML = '';
-  historyTbody.innerHTML = '';
-  historyPanel.classList.remove('show');
   buildCubes(parseInt($('inp-frames').value)||3);
   cubes.forEach((c,i) => { labels[i].textContent = '—'; colorCubeForPage(i, -1); });
   $('btn-run').textContent = '▶ RUN';
@@ -871,15 +920,16 @@ function animate() {
   requestAnimationFrame(animate);
   const t = clock.getElapsedTime();
   cubes.forEach((c, i) => {
-    c.mesh.rotation.y = t * 0.3 + i * 0.5;
-    c.mesh.rotation.x = Math.sin(t * 0.5 + i) * 0.15;
-    c.edges.rotation.copy(c.mesh.rotation);
+    /* gentle pillar glow pulse */
+    const basePulse = 0.3 + Math.sin(t * 1.5 + i * 0.7) * 0.08;
+    if(!anims.find(a => a.idx === i)) c.edges.material.opacity = basePulse;
+    /* subtle inner-block float when not animating */
+    const busy = anims.find(a => a.idx === i && (a.kind==='drop'||a.kind==='evict'||a.kind==='bounce'));
+    if(c.innerBlock && !busy) {
+      c.innerBlock.position.y = c.baseY + Math.sin(t * 2 + i) * 0.04;
+      c.innerEdges.position.y = c.innerBlock.position.y;
+    }
   });
-  particles.rotation.y = t * 0.02;
-  const pp = particles.geometry.attributes.position.array;
-  for(let i = 1; i < pp.length; i += 3) pp[i] += Math.sin(t + i) * 0.001;
-  particles.geometry.attributes.position.needsUpdate = true;
-  flashLight.intensity *= 0.92;
   processAnims(performance.now());
   controls.update();
   updateLabelPositions();
@@ -892,6 +942,89 @@ window.addEventListener('resize', () => {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
+
+/* ========== TUTORIAL LOGIC ========== */
+const tutorialSteps = [
+  { target: '#ref-chips', title: 'Reference String', text: 'This is the sequence of pages the CPU is requesting from memory.' },
+  { target: '#controls', title: 'Controls', text: 'Select your algorithm (FIFO, LRU, etc.), frame count, and simulation speed here.' },
+  { target: '#canvas-container', title: '3D Timeline', text: 'Watch the pages load into memory. A new column is generated for every step. Hits flash green, Faults flash red.' },
+  { target: '#panel-page-table', title: 'Page Table', text: 'This live dictionary tracks which pages are currently sitting in which physical memory frames.' },
+  { target: '#grid2d-container', title: '2D Grid', text: 'A tabular history showing the complete matrix of page replacements over time.' }
+];
+let currentTutStep = 0;
+
+function showTutorialStep(index) {
+  document.querySelectorAll('.tutorial-highlight').forEach(el => el.classList.remove('tutorial-highlight'));
+  
+  if (index >= tutorialSteps.length) {
+    endTutorial();
+    return;
+  }
+  
+  const step = tutorialSteps[index];
+  const targetEl = document.querySelector(step.target);
+  
+  if (targetEl) {
+    targetEl.classList.add('tutorial-highlight');
+    
+    // For 2D grid, ensure it's visible or explain appropriately if hidden
+    if (step.target === '#grid2d-container' && state.viewMode !== '2d') {
+      switchView('2d');
+    } else if (step.target === '#canvas-container' && state.viewMode !== '3d') {
+      switchView('3d');
+    }
+    
+    const rect = targetEl.getBoundingClientRect();
+    const tooltip = $('tutorial-tooltip');
+    
+    let top = rect.bottom + 10;
+    let left = rect.left;
+    
+    if (step.target === '#canvas-container') {
+        top = window.innerHeight / 2 - 100;
+        left = window.innerWidth / 2 - 150;
+    } else {
+        if (top + 200 > window.innerHeight) top = rect.top - 200;
+        if (left + 320 > window.innerWidth) left = window.innerWidth - 320;
+    }
+    
+    tooltip.style.top = Math.max(10, top) + 'px';
+    tooltip.style.left = Math.max(10, left) + 'px';
+    
+    $('tutorial-title').textContent = step.title;
+    $('tutorial-text').textContent = step.text;
+    $('tutorial-tooltip').classList.add('show');
+    $('btn-tut-next').textContent = index === tutorialSteps.length - 1 ? 'Finish' : 'Next';
+  } else {
+    showTutorialStep(index + 1);
+  }
+}
+
+function startTutorial() {
+  if (state.running && !state.paused) {
+    state.paused = true;
+    $('btn-run').textContent = '▶ RESUME';
+    $('btn-step').disabled = false;
+  }
+  
+  $('tutorial-overlay').classList.add('show');
+  currentTutStep = 0;
+  showTutorialStep(currentTutStep);
+}
+
+function endTutorial() {
+  $('tutorial-overlay').classList.remove('show');
+  $('tutorial-tooltip').classList.remove('show');
+  document.querySelectorAll('.tutorial-highlight').forEach(el => el.classList.remove('tutorial-highlight'));
+  if (state.viewMode !== '3d') switchView('3d'); // reset to default if changed
+}
+
+$('btn-learn').addEventListener('click', startTutorial);
+$('btn-tut-next').addEventListener('click', () => {
+  currentTutStep++;
+  showTutorialStep(currentTutStep);
+});
+$('btn-tut-close').addEventListener('click', endTutorial);
 </script>
 </body>
 </html>
