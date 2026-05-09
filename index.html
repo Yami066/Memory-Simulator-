@@ -3,1028 +3,155 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Virtual Memory Page Replacement Simulator</title>
-<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<title>Virtual Memory Simulator — Windows 11</title>
+<meta name="description" content="Interactive Windows 11 themed virtual memory page replacement simulator with FIFO, LRU, MRU, and Optimal algorithms."/>
+<link rel="stylesheet" href="style.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{--bg-deep:#070B14;--bg-panel:#0D1421;--bg-card:#111827;--border:#1E2D45;--accent-blue:#4FC3F7;--accent-violet:#7C4DFF;--accent-teal:#00E5CC;--fault-red:#FF5252;--text-primary:#E8EAF6;--text-muted:#546E7A}
-body{background:var(--bg-deep);color:var(--text-primary);font-family:'Space Grotesk',sans-serif;overflow:hidden;height:100vh;width:100vw;overflow-y:auto}
-#canvas-container{position:fixed;top:0;left:0;width:100%;height:100%;min-height:420px;z-index:0}
-
-.panel {
-  background:rgba(13,20,33,0.85);border:1px solid var(--border);border-radius:12px;backdrop-filter:blur(12px);padding:12px 16px;
-  display: flex; flex-direction: column; transition: all 0.3s ease; overflow: hidden; margin-bottom: 12px;
-}
-.panel.expanded { flex: 1; }
-.panel.collapsed { flex: 0; min-height: 52px; padding: 6px 16px; }
-
-.panel-header { display: flex; justify-content: space-between; align-items: center; height: 36px; cursor: pointer; overflow: visible; flex-shrink: 0; }
-.panel-title { font-family: 'Space Grotesk', sans-serif; font-size: 13px; color: var(--text-primary); text-transform: uppercase; letter-spacing: 2px; white-space: nowrap; overflow: visible; }
-.panel-toggle { width: 20px; height: 20px; border-radius: 50%; background: rgba(79,195,247,0.1); border: 1px solid var(--border); color: var(--accent-blue); font-size: 14px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s; pointer-events: none; }
-.panel-header:hover .panel-toggle { background: rgba(79,195,247,0.25); border-color: var(--accent-blue); }
-
-.panel-body { max-height: 500px; overflow-y: auto; transition: max-height 0.3s ease; margin-top: 8px; }
-.panel.collapsed .panel-body { display: none; margin-top: 0; }
-
-#page-table{width:100%;border-collapse:collapse;font-family:'JetBrains Mono',monospace}
-#page-table th,#page-table td{border:1px solid var(--border);padding:4px 6px;text-align:center;font-size:11px}
-#page-table th{background:var(--bg-card);color:var(--text-muted)}
-#page-table tbody tr:nth-child(even){background:rgba(255,255,255,0.02)}
-
-
-/* STATS HUD */
-#stats-hud{position:fixed;top:78px;left:50%;transform:translateX(-50%);z-index:15;display:flex;gap:12px;background:transparent}
-.stat-pill{display:flex;align-items:center;gap:8px;background:var(--bg-card);border:1px solid var(--border);border-radius:999px;padding:6px 16px;font-family:'Space Grotesk',sans-serif;font-size:11px}
-.stat-label{color:var(--text-muted);text-transform:uppercase;letter-spacing:1px}
-.stat-value{color:var(--accent-blue);font-weight:600}
-
-#bottom-panel{position:fixed;bottom:60px;left:10px;right:10px;z-index:13;background:rgba(13,20,33,0.85);border:1px solid var(--border);border-radius:12px;backdrop-filter:blur(12px);padding:16px;max-height:220px;display:none}
-#bottom-panel.show{display:block}
-#chart-container{width:100%;height:160px}
-
-/* REF STRING CHIPS */
-#ref-chips{position:fixed;top:10px;left:10px;right:10px;z-index:18;display:flex;flex-wrap:wrap;gap:6px;padding:12px 16px;background:rgba(13,20,33,0.85);border:1px solid var(--border);border-radius:12px;backdrop-filter:blur(12px);align-items:center}
-#ref-chips-label{font-family:'Space Grotesk',sans-serif;font-size:12px;color:var(--text-muted);letter-spacing:1px;margin-right:8px}
-.ref-chip{display:inline-flex;align-items:center;justify-content:center;width:32px;height:28px;border-radius:999px;border:1px solid var(--border);background:var(--bg-card);color:var(--text-muted);font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;transition:all 0.3s}
-.ref-chip.done{background:var(--bg-panel);color:var(--text-primary);border-color:var(--border)}
-.ref-chip.active{background:rgba(79,195,247,0.15);border:2px solid var(--accent-blue);color:var(--accent-blue);box-shadow:0 0 12px rgba(79,195,247,0.4);animation:pulse-ring 1s ease infinite}
-.ref-chip.upcoming{opacity:0.35}
-@keyframes pulse-ring{0%{box-shadow:0 0 0 0 rgba(79,195,247,0.4)}70%{box-shadow:0 0 0 6px rgba(79,195,247,0)}100%{box-shadow:0 0 0 0 rgba(79,195,247,0)}}
-
-
-
-/* BELADY BANNER */
-#belady-banner{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:30;padding:20px 32px;background:rgba(10,0,0,0.95);border:2px solid var(--fault-red);border-radius:12px;font-family:'Space Grotesk',sans-serif;font-size:15px;color:var(--fault-red);box-shadow:0 0 40px rgba(255,82,82,0.4);display:none;text-align:center;max-width:500px}
-#belady-banner.no-anomaly{border-color:var(--accent-teal);color:var(--accent-teal);box-shadow:0 0 40px rgba(0,229,204,0.3)}
-
-/* CONTROLS & BUTTONS */
-#controls{position:fixed;bottom:0;left:0;right:0;z-index:15;min-height:55px;background:var(--bg-deep);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:center;gap:12px;padding:8px 16px;flex-wrap:wrap}
-#controls label{color:var(--text-muted);font-size:11px;font-family:'Space Grotesk',sans-serif;letter-spacing:1px}
-#controls input,#controls select{background:var(--bg-panel);color:var(--text-primary);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-family:'JetBrains Mono',monospace;font-size:12px;outline:none}
-#controls input[type=text]{background:var(--bg-card);color:var(--text-muted);font-weight:600;width:220px;border-radius:999px;padding:6px 16px}
-#controls input[type=number]{width:50px}
-.btn{background:var(--bg-card);color:var(--text-primary);border:1px solid var(--border);border-radius:999px;padding:6px 18px;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:500;cursor:pointer;letter-spacing:0.5px;transition:all 0.2s}
-.btn:hover{background:var(--border);border-color:var(--accent-blue);color:var(--accent-blue)}
-#btn-run{background:linear-gradient(135deg, var(--accent-teal), var(--accent-blue));color:var(--bg-deep);border:none;font-weight:600}
-#btn-run:hover{opacity:0.9;transform:scale(1.02);color:var(--bg-deep)}
-#btn-reset:hover{border-color:var(--fault-red);color:var(--fault-red)}
-.btn-running{animation:btn-pulse 1.5s infinite}
-@keyframes btn-pulse{0%{box-shadow:0 0 0 0 rgba(79,195,247,0.4)}70%{box-shadow:0 0 0 8px rgba(79,195,247,0)}100%{box-shadow:0 0 0 0 rgba(79,195,247,0)}}
-
-/* FRAME LABELS */
-.frame-label{position:absolute;z-index:5;font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:600;color:var(--text-primary);pointer-events:none;transform:translate(-50%,-50%);transition:color 0.3s}
-
-/* Scrollbar */
-::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
-::-webkit-scrollbar-thumb:hover{background:var(--text-muted)}
-
-/* VIEW TOGGLE */
-#view-toggle{position:fixed;top:40px;left:50%;transform:translateX(-50%);z-index:22;display:flex;gap:4px;border-radius:999px;background:var(--bg-card);border:1px solid var(--border);padding:4px}
-.view-btn{padding:6px 20px;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:500;letter-spacing:1px;cursor:pointer;background:transparent;color:var(--text-muted);border:none;border-radius:999px;transition:all 0.3s}
-.view-btn.active{background:var(--border);color:var(--text-primary)}
-.view-btn:hover:not(.active){color:var(--text-primary)}
-
-/* 2D GRID */
-#grid2d-container{position:fixed;top:150px;left:10px;right:10px;bottom:100px;z-index:9;background:var(--bg-panel);border:1px solid var(--border);border-radius:8px;overflow-x:auto;overflow-y:auto;display:none;padding:16px}
-#grid2d-container.show{display:block}
-#grid2d-container h3{font-family:'Space Grotesk',sans-serif;font-size:13px;color:var(--text-primary);letter-spacing:1px;margin-bottom:12px}
-#grid2d{display:grid;gap:0;font-size:12px;font-family:'JetBrains Mono',monospace;width:max-content;padding-right:16px;padding-bottom:16px}
-.g2d-cell{min-width:48px;height:36px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);background:var(--bg-card);color:var(--text-muted);font-size:11px;font-weight:600;transition:all 0.3s}
-.g2d-cell.alt-row{background:var(--bg-panel)}
-.g2d-label{min-width:64px;background:var(--bg-card);color:var(--text-muted);font-family:'Space Grotesk',sans-serif;font-size:11px;letter-spacing:1px;position:sticky;left:0;z-index:2;text-transform:uppercase}
-.g2d-label.alt-row{background:var(--bg-panel)}
-.g2d-cell.current{background:rgba(79,195,247,0.08);border-left:1px solid var(--accent-blue);border-right:1px solid var(--accent-blue)}
-.g2d-cell.upcoming{opacity:0.25}
-.g2d-cell.fault-cell{color:var(--fault-red);font-weight:600}
-.g2d-cell.hit-cell{color:var(--accent-teal);font-weight:600}
-.g2d-cell.empty-frame{background:var(--bg-deep)}
-#canvas-container.hidden{display:none}
-.frame-label.hidden{display:none}
-
-/* TUTORIAL SYSTEM */
-#tutorial-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.75); z-index: 1000; display: none; }
-#tutorial-overlay.show { display: block; }
-.tutorial-highlight { position: relative; z-index: 1001 !important; box-shadow: 0 0 0 4px #AB47BC, 0 0 30px rgba(171,71,188,0.4) !important; border-radius: 8px; background: var(--bg-deep) !important; }
-#tutorial-tooltip { position: fixed; z-index: 1002; background: var(--bg-card); border: 1px solid #AB47BC; border-radius: 8px; padding: 16px; width: 300px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); display: none; flex-direction: column; gap: 8px; color: var(--text-primary); transition: all 0.3s ease; }
-#tutorial-tooltip.show { display: flex; }
-#tutorial-title { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 14px; color: #AB47BC; text-transform: uppercase; letter-spacing: 1px; }
-#tutorial-text { font-family: 'Space Grotesk', sans-serif; font-size: 13px; color: var(--text-muted); line-height: 1.5; }
-.tutorial-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
-.btn-tutorial { background: transparent; color: var(--text-muted); border: 1px solid var(--border); border-radius: 999px; padding: 6px 16px; font-family: 'Space Grotesk', sans-serif; font-size: 11px; cursor: pointer; transition: all 0.2s; }
-.btn-tutorial:hover { border-color: #AB47BC; color: #AB47BC; }
-#btn-tut-next { background: rgba(171,71,188,0.1); border-color: #AB47BC; color: #AB47BC; }
-#btn-tut-next:hover { background: #AB47BC; color: #fff; }
-</style>
 </head>
 <body>
-<div id="canvas-container"></div>
-<div id="center-flash"></div>
-<div id="view-toggle">
-  <button class="view-btn active" id="btn-3d">3D VIEW</button>
-  <button class="view-btn" id="btn-2d">2D VIEW</button>
+
+<!-- ═══════ DESKTOP ═══════ -->
+
+<!-- DESKTOP AREA (mini app windows appear here) -->
+<div id="desktop-area"></div>
+
+<!-- APP WINDOW -->
+<div id="app-window">
+
+  <!-- Title Bar -->
+  <div id="title-bar">
+    <div id="title-bar-left">
+      <svg id="title-bar-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <rect x="1" y="1" width="6" height="6" rx="1" fill="#0078D4"/>
+        <rect x="9" y="1" width="6" height="6" rx="1" fill="#00B4D8"/>
+        <rect x="1" y="9" width="6" height="6" rx="1" fill="#00B4D8"/>
+        <rect x="9" y="9" width="6" height="6" rx="1" fill="#0078D4"/>
+      </svg>
+      <span id="title-bar-text">Virtual Memory Manager</span>
+    </div>
+    <div id="title-bar-controls">
+      <button class="win-ctrl" id="win-minimize" title="Minimize">─</button>
+      <button class="win-ctrl" id="win-maximize" title="Maximize">□</button>
+      <button class="win-ctrl win-close" id="win-close" title="Close">✕</button>
+    </div>
+  </div>
+
+  <!-- Window Body -->
+  <div id="window-body">
+
+    <!-- STATS HUD -->
+    <div id="stats-hud">
+      <div class="stat-pill"><span class="stat-label">Accesses</span><span class="stat-value" id="stat-accesses">0</span></div>
+      <div class="stat-pill"><span class="stat-label">Faults</span><span class="stat-value" id="stat-faults">0</span></div>
+      <div class="stat-pill"><span class="stat-label">Hits</span><span class="stat-value" id="stat-hits">0</span></div>
+      <div class="stat-pill"><span class="stat-label">Fault Rate</span><span class="stat-value" id="stat-rate">0%</span></div>
+      <div class="stat-pill"><span class="stat-label">Algorithm</span><span class="stat-value" id="stat-algo">FIFO</span></div>
+      <div class="stat-pill"><span class="stat-label">Step</span><span class="stat-value" id="stat-step">0/0</span></div>
+    </div>
+
+    <!-- MAIN AREA -->
+    <div id="main-area">
+      <!-- Queue -->
+      <div id="queue-section">
+        <span id="queue-label">Activity Queue</span>
+        <div id="queue-chips"></div>
+      </div>
+
+      <!-- RAM -->
+      <div id="ram-section">
+        <div id="ram-title">Active RAM</div>
+        <div id="ram-slots"></div>
+      </div>
+
+      <!-- Controls -->
+      <div id="controls-row">
+        <label style="font-size:11px;color:#8b95a5">Frames</label>
+        <input type="number" id="inp-frames" value="3" min="1" max="6"/>
+        <select id="sel-algo"><option value="FIFO">FIFO</option><option value="LRU">LRU</option><option value="MRU">MRU</option><option value="OPT">Optimal</option></select>
+        <select id="sel-speed"><option value="1500">Slow</option><option value="900" selected>Normal</option><option value="400">Fast</option></select>
+        <button class="cbtn" id="btn-run">▶ RUN</button>
+        <button class="cbtn" id="btn-step">⏭ STEP</button>
+        <button class="cbtn" id="btn-reset">⟲ RESET</button>
+        <button class="cbtn" id="btn-random">🎲 RANDOM</button>
+        <button class="cbtn" id="btn-compare">📊 COMPARE</button>
+        <button class="cbtn" id="btn-belady">⚠ BELADY'S</button>
+      </div>
+    </div>
+
+    <!-- SIDE PANELS -->
+    <div id="side-panels">
+      <div class="panel" id="panel-page-table">
+        <div class="panel-header" onclick="togglePanel('panel-page-table')">
+          <span class="panel-title">Page Table</span>
+          <button class="panel-toggle">−</button>
+        </div>
+        <div class="panel-body">
+          <table id="page-table"><thead><tr><th>App</th><th>Frame</th><th>Valid</th></tr></thead><tbody id="page-table-body"></tbody></table>
+        </div>
+      </div>
+      <div class="panel" id="panel-event-log">
+        <div class="panel-header" onclick="togglePanel('panel-event-log')">
+          <span class="panel-title">Event Log</span>
+          <button class="panel-toggle">−</button>
+        </div>
+        <div class="panel-body">
+          <div id="event-log-wrapper">
+            <div id="event-log-titlebar">
+              <span>C:\Windows\System32\vmm.exe</span>
+              <span id="event-log-dots">─ □ ✕</span>
+            </div>
+            <div id="event-log"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /window-body -->
+</div><!-- /app-window -->
+
+<!-- TASKBAR -->
+<div id="taskbar">
+  <div id="taskbar-inner">
+    <!-- Start Button -->
+    <button class="taskbar-start" id="start-btn" title="Start">
+      <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+        <rect x="1" y="1" width="8" height="8" rx="1.5" fill="#fff"/>
+        <rect x="11" y="1" width="8" height="8" rx="1.5" fill="#fff"/>
+        <rect x="1" y="11" width="8" height="8" rx="1.5" fill="#fff"/>
+        <rect x="11" y="11" width="8" height="8" rx="1.5" fill="#fff"/>
+      </svg>
+    </button>
+    <div id="taskbar-separator"></div>
+    <!-- App Icons injected here by JS -->
+  </div>
+  <!-- System Tray -->
+  <div id="system-tray">
+    <span class="tray-item" title="Wi-Fi">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b0b8c4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+    </span>
+    <span class="tray-item" title="Battery">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b0b8c4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="6" width="18" height="12" rx="2" ry="2"/><line x1="23" y1="13" x2="23" y2="11"/><rect x="3" y="8" width="10" height="8" rx="1" fill="#4ade80" stroke="none"/></svg>
+    </span>
+    <span class="tray-clock" id="tray-clock"></span>
+  </div>
 </div>
-<div id="ref-chips"><span id="ref-chips-label">REF:</span></div>
+
+<!-- CHART OVERLAY -->
+<div id="bottom-panel"><button id="close-chart">✕</button><h3>Algorithm Comparison</h3><div id="chart-container"><canvas id="compare-chart"></canvas></div></div>
+
+<!-- BELADY BANNER -->
 <div id="belady-banner"></div>
-<div id="grid2d-container"><h3>2D Frame Grid</h3><div id="grid2d"></div></div>
 
-<div id="left-panel" style="position:fixed;top:10px;left:10px;width:180px;bottom:60px;display:flex;flex-direction:column;z-index:10;max-height:200px">
-  <div class="panel expanded" id="panel-page-table">
-    <div class="panel-header" onclick="togglePanel('panel-page-table')">
-      <span class="panel-title">PAGE TABLE</span>
-      <button class="panel-toggle">−</button>
-    </div>
-    <div class="panel-body">
-      <table id="page-table"><thead><tr><th>Page</th><th>Frame</th><th>Valid</th></tr></thead><tbody id="page-table-body"></tbody></table>
-    </div>
-  </div>
-
-</div>
-
-<div id="stats-hud">
-  <div class="stat-pill"><span class="stat-label">ACCESSES</span><span class="stat-value" id="stat-accesses">0</span></div>
-  <div class="stat-pill"><span class="stat-label">FAULTS</span><span class="stat-value" id="stat-faults">0</span></div>
-  <div class="stat-pill"><span class="stat-label">HITS</span><span class="stat-value" id="stat-hits">0</span></div>
-  <div class="stat-pill"><span class="stat-label">FAULT RATE</span><span class="stat-value" id="stat-rate">0%</span></div>
-  <div class="stat-pill"><span class="stat-label">ALGORITHM</span><span class="stat-value" id="stat-algo">FIFO</span></div>
-  <div class="stat-pill"><span class="stat-label">STEP</span><span class="stat-value" id="stat-step">0 / 0</span></div>
-</div>
-
-
-<div id="bottom-panel"><h3>Algorithm Comparison</h3><div id="chart-container"><canvas id="compare-chart"></canvas></div></div>
-
-<div id="controls">
-  <label>REF STRING</label><input type="text" id="inp-ref" value="1 2 3 4 1 2 5 1 2 3 4 5"/>
-  <label>FRAMES</label><input type="number" id="inp-frames" value="3" min="1" max="6"/>
-  <select id="sel-algo"><option value="FIFO">FIFO</option><option value="LRU">LRU</option><option value="MRU">MRU</option><option value="OPT">Optimal</option></select>
-  <select id="sel-speed"><option value="1500">Slow</option><option value="900" selected>Normal</option><option value="400">Fast</option></select>
-  <button class="btn" id="btn-run">▶ RUN</button>
-  <button class="btn btn-cyan" id="btn-step">⏭ STEP</button>
-  <button class="btn btn-red" id="btn-reset">⟲ RESET</button>
-  <button class="btn btn-orange" id="btn-random">🎲 RANDOM</button>
-  <button class="btn btn-magenta" id="btn-compare">COMPARE ALL</button>
-  <button class="btn btn-yellow" id="btn-belady">CHECK BELADY'S</button>
-  <button class="btn btn-magenta" id="btn-learn">🎓 LEARN</button>
-</div>
-
-<div id="tutorial-overlay"></div>
-<div id="tutorial-tooltip">
-  <div id="tutorial-title"></div>
-  <div id="tutorial-text"></div>
-  <div class="tutorial-actions">
-    <button class="btn-tutorial" id="btn-tut-close">Close</button>
-    <button class="btn-tutorial" id="btn-tut-next">Next</button>
-  </div>
-</div>
-
-<script type="module">
-import * as THREE from 'three';
-import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-
-window.togglePanel = function(id) {
-  const panel = document.getElementById(id);
-  const isCollapsed = panel.classList.toggle('collapsed');
-  panel.classList.toggle('expanded', !isCollapsed);
-  const btn = panel.querySelector('.panel-toggle');
-  btn.textContent = isCollapsed ? '+' : '−';
-};
-
-/* ========== STATE ========== */
-const state = {
-  refString: [], frames: [], frameCount: 3, algo: 'FIFO',
-  speed: 900, running: false, paused: false, stepIndex: 0,
-  faults: 0, hits: 0, fifoQueue: [], lruOrder: [], mruOrder: [],
-  pageTable: new Map(), animQueue: null,
-  stepping: false, stepResolve: null, simStarted: false,
-  loadOrder: [], loadCounter: 0,
-  stepHistory: [], viewMode: '3d'
-};
-
-/* ========== PAGE COLORS ========== */
-const PAGE_COLORS = {1:'#4FC3F7',2:'#7C4DFF',3:'#00E5CC',4:'#FF7043',5:'#AB47BC',6:'#26A69A',7:'#FFA726',8:'#EC407A'};
-const EMPTY_COLOR = '#1E2D45';
-function getPageColor(p) { return PAGE_COLORS[p] || `hsl(${(p*67)%360},80%,60%)`; }
-
-/* ========== THREE.JS SETUP ========== */
-const container = document.getElementById('canvas-container');
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x070B14);
-const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 100);
-camera.position.set(0, 4, 12);
-const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.setSize(window.innerWidth, window.innerHeight);
-container.appendChild(renderer.domElement);
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true; controls.dampingFactor = 0.05;
-controls.autoRotate = false;
-controls.maxDistance = 50; controls.minDistance = 3;
-
-/* Lights — clean, bright, minimalist */
-const ambLight = new THREE.AmbientLight(0xdde4f0, 1.8);
-scene.add(ambLight);
-const dirLight = new THREE.DirectionalLight(0xffffff, 2.0);
-dirLight.position.set(8, 12, 6); scene.add(dirLight);
-const fillLight = new THREE.DirectionalLight(0x8899bb, 0.8);
-fillLight.position.set(-6, 4, -4); scene.add(fillLight);
-
-/* Grid */
-const grid = new THREE.GridHelper(80, 80, 0x1E2D45, 0x0D1421);
-grid.position.y = -2; grid.material.opacity = 0.35; grid.material.transparent = true;
-scene.add(grid);
-
-/* ========== STANDING PILLARS & PAGE BLOCKS ========== */
-let cubes = [];
-let labels = [];
-const PILLAR_W = 1.5, PILLAR_H = 4.0, PILLAR_D = 1.5;
-const BLOCK_W = 1.1, BLOCK_H = 1.0, BLOCK_D = 1.1;
-const PILLAR_SPACING = 2.2;
-const anims = [];
-
-const slotMat = () => new THREE.MeshPhysicalMaterial({
-  color:0x4FC3F7, metalness:0.1, roughness:0.05,
-  transparent:true, opacity:0.06, side:THREE.DoubleSide,
-  depthWrite:false
-});
-const slotEdgeMat = () => new THREE.LineBasicMaterial({color:0x4FC3F7, transparent:true, opacity:0.35});
-
-function makeInnerBlock(color) {
-  const col = new THREE.Color(color);
-  const geo = new THREE.BoxGeometry(BLOCK_W, BLOCK_H, BLOCK_D);
-  const mat = new THREE.MeshStandardMaterial({
-    color:col, emissive:col, emissiveIntensity:0.35,
-    metalness:0.4, roughness:0.3, transparent:true, opacity:0.92,
-    depthWrite:true
-  });
-  const mesh = new THREE.Mesh(geo, mat);
-  mesh.renderOrder = 10;
-  const eGeo = new THREE.EdgesGeometry(geo);
-  const eMat = new THREE.LineBasicMaterial({color:col, transparent:true, opacity:0.8});
-  const edges = new THREE.LineSegments(eGeo, eMat);
-  edges.renderOrder = 11;
-  return {mesh, edges, mat, edgeMat:eMat};
-}
-
-function buildCubes(count) {
-  cubes.forEach(c => {
-    scene.remove(c.mesh); scene.remove(c.edges);
-    if(c.innerBlock) { scene.remove(c.innerBlock); scene.remove(c.innerEdges); }
-  });
-  for(let i = anims.length-1; i >= 0; i--) {
-    const a = anims[i];
-    if(a.evictBlock) { scene.remove(a.evictBlock); scene.remove(a.evictEdges); }
-    anims.splice(i,1);
-  }
-  labels.forEach(l => l.remove());
-  cubes = []; labels = [];
-  const startX = -(count - 1) * PILLAR_SPACING / 2;
-  for(let i = 0; i < count; i++) {
-    const geo = new THREE.BoxGeometry(PILLAR_W, PILLAR_H, PILLAR_D);
-    const mat = slotMat();
-    const mesh = new THREE.Mesh(geo, mat);
-    mesh.renderOrder = 0;
-    mesh.position.set(startX + i * PILLAR_SPACING, 0, 0);
-    scene.add(mesh);
-    const edgeGeo = new THREE.EdgesGeometry(geo);
-    const edge = new THREE.LineSegments(edgeGeo, slotEdgeMat());
-    edge.renderOrder = 1;
-    edge.position.copy(mesh.position);
-    scene.add(edge);
-    const lbl = document.createElement('div');
-    lbl.className = 'frame-label';
-    lbl.textContent = '—';
-    document.body.appendChild(lbl);
-    cubes.push({
-      mesh, edges:edge, mat,
-      baseX:mesh.position.x, baseY:0, page:-1,
-      innerBlock:null, innerEdges:null, innerMat:null, innerEdgeMat:null
-    });
-    labels.push(lbl);
-  }
-}
-buildCubes(3);
-
-function colorCubeForPage(idx, page) {
-  const c = cubes[idx];
-  if(page < 0) {
-    c.edges.material.color.set(0x4FC3F7); c.edges.material.opacity = 0.35;
-    labels[idx].style.color = '#546E7A';
-    labels[idx].style.textShadow = 'none';
-  } else {
-    const col = getPageColor(page);
-    if(c.innerBlock) {
-      c.innerMat.color.set(col); c.innerMat.emissive.set(col);
-      c.innerMat.emissiveIntensity = 0.35;
-      c.innerEdgeMat.color.set(col);
-    }
-    c.edges.material.color.set(col); c.edges.material.opacity = 0.5;
-    labels[idx].style.color = col;
-    labels[idx].style.textShadow = `0 0 10px ${col}, 0 0 20px ${col}`;
-  }
-}
-
-function updateLabelPositions() {
-  cubes.forEach((c, i) => {
-    const target = c.innerBlock || c.mesh;
-    const v = new THREE.Vector3();
-    target.getWorldPosition(v);
-    v.project(camera);
-    const x = (v.x * 0.5 + 0.5) * window.innerWidth;
-    const y = (-v.y * 0.5 + 0.5) * window.innerHeight;
-    labels[i].style.left = x + 'px';
-    labels[i].style.top = y + 'px';
-  });
-}
-
-/* ========== UI HELPERS ========== */
-const $ = id => document.getElementById(id);
-const flash = $('center-flash');
-const pageTableBody = $('page-table-body');
-
-function showFlash(text, color) {
-  flash.textContent = text;
-  flash.style.color = color;
-  flash.style.opacity = '1';
-  setTimeout(() => flash.style.opacity = '0', 600);
-}
-
-function updateStats() {
-  $('stat-accesses').textContent = state.faults + state.hits;
-  $('stat-faults').textContent = state.faults;
-  $('stat-hits').textContent = state.hits;
-  const total = state.faults + state.hits;
-  $('stat-rate').textContent = total ? (state.faults/total*100).toFixed(1)+'%' : '0%';
-  $('stat-algo').textContent = state.algo;
-  $('stat-step').textContent = `${state.stepIndex} / ${state.refString.length}`;
-}
-
-function updatePageTable() {
-  pageTableBody.innerHTML = '';
-  state.pageTable.forEach((frame, page) => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td style="color:${getPageColor(page)};font-weight:600">P${page}</td><td>F${frame}</td><td style="color:${state.frames[frame]===page?'var(--accent-teal)':'var(--fault-red)'};font-size:14px">${state.frames[frame]===page?'●':'○'}</td>`;
-    pageTableBody.appendChild(tr);
-  });
-}
-
-/* ========== REF CHIPS ========== */
-const refChipsContainer = $('ref-chips');
-function buildRefChips(refStr) {
-  refChipsContainer.innerHTML = '<span id="ref-chips-label">REF:</span>';
-  refStr.forEach((p, i) => {
-    const chip = document.createElement('span');
-    chip.className = 'ref-chip';
-    chip.textContent = p;
-    chip.dataset.index = i;
-    refChipsContainer.appendChild(chip);
-  });
-}
-function updateRefChips(stepIndex) {
-  const chips = refChipsContainer.querySelectorAll('.ref-chip');
-  chips.forEach((chip, i) => {
-    chip.classList.remove('active', 'done');
-    if(i < stepIndex - 1) chip.classList.add('done');
-    else if(i === stepIndex - 1) chip.classList.add('active');
-  });
-}
-
-
-
-/* ========== ANIMATIONS ========== */
-function animateCube(idx, type, newPage) {
-  return new Promise(resolve => {
-    const c = cubes[idx];
-    const evictDelay = (c.innerBlock && type === 'fault') ? 350 : 0;
-
-    if(type === 'fault') {
-      /* --- evict old block if present --- */
-      if(c.innerBlock) {
-        anims.push({
-          kind:'evict', cube:c, idx,
-          evictBlock:c.innerBlock, evictEdges:c.innerEdges, evictMat:c.innerMat,
-          startY:c.baseY, targetY:c.baseY - 5,
-          start:performance.now(), duration:350, resolve:null
-        });
-        c.innerBlock = null; c.innerEdges = null; c.innerMat = null; c.innerEdgeMat = null;
-      }
-      /* --- create new inner block --- */
-      const col = getPageColor(newPage !== undefined ? newPage : 1);
-      const ib = makeInnerBlock(col);
-      ib.mesh.position.set(c.baseX, c.baseY + 5, 0);
-      ib.edges.position.copy(ib.mesh.position);
-      scene.add(ib.mesh); scene.add(ib.edges);
-      c.innerBlock = ib.mesh; c.innerEdges = ib.edges;
-      c.innerMat = ib.mat; c.innerEdgeMat = ib.edgeMat;
-
-      c.edges.material.color.set(0xFF5252); c.edges.material.opacity = 0.7;
-      labels[idx].style.color = '#FF5252';
-
-      anims.push({
-        kind:'drop', cube:c, idx,
-        startY:c.baseY + 5, targetY:c.baseY,
-        start:performance.now() + evictDelay, duration:500, resolve
-      });
-    } else {
-      /* --- hit: bounce block upward inside pillar --- */
-      if(c.innerBlock) {
-        c.innerMat.emissive.set(0x00E5CC);
-        c.innerMat.emissiveIntensity = 1.0;
-      }
-      c.edges.material.color.set(0x00E5CC); c.edges.material.opacity = 0.7;
-      labels[idx].style.color = '#00E5CC';
-      anims.push({
-        kind:'bounce', cube:c, idx,
-        baseY:c.baseY, peakY:c.baseY + 1.0,
-        start:performance.now(), duration:450, resolve
-      });
-    }
-  });
-}
-
-function processAnims(now) {
-  for(let i = anims.length-1; i >= 0; i--) {
-    const a = anims[i];
-    if(now < a.start) continue;
-    const t = Math.min((now - a.start)/a.duration, 1);
-    const ease = t < 0.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2;
-
-    if(a.kind === 'drop') {
-      const y = a.startY + (a.targetY - a.startY) * ease;
-      if(a.cube.innerBlock) {
-        a.cube.innerBlock.position.y = y;
-        a.cube.innerEdges.position.y = y;
-      }
-      if(t >= 1) {
-        if(a.cube.innerBlock) {
-          a.cube.innerBlock.position.y = a.targetY;
-          a.cube.innerEdges.position.y = a.targetY;
-        }
-        a.cube.edges.material.color.set(0x4FC3F7); a.cube.edges.material.opacity = 0.35;
-        anims.splice(i,1);
-        if(a.resolve) a.resolve();
-      }
-    } else if(a.kind === 'evict') {
-      const y = a.startY + (a.targetY - a.startY) * ease;
-      a.evictBlock.position.y = y; a.evictEdges.position.y = y;
-      a.evictMat.opacity = 1 - ease;
-      if(t >= 1) {
-        scene.remove(a.evictBlock); scene.remove(a.evictEdges);
-        a.evictBlock.geometry.dispose(); a.evictMat.dispose();
-        a.evictEdges.geometry.dispose();
-        anims.splice(i,1);
-        if(a.resolve) a.resolve();
-      }
-    } else if(a.kind === 'bounce') {
-      /* jump up then back down using a sine arc */
-      const arc = Math.sin(t * Math.PI);
-      const y = a.baseY + (a.peakY - a.baseY) * arc;
-      if(a.cube.innerBlock) {
-        a.cube.innerBlock.position.y = y;
-        a.cube.innerEdges.position.y = y;
-        a.cube.innerMat.emissiveIntensity = 0.35 + arc * 0.65;
-      }
-      a.cube.edges.material.opacity = 0.35 + arc * 0.5;
-      if(t >= 1) {
-        if(a.cube.innerBlock) {
-          a.cube.innerBlock.position.y = a.baseY;
-          a.cube.innerEdges.position.y = a.baseY;
-          a.cube.innerMat.emissiveIntensity = 0.35;
-          const pg = a.cube.page;
-          if(pg >= 0) {
-            const col = getPageColor(pg);
-            a.cube.innerMat.emissive.set(col);
-            labels[a.idx].style.color = col;
-            labels[a.idx].style.textShadow = `0 0 10px ${col}, 0 0 20px ${col}`;
-          }
-        }
-        a.cube.edges.material.color.set(0x4FC3F7); a.cube.edges.material.opacity = 0.35;
-        anims.splice(i,1);
-        if(a.resolve) a.resolve();
-      }
-    }
-  }
-}
-
-/* ========== ALGORITHMS ========== */
-function runAlgoStep(page, index, frames, frameCount, algo, fifoQ, lruOrd, refStr, loadOrd, loadCtr, mruOrd) {
-  const fi = frames.indexOf(page);
-  if(fi !== -1) {
-    if(algo === 'LRU') {
-      lruOrd.splice(lruOrd.indexOf(page), 1);
-      lruOrd.push(page);
-    }
-    if(algo === 'MRU') {
-      mruOrd.splice(mruOrd.indexOf(page), 1);
-      mruOrd.push(page);
-    }
-    return {hit:true, frameIdx:fi, victim:-1, loadCtr};
-  }
-  let victim = -1, frameIdx = frames.indexOf(-1);
-  if(frameIdx === -1) {
-    if(algo === 'FIFO') {
-      victim = fifoQ.shift();
-      frameIdx = frames.indexOf(victim);
-    } else if(algo === 'LRU') {
-      victim = lruOrd.shift();
-      frameIdx = frames.indexOf(victim);
-    } else if(algo === 'MRU') {
-      victim = mruOrd.pop();
-      frameIdx = frames.indexOf(victim);
-    } else {
-      /* OPT with FIFO tie-breaking for Infinity distances */
-      let distances = [];
-      for(let f = 0; f < frameCount; f++) {
-        let nextUse = refStr.slice(index+1).indexOf(frames[f]);
-        distances.push(nextUse === -1 ? Infinity : nextUse);
-      }
-      let maxDist = Math.max(...distances);
-      let candidates = [];
-      for(let f = 0; f < frameCount; f++) {
-        if(distances[f] === maxDist) candidates.push(f);
-      }
-      if(candidates.length === 1) {
-        frameIdx = candidates[0];
-      } else {
-        frameIdx = candidates.reduce((best, f) =>
-          (loadOrd[f] < loadOrd[best]) ? f : best
-        , candidates[0]);
-      }
-      victim = frames[frameIdx];
-    }
-    if(algo === 'LRU' && victim === -1) { /* already shifted */ }
-  }
-  frames[frameIdx] = page;
-  fifoQ.push(page);
-  if(algo === 'LRU') lruOrd.push(page);
-  if(algo === 'MRU') mruOrd.push(page);
-  if(loadOrd) loadOrd[frameIdx] = loadCtr;
-  return {hit:false, frameIdx, victim, loadCtr: loadCtr + 1};
-}
-
-/* Silent run for comparison */
-function silentRun(refStr, frameCount, algo) {
-  const frames = Array(frameCount).fill(-1);
-  const fifoQ = [], lruOrd = [], mruOrd = [];
-  const loadOrd = Array(frameCount).fill(0);
-  let loadCtr = 0;
-  let faults = 0;
-  refStr.forEach((page, idx) => {
-    const r = runAlgoStep(page, idx, frames, frameCount, algo, fifoQ, lruOrd, refStr, loadOrd, loadCtr, mruOrd);
-    loadCtr = r.loadCtr !== undefined ? r.loadCtr : loadCtr;
-    if(!r.hit) faults++;
-  });
-  return faults;
-}
-
-/* ========== SIMULATION RUNNER ========== */
-function initSim() {
-  const refStr = $('inp-ref').value.trim().split(/\s+/).map(Number).filter(n => !isNaN(n));
-  const frameCount = Math.max(1, Math.min(6, parseInt($('inp-frames').value)||3));
-  const algo = $('sel-algo').value;
-  const speed = parseInt($('sel-speed').value);
-  if(!refStr.length) return false;
-  state.refString = refStr; state.frameCount = frameCount; state.algo = algo; state.speed = speed;
-  state.frames = Array(frameCount).fill(-1);
-  state.fifoQueue = []; state.lruOrder = []; state.mruOrder = [];
-  state.loadOrder = Array(frameCount).fill(0); state.loadCounter = 0;
-  state.faults = 0; state.hits = 0; state.stepIndex = 0;
-  state.pageTable.clear(); state.simStarted = true;
-  state.stepHistory = [];
-  buildCubes(frameCount);
-  buildRefChips(refStr);
-  cubes.forEach((c,i) => { labels[i].textContent = '—'; colorCubeForPage(i, -1); });
-  updateStats();
-  return true;
-}
-
-async function executeStep(i) {
-  const page = state.refString[i];
-  state.stepIndex = i + 1;
-  updateRefChips(state.stepIndex);
-  const result = runAlgoStep(page, i, state.frames, state.frameCount, state.algo, state.fifoQueue, state.lruOrder, state.refString, state.loadOrder, state.loadCounter, state.mruOrder);
-  if(result.loadCtr !== undefined) state.loadCounter = result.loadCtr;
-  if(result.hit) {
-    state.hits++;
-    showFlash(`PAGE HIT — P${page}`, 'var(--neon-green)');
-    await animateCube(result.frameIdx, 'hit', page);
-  } else {
-    state.faults++;
-    showFlash(`PAGE FAULT — P${page}`, 'var(--neon-red)');
-    await animateCube(result.frameIdx, 'fault', page);
-  }
-  cubes[result.frameIdx].page = page;
-  labels[result.frameIdx].textContent = `P${page}`;
-  colorCubeForPage(result.frameIdx, page);
-  state.pageTable.set(page, result.frameIdx);
-  state.stepHistory.push({step:i+1, page, frames:[...state.frames], hit:result.hit});
-  update2DGrid();
-  updatePageTable(); updateStats();
-}
-
-async function runSimulation() {
-  if(!state.simStarted && !initSim()) return;
-  state.running = true; state.paused = false; state.stepping = false;
-  $('btn-run').textContent = '⏸ PAUSE';
-  $('btn-step').disabled = true;
-  for(let i = state.stepIndex; i < state.refString.length; i++) {
-    if(!state.running) break;
-    while(state.paused) await new Promise(r => setTimeout(r, 100));
-    if(!state.running) break;
-    await executeStep(i);
-    await new Promise(r => setTimeout(r, state.speed));
-  }
-  state.running = false;
-  $('btn-run').textContent = '▶ RUN';
-  $('btn-step').disabled = (state.stepIndex >= state.refString.length);
-  if(state.stepIndex >= state.refString.length) {
-    state.simStarted = false;
-  }
-}
-
-async function stepOnce() {
-  if(!state.simStarted && !initSim()) return;
-  if(state.stepIndex >= state.refString.length) { $('btn-step').disabled = true; return; }
-  $('btn-step').disabled = true;
-  await executeStep(state.stepIndex);
-  $('btn-step').disabled = (state.stepIndex >= state.refString.length);
-  if(state.stepIndex >= state.refString.length) {
-    state.simStarted = false;
-  }
-}
-
-/* ========== CHART ========== */
-let chart = null;
-function initChart(data = [0,0,0,0]) {
-  const ctx = document.getElementById('compare-chart').getContext('2d');
-  if(chart) chart.destroy();
-  chart = new Chart(ctx, {
-    type:'bar',
-    data:{labels:['FIFO','LRU','MRU','Optimal'],datasets:[{label:'Page Faults',data:data,backgroundColor:['#4FC3F7','#7C4DFF','#FF7043','#00E5CC'],borderColor:['#4FC3F7','#7C4DFF','#FF7043','#00E5CC'],borderWidth:0,borderRadius:4}]},
-    options:{responsive:true,maintainAspectRatio:false,
-      scales:{y:{beginAtZero:true,ticks:{color:'#546E7A',stepSize:1,precision:0},grid:{color:'#1E2D45'}},x:{ticks:{color:'#E8EAF6',font:{family:'Space Grotesk'}},grid:{color:'#1E2D45'}}},
-      plugins:{legend:{display:false},
-        tooltip:{callbacks:{label:c=>`Faults: ${c.raw}`}}
-      }
-    },
-    plugins:[{id:'datalabels',afterDatasetsDraw(c){const meta=c.getDatasetMeta(0);const ctx2=c.ctx;ctx2.save();ctx2.font='bold 12px Space Grotesk';ctx2.textAlign='center';ctx2.fillStyle='#E8EAF6';meta.data.forEach((bar,i)=>{ctx2.fillText(c.data.datasets[0].data[i],bar.x,bar.y-8)});ctx2.restore();}}]
-  });
-}
-initChart();
-
-function compareAll() {
-  const refStr = document.getElementById('inp-ref').value.trim().split(/\s+/).map(Number).filter(n => !isNaN(n));
-  const fc = Math.max(1, Math.min(6, parseInt(document.getElementById('inp-frames').value)||3));
-  if(!refStr.length) return;
-  const f1 = silentRun([...refStr], fc, 'FIFO');
-  const f2 = silentRun([...refStr], fc, 'LRU');
-  const f3 = silentRun([...refStr], fc, 'MRU');
-  const f4 = silentRun([...refStr], fc, 'OPT');
-  initChart([f1, f2, f3, f4]);
-  document.getElementById('bottom-panel').classList.add('show');
-  chart.options.scales.y.max = refStr.length + 1;
-  chart.update();
-}
-
-/* ========== BELADY'S ANOMALY ========== */
-function checkBelady() {
-  const refStr = $('inp-ref').value.trim().split(/\s+/).map(Number).filter(n => !isNaN(n));
-  const fc = Math.max(1, Math.min(6, parseInt($('inp-frames').value)||3));
-  if(!refStr.length || fc >= 6) return;
-  const fN = silentRun([...refStr], fc, 'FIFO');
-  const fN1 = silentRun([...refStr], fc + 1, 'FIFO');
-  const banner = $('belady-banner');
-  if(fN1 >= fN) {
-    banner.className = '';
-    banner.innerHTML = `⚠ BELADY'S ANOMALY DETECTED!<br><br>FIFO with ${fc} frames = <b>${fN}</b> faults<br>FIFO with ${fc+1} frames = <b>${fN1}</b> faults<br><br>More frames did NOT reduce faults!`;
-  } else {
-    banner.className = 'no-anomaly';
-    banner.innerHTML = `✓ No Belady's Anomaly detected.<br>FIFO: ${fc} frames = ${fN} faults, ${fc+1} frames = ${fN1} faults`;
-  }
-  banner.style.display = 'block';
-  setTimeout(() => banner.style.display = 'none', 5000);
-}
-
-/* ========== RANDOM REF STRING ========== */
-function generateRandom() {
-  const fc = Math.max(1, Math.min(6, parseInt($('inp-frames').value)||3));
-  const len = 12 + Math.floor(Math.random() * 4);
-  const maxPage = fc + 3;
-  const arr = [];
-  for(let i = 0; i < len; i++) arr.push(1 + Math.floor(Math.random() * maxPage));
-  $('inp-ref').value = arr.join(' ');
-  doReset();
-  buildRefChips(arr);
-}
-
-/* ========== CONTROLS ========== */
-$('btn-run').addEventListener('click', () => {
-  if(state.running && !state.paused) {
-    state.paused = true;
-    $('btn-run').textContent = '▶ RESUME';
-    $('btn-step').disabled = false;
-  } else if(state.running && state.paused) {
-    state.paused = false;
-    $('btn-run').textContent = '⏸ PAUSE';
-    $('btn-step').disabled = true;
-  } else {
-    runSimulation();
-  }
-});
-
-$('btn-step').addEventListener('click', () => {
-  if(state.running) { state.running = false; state.paused = false; }
-  stepOnce();
-});
-
-function doReset() {
-  state.running = false; state.paused = false; state.simStarted = false;
-  state.faults = 0; state.hits = 0; state.stepIndex = 0;
-  state.frames = []; state.fifoQueue = []; state.lruOrder = []; state.mruOrder = [];
-  state.loadOrder = []; state.loadCounter = 0;
-  state.stepHistory = [];
-  state.pageTable.clear();
-  pageTableBody.innerHTML = '';
-  buildCubes(parseInt($('inp-frames').value)||3);
-  cubes.forEach((c,i) => { labels[i].textContent = '—'; colorCubeForPage(i, -1); });
-  $('btn-run').textContent = '▶ RUN';
-  $('btn-step').disabled = false;
-  updateStats();
-  const refStr = $('inp-ref').value.trim().split(/\s+/).map(Number).filter(n => !isNaN(n));
-  buildRefChips(refStr);
-  clear2DGrid();
-}
-
-$('btn-reset').addEventListener('click', doReset);
-$('btn-compare').addEventListener('click', compareAll);
-$('btn-belady').addEventListener('click', checkBelady);
-$('btn-random').addEventListener('click', generateRandom);
-
-document.addEventListener('click', (e) => {
-  const bp = $('bottom-panel');
-  const btnCompare = $('btn-compare');
-  if (bp && bp.classList.contains('show') && !bp.contains(e.target) && (!btnCompare || !btnCompare.contains(e.target))) {
-    bp.classList.remove('show');
-  }
-});
-
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') {
-    const bp = $('bottom-panel');
-    if (bp) bp.classList.remove('show');
-  }
-});
-
-/* Init ref chips on load */
-buildRefChips($('inp-ref').value.trim().split(/\s+/).map(Number).filter(n => !isNaN(n)));
-
-/* ========== 2D GRID VIEW ========== */
-const grid2dContainer = $('grid2d-container');
-const grid2d = $('grid2d');
-const canvasContainer = $('canvas-container');
-
-function switchView(mode) {
-  state.viewMode = mode;
-  $('btn-3d').classList.toggle('active', mode === '3d');
-  $('btn-2d').classList.toggle('active', mode === '2d');
-  if(mode === '2d') {
-    canvasContainer.classList.add('hidden');
-    labels.forEach(l => l.classList.add('hidden'));
-    grid2dContainer.classList.add('show');
-    update2DGrid();
-  } else {
-    canvasContainer.classList.remove('hidden');
-    labels.forEach(l => l.classList.remove('hidden'));
-    grid2dContainer.classList.remove('show');
-  }
-}
-$('btn-3d').addEventListener('click', () => switchView('3d'));
-$('btn-2d').addEventListener('click', () => switchView('2d'));
-
-function clear2DGrid() {
-  grid2d.innerHTML = '';
-}
-
-function update2DGrid() {
-  if(state.viewMode !== '2d') return;
-  grid2d.innerHTML = '';
-  const history = state.stepHistory;
-  const refStr = state.refString;
-  const fc = state.frameCount || parseInt($('inp-frames').value) || 3;
-  const totalSteps = refStr.length;
-  if(!totalSteps) return;
-
-  const cols = totalSteps + 1; /* +1 for label column */
-  const rows = fc + 3; /* label + page + frames + result */
-  grid2d.style.gridTemplateColumns = `60px repeat(${totalSteps}, minmax(48px, 1fr))`;
-  grid2d.style.gridTemplateRows = `repeat(${rows}, 32px)`;
-
-  const currentStep = state.stepIndex;
-
-  /* Row 0: Step numbers */
-  const lblStep = mkCell('Step', true);
-  grid2d.appendChild(lblStep);
-  for(let s = 1; s <= totalSteps; s++) {
-    const c = mkCell(s);
-    applyColClass(c, s, currentStep, totalSteps);
-    grid2d.appendChild(c);
-  }
-
-  const lblPage = mkCell('Page', true);
-  lblPage.classList.add('alt-row');
-  grid2d.appendChild(lblPage);
-  for(let s = 0; s < totalSteps; s++) {
-    const p = refStr[s];
-    const c = mkCell('P' + p);
-    c.style.color = getPageColor(p);
-    c.classList.add('alt-row');
-    applyColClass(c, s + 1, currentStep, totalSteps);
-    grid2d.appendChild(c);
-  }
-
-  /* Frame rows */
-  for(let f = 0; f < fc; f++) {
-    const isAlt = (f % 2 === 0);
-    const lblF = mkCell('F' + f, true);
-    if(isAlt) lblF.classList.add('alt-row');
-    grid2d.appendChild(lblF);
-    for(let s = 0; s < totalSteps; s++) {
-      const stepNum = s + 1;
-      const entry = history.find(h => h.step === stepNum);
-      let c;
-      if(entry) {
-        const pg = entry.frames[f];
-        if(pg < 0) {
-          c = mkCell('—');
-          c.classList.add('empty-frame');
-        } else {
-          c = mkCell('P' + pg);
-          c.style.color = getPageColor(pg);
-        }
-      } else {
-        c = mkCell('');
-        c.classList.add('empty-frame');
-      }
-      if(isAlt) c.classList.add('alt-row');
-      applyColClass(c, stepNum, currentStep, totalSteps);
-      grid2d.appendChild(c);
-    }
-  }
-
-  /* Result row */
-  const resAlt = (fc % 2 !== 0);
-  const lblR = mkCell('Result', true);
-  if(resAlt) lblR.classList.add('alt-row');
-  grid2d.appendChild(lblR);
-  for(let s = 0; s < totalSteps; s++) {
-    const stepNum = s + 1;
-    const entry = history.find(h => h.step === stepNum);
-    let c;
-    if(entry) {
-      if(entry.hit) {
-        c = mkCell('✓'); c.classList.add('hit-cell');
-      } else {
-        c = mkCell('✗'); c.classList.add('fault-cell');
-      }
-    } else {
-      c = mkCell('');
-    }
-    if(resAlt) c.classList.add('alt-row');
-    applyColClass(c, stepNum, currentStep, totalSteps);
-    grid2d.appendChild(c);
-  }
-
-  /* Auto-scroll to current step */
-  if(currentStep > 0) {
-    const cellW = 50;
-    const scrollTarget = (currentStep - 1) * cellW - grid2dContainer.clientWidth / 2 + cellW;
-    grid2dContainer.scrollLeft = Math.max(0, scrollTarget);
-  }
-}
-
-function mkCell(text, isLabel) {
-  const d = document.createElement('div');
-  d.className = 'g2d-cell' + (isLabel ? ' g2d-label' : '');
-  d.textContent = text;
-  return d;
-}
-
-function applyColClass(cell, stepNum, currentStep, totalSteps) {
-  if(stepNum === currentStep) cell.classList.add('current');
-  else if(stepNum > currentStep) cell.classList.add('upcoming');
-}
-
-/* ========== RENDER LOOP ========== */
-const clock = new THREE.Clock();
-function animate() {
-  requestAnimationFrame(animate);
-  const t = clock.getElapsedTime();
-  cubes.forEach((c, i) => {
-    /* gentle pillar glow pulse */
-    const basePulse = 0.3 + Math.sin(t * 1.5 + i * 0.7) * 0.08;
-    if(!anims.find(a => a.idx === i)) c.edges.material.opacity = basePulse;
-    /* subtle inner-block float when not animating */
-    const busy = anims.find(a => a.idx === i && (a.kind==='drop'||a.kind==='evict'||a.kind==='bounce'));
-    if(c.innerBlock && !busy) {
-      c.innerBlock.position.y = c.baseY + Math.sin(t * 2 + i) * 0.04;
-      c.innerEdges.position.y = c.innerBlock.position.y;
-    }
-  });
-  processAnims(performance.now());
-  controls.update();
-  updateLabelPositions();
-  renderer.render(scene, camera);
-}
-animate();
-
-window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-});
-
-/* ========== TUTORIAL LOGIC ========== */
-const tutorialSteps = [
-  { target: '#ref-chips', title: 'Reference String', text: 'This is the sequence of pages the CPU is requesting from memory.' },
-  { target: '#controls', title: 'Controls', text: 'Select your algorithm (FIFO, LRU, etc.), frame count, and simulation speed here.' },
-  { target: '#canvas-container', title: '3D Timeline', text: 'Watch the pages load into memory. A new column is generated for every step. Hits flash green, Faults flash red.' },
-  { target: '#panel-page-table', title: 'Page Table', text: 'This live dictionary tracks which pages are currently sitting in which physical memory frames.' },
-  { target: '#grid2d-container', title: '2D Grid', text: 'A tabular history showing the complete matrix of page replacements over time.' }
-];
-let currentTutStep = 0;
-
-function showTutorialStep(index) {
-  document.querySelectorAll('.tutorial-highlight').forEach(el => el.classList.remove('tutorial-highlight'));
-  
-  if (index >= tutorialSteps.length) {
-    endTutorial();
-    return;
-  }
-  
-  const step = tutorialSteps[index];
-  const targetEl = document.querySelector(step.target);
-  
-  if (targetEl) {
-    targetEl.classList.add('tutorial-highlight');
-    
-    // For 2D grid, ensure it's visible or explain appropriately if hidden
-    if (step.target === '#grid2d-container' && state.viewMode !== '2d') {
-      switchView('2d');
-    } else if (step.target === '#canvas-container' && state.viewMode !== '3d') {
-      switchView('3d');
-    }
-    
-    const rect = targetEl.getBoundingClientRect();
-    const tooltip = $('tutorial-tooltip');
-    
-    let top = rect.bottom + 10;
-    let left = rect.left;
-    
-    if (step.target === '#canvas-container') {
-        top = window.innerHeight / 2 - 100;
-        left = window.innerWidth / 2 - 150;
-    } else {
-        if (top + 200 > window.innerHeight) top = rect.top - 200;
-        if (left + 320 > window.innerWidth) left = window.innerWidth - 320;
-    }
-    
-    tooltip.style.top = Math.max(10, top) + 'px';
-    tooltip.style.left = Math.max(10, left) + 'px';
-    
-    $('tutorial-title').textContent = step.title;
-    $('tutorial-text').textContent = step.text;
-    $('tutorial-tooltip').classList.add('show');
-    $('btn-tut-next').textContent = index === tutorialSteps.length - 1 ? 'Finish' : 'Next';
-  } else {
-    showTutorialStep(index + 1);
-  }
-}
-
-function startTutorial() {
-  if (state.running && !state.paused) {
-    state.paused = true;
-    $('btn-run').textContent = '▶ RESUME';
-    $('btn-step').disabled = false;
-  }
-  
-  $('tutorial-overlay').classList.add('show');
-  currentTutStep = 0;
-  showTutorialStep(currentTutStep);
-}
-
-function endTutorial() {
-  $('tutorial-overlay').classList.remove('show');
-  $('tutorial-tooltip').classList.remove('show');
-  document.querySelectorAll('.tutorial-highlight').forEach(el => el.classList.remove('tutorial-highlight'));
-  if (state.viewMode !== '3d') switchView('3d'); // reset to default if changed
-}
-
-$('btn-learn').addEventListener('click', startTutorial);
-$('btn-tut-next').addEventListener('click', () => {
-  currentTutStep++;
-  showTutorialStep(currentTutStep);
-});
-$('btn-tut-close').addEventListener('click', endTutorial);
+<script src="app.js"></script>
+<script>
+/* === Taskbar clock (purely cosmetic) === */
+(function tickClock(){
+  const el=document.getElementById('tray-clock');
+  if(!el) return;
+  const now=new Date();
+  el.textContent=now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  setTimeout(tickClock,10000);
+})();
 </script>
 </body>
 </html>
