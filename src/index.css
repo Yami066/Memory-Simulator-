@@ -1,0 +1,37 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+@import "tailwindcss";
+
+/* ═══ Color tokens ═══ */
+:root {
+  --win-bg: #202020;
+  --win-surface: rgba(32,32,32,0.82);
+  --win-surface2: rgba(45,45,45,0.75);
+  --win-card: rgba(255,255,255,0.045);
+  --win-card-hover: rgba(255,255,255,0.07);
+  --win-border: rgba(255,255,255,0.08);
+  --win-border-hover: rgba(255,255,255,0.14);
+  --win-text: #e4e4e4;
+  --win-text-secondary: #9a9a9a;
+  --win-accent: #60cdff;
+  --win-accent2: #0078d4;
+  --color-hit: #6ccb5f;
+  --color-miss: #ff6b6b;
+  --taskbar-h: 48px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  color: var(--win-text);
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  user-select: none;
+}
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.18); }

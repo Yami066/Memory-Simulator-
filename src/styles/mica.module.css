@@ -1,0 +1,175 @@
+/* ═══════════════════════════════════════════════════
+   Mica / Glassmorphism effects — beyond Tailwind
+   ═══════════════════════════════════════════════════ */
+
+/* Bloom wallpaper */
+.bloom {
+  background:
+    radial-gradient(ellipse 120% 80% at 15% 60%, rgba(0,180,216,0.35) 0%, transparent 55%),
+    radial-gradient(ellipse 100% 90% at 85% 30%, rgba(99,102,241,0.30) 0%, transparent 50%),
+    radial-gradient(ellipse 80% 70% at 50% 90%, rgba(168,85,247,0.22) 0%, transparent 50%),
+    radial-gradient(ellipse 90% 60% at 70% 70%, rgba(14,165,233,0.18) 0%, transparent 45%),
+    radial-gradient(ellipse 60% 50% at 30% 30%, rgba(192,38,211,0.12) 0%, transparent 40%),
+    linear-gradient(145deg, #0c1221 0%, #0d1b2a 30%, #1b2838 60%, #162032 100%);
+}
+
+/* App window — Mica surface */
+.appWindow {
+  background: var(--win-surface);
+  backdrop-filter: blur(40px) saturate(1.4);
+  -webkit-backdrop-filter: blur(40px) saturate(1.4);
+  border: 1px solid var(--win-border);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.55), 0 2px 8px rgba(0,0,0,0.3);
+}
+
+/* Title bar */
+.titleBar {
+  background: rgba(32,32,32,0.65);
+  backdrop-filter: blur(30px);
+  border-bottom: 1px solid var(--win-border);
+}
+
+/* Taskbar acrylic */
+.taskbar {
+  background: rgba(20,20,20,0.78);
+  backdrop-filter: blur(30px) saturate(1.6);
+  -webkit-backdrop-filter: blur(30px) saturate(1.6);
+  border-top: 1px solid rgba(255,255,255,0.07);
+}
+
+/* Side panel glass */
+.panelGlass {
+  background: rgba(40,40,40,0.7);
+  border: 1px solid var(--win-border);
+  backdrop-filter: blur(12px);
+}
+
+/* Terminal body */
+.terminalBody {
+  background: rgba(12,12,12,0.9);
+  font-family: 'JetBrains Mono', monospace;
+}
+.terminalTitlebar {
+  background: rgba(25,25,25,0.95);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+/* Chart overlay */
+.chartOverlay {
+  background: rgba(32,32,32,0.92);
+  border: 1px solid var(--win-border);
+  backdrop-filter: blur(24px);
+}
+
+/* Belady banner */
+.beladyBanner {
+  background: rgba(20,10,10,0.96);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 0 60px rgba(255,107,107,0.25), inset 0 0 30px rgba(255,107,107,0.04);
+}
+.beladyPass {
+  box-shadow: 0 0 60px rgba(108,203,95,0.18);
+}
+
+/* Stat pill */
+.statPill {
+  background: var(--win-card);
+  border: 1px solid var(--win-border);
+  transition: background 0.2s;
+}
+.statPill:hover {
+  background: var(--win-card-hover);
+}
+
+/* RAM slot card */
+.ramSlot {
+  background: var(--win-card);
+  border: 1px solid var(--win-border);
+  backdrop-filter: blur(12px);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.ramSlot:hover {
+  background: var(--win-card-hover);
+  border-color: var(--win-border-hover);
+}
+
+/* Queue chip */
+.qChip {
+  background: var(--win-card);
+  border: 1px solid var(--win-border);
+  transition: all 0.3s;
+}
+
+/* Fluent button base */
+.fluentBtn {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--win-border);
+  transition: all 0.15s;
+}
+.fluentBtn:hover {
+  background: rgba(255,255,255,0.09);
+  border-color: var(--win-border-hover);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
+}
+.fluentBtn:active {
+  transform: scale(0.97);
+}
+
+/* Primary accent button */
+.fluentBtnPrimary {
+  background: var(--win-accent2);
+  border: 1px solid rgba(0,120,212,0.6);
+}
+.fluentBtnPrimary:hover {
+  background: #1a86d8;
+  border-color: rgba(0,120,212,0.8);
+}
+
+/* Fluent select / input */
+.fluentSelect {
+  background: rgba(50,50,50,0.8);
+  border: 1px solid var(--win-border);
+  transition: border-color 0.2s;
+}
+.fluentSelect:hover { border-color: var(--win-border-hover); }
+.fluentSelect:focus { border-color: var(--win-accent); outline: none; }
+
+/* Mini window */
+.miniWindow {
+  box-shadow: 0 8px 30px rgba(0,0,0,0.45), 0 1px 4px rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.09);
+}
+.miniTitlebar {
+  background: rgba(30,30,30,0.92);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+/* Running pulse */
+@keyframes runPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0,120,212,0.4); }
+  50% { box-shadow: 0 0 0 6px rgba(0,120,212,0); }
+}
+.runningPulse { animation: runPulse 1.5s infinite; }
+
+/* Active queue chip glow */
+@keyframes qPulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(96,205,255,0.25); }
+  50% { box-shadow: 0 0 20px rgba(96,205,255,0.5); }
+}
+.qActive {
+  box-shadow: 0 0 14px rgba(96,205,255,0.35);
+  border-color: var(--win-accent) !important;
+  animation: qPulse 1.2s infinite;
+}
+
+/* Scrollable right column */
+.rightCol::-webkit-scrollbar { width: 5px; }
+.rightCol::-webkit-scrollbar-track { background: transparent; }
+.rightCol::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.1);
+  border-radius: 10px;
+}
+.rightCol::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.2);
+}
