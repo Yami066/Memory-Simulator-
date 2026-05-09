@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle, XCircle, Brain, ArrowRight, RotateCcw, Trophy, Zap } from 'lucide-react';
+import { Brain, ArrowRight, Trophy, Zap, RotateCcw, CheckCircle, XCircle, ChevronLeft, Flame } from 'lucide-react';
 import { getQuizQuestions, ALGO_LIST } from '../../data/quizData.js';
 import s from '../../styles/mica.module.css';
 
@@ -61,7 +61,19 @@ export default function QuizMode({ algorithm, onNavigate, onComplete }) {
   const handleNext = () => {
     if (currentQ >= questions.length - 1) {
       setShowResult(true);
-      onComplete?.(algorithm, score + (selected === questions[currentQ]?.correctAnswer ? 10 : 0));
+      const finalScore = score + (selected === questions[currentQ]?.correctAnswer ? 10 : 0);
+      const total = questions.length * 10;
+      const correctCount = finalScore / 10;
+      const pct = Math.round((finalScore / total) * 100);
+      const grade = pct >= 90 ? 'S' : pct >= 70 ? 'A' : pct >= 50 ? 'B' : pct >= 30 ? 'C' : 'F';
+      onComplete?.(algorithm, {
+        score: finalScore,
+        total,
+        correct: correctCount,
+        totalQuestions: questions.length,
+        maxStreak: Math.max(maxStreak, streak + (selected === questions[currentQ]?.correctAnswer ? 1 : 0)),
+        grade,
+      });
       return;
     }
     setCurrentQ(prev => prev + 1);
@@ -91,8 +103,8 @@ export default function QuizMode({ algorithm, onNavigate, onComplete }) {
     const gradeColor = pct >= 90 ? '#fbbf24' : pct >= 70 ? '#6ccb5f' : pct >= 50 ? '#60cdff' : pct >= 30 ? '#f59e0b' : '#ff6b6b';
 
     return (
-      <div className="w-full h-full overflow-y-auto">
-        <div className="max-w-2xl mx-auto px-5 py-5">
+      <div className="w-full h-full overflow-y-auto flex justify-center">
+        <div className="w-full max-w-2xl px-5 py-6 flex flex-col items-center justify-center min-h-full">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -123,18 +135,27 @@ export default function QuizMode({ algorithm, onNavigate, onComplete }) {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-4 w-full">
-              <div className="bg-white/[0.04] rounded-lg p-3">
-                <p className="text-[9px] uppercase tracking-wider text-[var(--win-text-secondary)]">Score</p>
-                <p className="text-lg font-bold font-mono text-[var(--win-accent)]">{finalScore}/{total}</p>
+            <div className="grid grid-cols-3 gap-3 w-full">
+              <div className="bg-white/[0.04] rounded-xl p-4 text-center border border-white/[0.06]">
+                <div className="flex items-center justify-center gap-1 mb-1.5">
+                  <Zap size={12} className="text-[var(--win-accent)]" />
+                  <p className="text-[9px] uppercase tracking-[0.15em] text-[var(--win-text-secondary)] font-semibold">Score</p>
+                </div>
+                <p className="text-xl font-bold font-mono text-[var(--win-accent)]">{finalScore}<span className="text-sm text-white/30">/{total}</span></p>
               </div>
-              <div className="bg-white/[0.04] rounded-lg p-3">
-                <p className="text-[9px] uppercase tracking-wider text-[var(--win-text-secondary)]">Correct</p>
-                <p className="text-lg font-bold font-mono text-[var(--color-hit)]">{finalScore / 10}</p>
+              <div className="bg-white/[0.04] rounded-xl p-4 text-center border border-white/[0.06]">
+                <div className="flex items-center justify-center gap-1 mb-1.5">
+                  <CheckCircle size={12} className="text-[var(--color-hit)]" />
+                  <p className="text-[9px] uppercase tracking-[0.15em] text-[var(--win-text-secondary)] font-semibold">Correct</p>
+                </div>
+                <p className="text-xl font-bold font-mono text-[var(--color-hit)]">{finalScore / 10}<span className="text-sm text-white/30">/{questions.length}</span></p>
               </div>
-              <div className="bg-white/[0.04] rounded-lg p-3">
-                <p className="text-[9px] uppercase tracking-wider text-[var(--win-text-secondary)]">Best Streak</p>
-                <p className="text-lg font-bold font-mono text-amber-400">{maxStreak}🔥</p>
+              <div className="bg-white/[0.04] rounded-xl p-4 text-center border border-white/[0.06]">
+                <div className="flex items-center justify-center gap-1 mb-1.5">
+                  <Flame size={12} className="text-amber-400" />
+                  <p className="text-[9px] uppercase tracking-[0.15em] text-[var(--win-text-secondary)] font-semibold">Streak</p>
+                </div>
+                <p className="text-xl font-bold font-mono text-amber-400">{maxStreak}</p>
               </div>
             </div>
 
@@ -181,8 +202,8 @@ export default function QuizMode({ algorithm, onNavigate, onComplete }) {
   const q = questions[currentQ];
 
   return (
-    <div className="w-full h-full overflow-y-auto">
-      <div className="max-w-2xl mx-auto px-5 py-5">
+    <div className="w-full h-full overflow-y-auto flex justify-center">
+      <div className="w-full max-w-2xl px-5 py-8 flex flex-col justify-center min-h-full">
         {/* Confetti Layer */}
         <AnimatePresence>
           {confettiParticles.map(p => (
@@ -213,9 +234,9 @@ export default function QuizMode({ algorithm, onNavigate, onComplete }) {
         <div className="flex items-center gap-3 mb-4">
           <button
             onClick={() => onNavigate('home')}
-            className={`${s.fluentBtn} px-2 py-1 rounded text-[11px] font-medium text-[var(--win-text)] cursor-pointer`}
+            className={`${s.fluentBtn} px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-[var(--win-text)] cursor-pointer flex items-center gap-1`}
           >
-            ← Back
+            <ChevronLeft size={14} /> Back
           </button>
           <div className="flex-1">
             <h2 className="text-base font-bold text-white flex items-center gap-2">
@@ -230,10 +251,10 @@ export default function QuizMode({ algorithm, onNavigate, onComplete }) {
                 animate={{ scale: 1 }}
                 className="text-[11px] font-bold text-amber-400"
               >
-                🔥 {streak} streak!
+                <Flame size={13} className="inline" /> {streak} streak!
               </motion.span>
             )}
-            <span className="text-[11px] font-mono text-[var(--win-accent)]">
+            <span className="text-[11px] font-semibold font-mono text-[var(--win-accent)] bg-[var(--win-accent)]/10 px-2 py-0.5 rounded-md border border-[var(--win-accent)]/20">
               {score} XP
             </span>
           </div>
@@ -276,7 +297,7 @@ export default function QuizMode({ algorithm, onNavigate, onComplete }) {
             </div>
 
             {/* Question Text */}
-            <p className="text-[14px] font-medium text-white leading-relaxed">
+            <p className="text-[15px] font-semibold text-white leading-relaxed">
               {q.question}
             </p>
 
@@ -310,7 +331,7 @@ export default function QuizMode({ algorithm, onNavigate, onComplete }) {
                       <span className="w-6 h-6 rounded-md bg-white/[0.06] border border-white/10 flex items-center justify-center text-[10px] font-bold text-white/40 shrink-0">
                         {String.fromCharCode(65 + i)}
                       </span>
-                      <span className="text-[12px] md:text-[13px]">{opt}</span>
+                      <span className="text-[13px] leading-relaxed">{opt}</span>
                     </div>
                     {answered && isCorrect && <CheckCircle size={16} className="text-green-400 shrink-0" />}
                     {answered && isSelected && !isCorrect && <XCircle size={16} className="text-red-400 shrink-0" />}
@@ -326,16 +347,24 @@ export default function QuizMode({ algorithm, onNavigate, onComplete }) {
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
-                  className={`p-3 rounded-lg border text-[12px] leading-relaxed ${
+                  className={`p-4 rounded-xl border text-[13px] leading-relaxed ${
                     selected === q.correctAnswer
                       ? 'bg-green-500/[0.06] border-green-500/20 text-green-200'
                       : 'bg-amber-500/[0.06] border-amber-500/20 text-amber-200'
                   }`}
                 >
-                  <span className="font-semibold">
-                    {selected === q.correctAnswer ? '✓ Correct! ' : '✗ Wrong! '}
-                  </span>
-                  {q.explanation}
+                  <div className="flex items-start gap-2">
+                    {selected === q.correctAnswer
+                      ? <CheckCircle size={15} className="text-green-400 mt-0.5 shrink-0" />
+                      : <XCircle size={15} className="text-amber-400 mt-0.5 shrink-0" />
+                    }
+                    <div>
+                      <span className="font-bold">
+                        {selected === q.correctAnswer ? 'Correct! ' : 'Incorrect. '}
+                      </span>
+                      {q.explanation}
+                    </div>
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>

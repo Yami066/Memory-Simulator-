@@ -1,8 +1,30 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, BookOpen, Brain, AlertTriangle, Lightbulb, ArrowRight } from 'lucide-react';
+import {
+  ChevronLeft, ChevronRight, BookOpen, Brain, AlertTriangle, Lightbulb,
+  ArrowRight, ArrowDownToLine, Package, ListOrdered, Scale, Clock,
+  BarChart3, Wrench, Eye, Zap, TrendingUp, Timer, CheckCircle, XCircle,
+  RefreshCw, ThumbsUp, ThumbsDown
+} from 'lucide-react';
 import ClockVisualization from './ClockVisualization.jsx';
 import s from '../../styles/mica.module.css';
+
+/* Icon map for concept cards */
+const ICON_MAP = {
+  'how-works': ArrowDownToLine,
+  'queue': Package,
+  'steps': ListOrdered,
+  'anomaly': AlertTriangle,
+  'pros-cons': Scale,
+  'clock': Clock,
+  'recency': BarChart3,
+  'implement': Wrench,
+  'impossible': Zap,
+  'benchmark': TrendingUp,
+  'demo': Timer,
+  'ref-bit': Eye,
+  'refresh': RefreshCw,
+};
 
 /* ═══ CONCEPT DATA PER ALGORITHM ═══ */
 const CONCEPTS = {
@@ -12,21 +34,21 @@ const CONCEPTS = {
     cards: [
       {
         title: 'How FIFO Works',
-        icon: '📥',
+        iconKey: 'how-works',
         content: 'FIFO replaces the **oldest** page in memory — the one that was loaded first. Think of it like a queue at a store: the first person in line is the first to leave.',
         visual: 'queue',
         keyPoints: ['Simple queue-based eviction', 'No recency tracking', 'Easy to implement'],
       },
       {
         title: 'Queue Behavior',
-        icon: '📦',
+        iconKey: 'queue',
         content: 'Pages enter the queue from the **back** and are evicted from the **front**. When memory is full and a new page arrives, the front page is removed regardless of how often it was used.',
         visual: 'queue-anim',
         keyPoints: ['New pages → back of queue', 'Evictions → front of queue', 'Order is strictly by arrival time'],
       },
       {
         title: 'Step-by-Step Example',
-        icon: '🔢',
+        iconKey: 'steps',
         content: 'Reference string: **1, 2, 3, 4, 1, 2** with **3 frames**',
         steps: [
           { ref: 1, frames: [1, '-', '-'], result: 'FAULT', note: 'Page 1 loaded into empty frame' },
@@ -38,8 +60,8 @@ const CONCEPTS = {
         ],
       },
       {
-        title: "⚠️ Belady's Anomaly",
-        icon: '⚠️',
+        title: "Belady's Anomaly",
+        iconKey: 'anomaly',
         content: "**Belady's Anomaly** is a surprising phenomenon unique to FIFO: sometimes, adding MORE frames leads to MORE page faults! This is counter-intuitive because you'd expect more memory to always help.",
         keyPoints: [
           'Only affects FIFO (not LRU or OPT)',
@@ -51,7 +73,7 @@ const CONCEPTS = {
       },
       {
         title: 'Pros & Cons',
-        icon: '⚖️',
+        iconKey: 'pros-cons',
         pros: ['Very simple to implement', 'Low overhead — just a queue pointer', 'Predictable behavior'],
         cons: ["Suffers from Belady's Anomaly", 'Ignores page usage patterns', 'May evict frequently-used pages', 'Generally more faults than LRU'],
       },
@@ -64,20 +86,20 @@ const CONCEPTS = {
     cards: [
       {
         title: 'How LRU Works',
-        icon: '🕐',
+        iconKey: 'how-works',
         content: 'LRU evicts the page that **has not been used for the longest time**. It assumes that pages used recently will be used again soon — this is called **temporal locality**.',
         keyPoints: ['Evicts least recently accessed page', 'Exploits temporal locality', 'Better than FIFO in most cases'],
       },
       {
         title: 'Recency Tracking',
-        icon: '📊',
+        iconKey: 'recency',
         content: 'Every time a page is accessed (hit or load), it moves to the **most recently used** position. The page at the "bottom" of the recency stack is the LRU victim.',
         visual: 'recency',
         keyPoints: ['Every access updates recency', 'Most recent → safe from eviction', 'Least recent → next eviction candidate'],
       },
       {
         title: 'Step-by-Step Example',
-        icon: '🔢',
+        iconKey: 'steps',
         content: 'Reference string: **1, 2, 3, 2, 1, 4** with **3 frames**',
         steps: [
           { ref: 1, frames: [1, '-', '-'], result: 'FAULT', note: 'Page 1 loaded' },
@@ -90,7 +112,7 @@ const CONCEPTS = {
       },
       {
         title: 'Implementation Methods',
-        icon: '🛠️',
+        iconKey: 'implement',
         content: 'LRU can be implemented using: **counters** (timestamp each access), **stack** (move accessed page to top), or **hash map + doubly linked list** (O(1) operations).',
         keyPoints: [
           'Counter method: store last-access time for each page',
@@ -101,7 +123,7 @@ const CONCEPTS = {
       },
       {
         title: 'Pros & Cons',
-        icon: '⚖️',
+        iconKey: 'pros-cons',
         pros: ['No Belady\'s Anomaly (stack algorithm)', 'Good performance with locality', 'Closely approximates optimal', 'Widely used in practice (approximations)'],
         cons: ['Expensive to implement perfectly', 'Requires tracking every access', 'Hardware implementation is costly', 'Overhead with many pages'],
       },
@@ -114,13 +136,13 @@ const CONCEPTS = {
     cards: [
       {
         title: 'How Optimal Works',
-        icon: '🔮',
+        iconKey: 'how-works',
         content: 'The Optimal algorithm replaces the page that will **not be used for the longest time in the future**. It guarantees the minimum possible page faults.',
         keyPoints: ['Looks into the FUTURE', 'Evicts farthest-future page', 'Theoretical best — minimum faults possible'],
       },
       {
         title: 'Why It\'s Impossible',
-        icon: '⚡',
+        iconKey: 'impossible',
         content: 'OPT requires knowing the **complete future reference string** before execution. In real operating systems, we cannot predict which pages will be needed next — making OPT purely theoretical.',
         keyPoints: [
           'Requires future knowledge',
@@ -132,7 +154,7 @@ const CONCEPTS = {
       },
       {
         title: 'Step-by-Step Example',
-        icon: '🔢',
+        iconKey: 'steps',
         content: 'Reference string: **1, 2, 3, 4, 1, 2** with **3 frames**',
         steps: [
           { ref: 1, frames: [1, '-', '-'], result: 'FAULT', note: 'Page 1 loaded' },
@@ -145,7 +167,7 @@ const CONCEPTS = {
       },
       {
         title: 'Benchmarking Value',
-        icon: '📈',
+        iconKey: 'benchmark',
         content: 'OPT is invaluable as a **yardstick**. When developing a new page replacement algorithm, you compare its fault count against OPT to measure how close to "perfect" it is.',
         keyPoints: [
           'FIFO typically 20-40% worse than OPT',
@@ -156,7 +178,7 @@ const CONCEPTS = {
       },
       {
         title: 'Pros & Cons',
-        icon: '⚖️',
+        iconKey: 'pros-cons',
         pros: ['Guaranteed minimum faults', 'No Belady\'s Anomaly', 'Perfect benchmark', 'Elegant theoretical model'],
         cons: ['Impossible to implement in practice', 'Requires full future knowledge', 'Only useful for analysis', 'Cannot be used in real OS kernels'],
       },
@@ -169,13 +191,13 @@ const CONCEPTS = {
     cards: [
       {
         title: 'How Second Chance Works',
-        icon: '🔄',
+        iconKey: 'refresh',
         content: 'Second Chance enhances FIFO by adding a **reference bit** to each page. Before evicting the oldest page, it checks: was this page recently used? If yes, give it a "second chance" by clearing its bit and moving on.',
         keyPoints: ['Enhancement of FIFO', 'Uses reference bit (0 or 1)', 'Gives recently-used pages a second chance'],
       },
       {
         title: 'The Clock Mechanism',
-        icon: '🕐',
+        iconKey: 'clock',
         content: 'Pages are arranged in a **circular buffer** (like a clock face). A pointer rotates around the circle. When a page fault occurs, the pointer scans until it finds a page with reference bit = 0.',
         visual: 'clock',
         keyPoints: [
@@ -187,7 +209,7 @@ const CONCEPTS = {
       },
       {
         title: 'Reference Bit Behavior',
-        icon: '🔢',
+        iconKey: 'ref-bit',
         content: 'The reference bit is **set to 1** whenever a page is accessed. When the clock pointer reaches a page: if bit=1, reset to 0 and advance; if bit=0, evict the page.',
         steps: [
           { ref: 'Access', frames: ['bit → 1'], result: 'SET', note: 'Any access sets the reference bit to 1' },
@@ -197,13 +219,13 @@ const CONCEPTS = {
       },
       {
         title: 'Interactive Clock Demo',
-        icon: '⏰',
+        iconKey: 'demo',
         content: 'Watch the clock algorithm in action! The pointer scans the circular buffer, checking reference bits and making replacement decisions.',
         visual: 'clock-interactive',
       },
       {
         title: 'Pros & Cons',
-        icon: '⚖️',
+        iconKey: 'pros-cons',
         pros: ['Better than pure FIFO', 'Low overhead with hardware support', 'Approximates LRU behavior', 'Used in real operating systems (Linux)'],
         cons: ['Not as good as true LRU', 'Can degenerate to FIFO (all bits=0)', 'Additional bit storage needed', 'Needs hardware reference bit support'],
       },
@@ -314,31 +336,33 @@ function StepTable({ steps }) {
   const [currentStep, setCurrentStep] = useState(0);
 
   return (
-    <div className="flex flex-col gap-2 py-2">
-      <div className="grid grid-cols-[40px_1fr_60px] gap-1 text-[9px] uppercase tracking-wider text-[var(--win-text-secondary)] font-semibold px-2">
+    <div className="flex flex-col gap-1.5 py-2">
+      {/* Header */}
+      <div className="grid grid-cols-[48px_1fr_72px] gap-2 text-[9px] uppercase tracking-[0.15em] text-[var(--win-text-secondary)] font-semibold px-3 pb-1 border-b border-white/[0.06]">
         <span>Ref</span>
         <span>Frames</span>
-        <span>Result</span>
+        <span className="text-right">Result</span>
       </div>
+      {/* Rows */}
       {steps.map((step, i) => (
         <motion.div
           key={i}
           initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: i <= currentStep ? 1 : 0.3, x: 0 }}
+          animate={{ opacity: i <= currentStep ? 1 : 0.25, x: 0 }}
           transition={{ delay: i * 0.05 }}
-          className={`grid grid-cols-[40px_1fr_60px] gap-1 items-center px-2 py-1.5 rounded-lg transition-all ${
-            i === currentStep ? 'bg-white/[0.06] border border-white/[0.1]' : ''
+          className={`grid grid-cols-[48px_1fr_72px] gap-2 items-center px-3 py-2 rounded-lg transition-all ${
+            i === currentStep ? 'bg-white/[0.06] border border-white/[0.1] shadow-sm' : 'border border-transparent'
           }`}
         >
-          <span className="text-[12px] font-bold font-mono text-white">{step.ref}</span>
-          <div className="flex gap-1">
+          <span className="text-[13px] font-bold font-mono text-white">{step.ref}</span>
+          <div className="flex gap-1.5">
             {(Array.isArray(step.frames) ? step.frames : [step.frames]).map((f, fi) => (
-              <span key={fi} className="text-[11px] font-mono px-1.5 py-0.5 rounded bg-white/[0.05] text-white/80">
+              <span key={fi} className="text-[12px] font-mono px-2 py-1 rounded-md bg-white/[0.06] border border-white/[0.06] text-white/80 min-w-[32px] text-center">
                 {f}
               </span>
             ))}
           </div>
-          <span className={`text-[10px] font-bold ${
+          <span className={`text-[11px] font-bold text-right flex items-center justify-end gap-1 ${
             step.result === 'HIT' ? 'text-[var(--color-hit)]'
             : step.result === 'FAULT' ? 'text-[var(--color-miss)]'
             : step.result === 'SET' ? 'text-[var(--win-accent)]'
@@ -346,36 +370,42 @@ function StepTable({ steps }) {
             : step.result === 'EVICT' ? 'text-[var(--color-miss)]'
             : 'text-white/40'
           }`}>
+            {step.result === 'HIT' && <CheckCircle size={11} />}
+            {step.result === 'FAULT' && <XCircle size={11} />}
             {step.result}
           </span>
         </motion.div>
       ))}
-      {currentStep < steps.length - 1 && (
-        <button
-          onClick={() => setCurrentStep(prev => Math.min(prev + 1, steps.length - 1))}
-          className={`${s.fluentBtn} self-center px-3 py-1 rounded text-[10px] font-medium text-[var(--win-text)] cursor-pointer mt-1`}
-        >
-          Next Step →
-        </button>
-      )}
-      {currentStep >= steps.length - 1 && (
-        <button
-          onClick={() => setCurrentStep(0)}
-          className={`${s.fluentBtn} self-center px-3 py-1 rounded text-[10px] font-medium text-[var(--win-text)] cursor-pointer mt-1`}
-        >
-          Replay
-        </button>
-      )}
+      {/* Note */}
       {steps[currentStep]?.note && (
-        <motion.p
+        <motion.div
           key={currentStep}
           initial={{ opacity: 0, y: 5 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-[10px] text-[var(--win-text-secondary)] italic text-center mt-1"
+          className="text-[11px] text-[var(--win-text-secondary)] text-center mt-1 bg-white/[0.03] rounded-lg px-3 py-2 border border-white/[0.04]"
         >
+          <Lightbulb size={10} className="inline text-amber-400 mr-1.5 -mt-0.5" />
           {steps[currentStep].note}
-        </motion.p>
+        </motion.div>
       )}
+      {/* Buttons */}
+      <div className="flex justify-center gap-2 mt-1">
+        {currentStep < steps.length - 1 ? (
+          <button
+            onClick={() => setCurrentStep(prev => Math.min(prev + 1, steps.length - 1))}
+            className={`${s.fluentBtnPrimary} px-4 py-1.5 rounded-lg text-[11px] font-semibold text-white cursor-pointer flex items-center gap-1.5`}
+          >
+            Next Step <ChevronRight size={12} />
+          </button>
+        ) : (
+          <button
+            onClick={() => setCurrentStep(0)}
+            className={`${s.fluentBtn} px-4 py-1.5 rounded-lg text-[11px] font-medium text-[var(--win-text)] cursor-pointer flex items-center gap-1.5`}
+          >
+            <RefreshCw size={11} /> Replay
+          </button>
+        )}
+      </div>
     </div>
   );
 }
@@ -404,19 +434,19 @@ export default function ConceptCards({ algorithm, onNavigate, onComplete }) {
   };
 
   return (
-    <div className="w-full h-full overflow-y-auto">
-      <div className="max-w-3xl mx-auto px-5 py-5">
+    <div className="w-full h-full overflow-y-auto flex justify-center">
+      <div className="w-full max-w-3xl px-5 py-8 flex flex-col justify-center min-h-full">
         {/* Header */}
         <div className="flex items-center gap-3 mb-4">
           <button
             onClick={() => onNavigate('home')}
-            className={`${s.fluentBtn} px-2 py-1 rounded text-[11px] font-medium text-[var(--win-text)] cursor-pointer`}
+            className={`${s.fluentBtn} px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-[var(--win-text)] cursor-pointer flex items-center gap-1`}
           >
-            ← Back
+            <ChevronLeft size={14} /> Back
           </button>
-          <div>
+          <div className="flex-1">
             <h2 className="text-lg font-bold text-white">{data.title}</h2>
-            <p className="text-[10px] text-[var(--win-text-secondary)]">
+            <p className="text-[10px] text-[var(--win-text-secondary)] font-medium">
               Card {cardIdx + 1} of {data.cards.length}
             </p>
           </div>
@@ -447,26 +477,36 @@ export default function ConceptCards({ algorithm, onNavigate, onComplete }) {
           >
             {/* Card Title */}
             <div className="flex items-center gap-3">
-              <span className="text-2xl">{card.icon}</span>
-              <h3 className="text-base font-bold text-white">{card.title}</h3>
+              {(() => {
+                const IconComp = ICON_MAP[card.iconKey];
+                return IconComp ? (
+                  <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: `${data.color}18`, border: `1px solid ${data.color}30` }}>
+                    <IconComp size={18} style={{ color: data.color }} />
+                  </div>
+                ) : null;
+              })()}
+              <h3 className="text-[16px] font-bold text-white leading-snug">{card.title}</h3>
             </div>
 
             {/* Main Content */}
             {card.content && (
-              <p className="text-[13px] text-[var(--win-text-secondary)] leading-relaxed"
+              <p className="text-[13px] text-slate-300 leading-[1.7]"
                 dangerouslySetInnerHTML={{
-                  __html: card.content.replace(/\*\*(.*?)\*\*/g, '<strong style="color:#e4e4e4">$1</strong>')
+                  __html: card.content.replace(/\*\*(.*?)\*\*/g, '<strong style="color:#e4e4e4;font-weight:600">$1</strong>')
                 }}
               />
             )}
 
             {/* Key Points */}
             {card.keyPoints && (
-              <div className="flex flex-col gap-1.5 bg-white/[0.03] rounded-lg p-3 border border-white/[0.06]">
+              <div className="flex flex-col gap-2 bg-white/[0.03] rounded-xl p-4 border border-white/[0.06]">
+                <p className="text-[9px] uppercase tracking-[0.15em] text-[var(--win-text-secondary)] font-semibold mb-0.5">Key Takeaways</p>
                 {card.keyPoints.map((point, i) => (
-                  <div key={i} className="flex items-start gap-2">
-                    <Lightbulb size={12} className="text-amber-400 mt-0.5 shrink-0" />
-                    <span className="text-[11px] text-[var(--win-text-secondary)]">{point}</span>
+                  <div key={i} className="flex items-start gap-2.5">
+                    <div className="w-4 h-4 rounded-full bg-amber-500/15 border border-amber-500/20 flex items-center justify-center shrink-0 mt-0.5">
+                      <Lightbulb size={9} className="text-amber-400" />
+                    </div>
+                    <span className="text-[12px] text-slate-300 leading-relaxed">{point}</span>
                   </div>
                 ))}
               </div>
@@ -490,16 +530,28 @@ export default function ConceptCards({ algorithm, onNavigate, onComplete }) {
             {/* Pros & Cons */}
             {card.pros && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="bg-green-500/[0.05] border border-green-500/[0.15] rounded-lg p-3">
-                  <p className="text-[10px] uppercase tracking-wider text-green-400 font-semibold mb-2">✓ Advantages</p>
+                <div className="bg-green-500/[0.06] border border-green-500/[0.15] rounded-xl p-4">
+                  <div className="flex items-center gap-1.5 mb-3">
+                    <ThumbsUp size={13} className="text-green-400" />
+                    <p className="text-[10px] uppercase tracking-[0.15em] text-green-400 font-semibold">Advantages</p>
+                  </div>
                   {card.pros.map((p, i) => (
-                    <p key={i} className="text-[11px] text-green-200/80 mb-1">• {p}</p>
+                    <div key={i} className="flex items-start gap-2 mb-1.5 last:mb-0">
+                      <CheckCircle size={11} className="text-green-400/70 mt-0.5 shrink-0" />
+                      <span className="text-[12px] text-green-200/80 leading-relaxed">{p}</span>
+                    </div>
                   ))}
                 </div>
-                <div className="bg-red-500/[0.05] border border-red-500/[0.15] rounded-lg p-3">
-                  <p className="text-[10px] uppercase tracking-wider text-red-400 font-semibold mb-2">✗ Disadvantages</p>
+                <div className="bg-red-500/[0.06] border border-red-500/[0.15] rounded-xl p-4">
+                  <div className="flex items-center gap-1.5 mb-3">
+                    <ThumbsDown size={13} className="text-red-400" />
+                    <p className="text-[10px] uppercase tracking-[0.15em] text-red-400 font-semibold">Disadvantages</p>
+                  </div>
                   {card.cons.map((c, i) => (
-                    <p key={i} className="text-[11px] text-red-200/80 mb-1">• {c}</p>
+                    <div key={i} className="flex items-start gap-2 mb-1.5 last:mb-0">
+                      <XCircle size={11} className="text-red-400/70 mt-0.5 shrink-0" />
+                      <span className="text-[12px] text-red-200/80 leading-relaxed">{c}</span>
+                    </div>
                   ))}
                 </div>
               </div>

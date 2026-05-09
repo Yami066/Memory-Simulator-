@@ -156,7 +156,14 @@ export default function PredictionMode({ algorithm, onNavigate, onComplete }) {
   const handleNext = () => {
     if (stepIndex + 1 >= refString.length) {
       setPhase('done');
-      onComplete?.(algorithm, score);
+      const accuracy = totalPredictions > 0 ? Math.round((correctPredictions / totalPredictions) * 100) : 0;
+      onComplete?.(algorithm, {
+        score,
+        accuracy,
+        correct: correctPredictions,
+        total: totalPredictions,
+        maxStreak: Math.max(maxStreak, streak),
+      });
       return;
     }
     setStepIndex(prev => prev + 1);
@@ -191,8 +198,8 @@ export default function PredictionMode({ algorithm, onNavigate, onComplete }) {
   if (phase === 'done') {
     const accuracy = totalPredictions > 0 ? Math.round((correctPredictions / totalPredictions) * 100) : 0;
     return (
-      <div className="w-full h-full overflow-y-auto px-4 pb-6">
-        <div className="max-w-lg mx-auto">
+      <div className="w-full h-full overflow-y-auto flex justify-center px-4 pb-6">
+        <div className="w-full max-w-lg flex flex-col items-center justify-center min-h-full">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -265,7 +272,7 @@ export default function PredictionMode({ algorithm, onNavigate, onComplete }) {
 
   // ═══ GAME SCREEN ═══
   return (
-    <div className="w-full h-full overflow-y-auto px-4 pb-6">
+    <div className="w-full h-full overflow-y-auto flex justify-center px-4 pb-6">
       {/* Confetti */}
       <AnimatePresence>
         {confetti.map(p => (
@@ -281,7 +288,7 @@ export default function PredictionMode({ algorithm, onNavigate, onComplete }) {
         ))}
       </AnimatePresence>
 
-      <div className="max-w-2xl mx-auto">
+      <div className="w-full max-w-2xl flex flex-col justify-center min-h-full py-4">
         {/* Header */}
         <div className="flex items-center gap-3 mb-3">
           <button onClick={() => onNavigate('home')} className={`${s.fluentBtn} px-2 py-1 rounded text-[11px] font-medium text-[var(--win-text)] cursor-pointer`}>

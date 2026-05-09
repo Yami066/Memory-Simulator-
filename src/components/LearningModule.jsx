@@ -5,8 +5,10 @@ import ConceptCards from './learning/ConceptCards.jsx';
 import QuizMode from './learning/QuizMode.jsx';
 import PredictionMode from './learning/PredictionMode.jsx';
 import Scoreboard from './learning/Scoreboard.jsx';
+import ResultsHistory from './learning/ResultsHistory.jsx';
 
 const STORAGE_KEY = 'vmm-learning-progress';
+const HISTORY_KEY = 'vmm-learning-history';
 
 function loadProgress() {
   try {
@@ -25,15 +27,38 @@ function saveProgress(progress) {
   }
 }
 
+function loadHistory() {
+  try {
+    const raw = localStorage.getItem(HISTORY_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveHistory(history) {
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+  } catch {
+    // silently fail
+  }
+}
+
 export default function LearningModule() {
-  const [view, setView] = useState('home'); // home | learn | quiz | practice | scoreboard
+  const [view, setView] = useState('home'); // home | learn | quiz | practice | scoreboard | history
   const [selectedAlgo, setSelectedAlgo] = useState(null);
   const [progress, setProgress] = useState(loadProgress);
+  const [history, setHistory] = useState(loadHistory);
 
   // Persist progress
   useEffect(() => {
     saveProgress(progress);
   }, [progress]);
+
+  // Persist history
+  useEffect(() => {
+    saveHistory(history);
+  }, [history]);
 
   // Navigation handler
   const handleNavigate = useCallback((targetView, algo = null) => {
@@ -49,11 +74,15 @@ export default function LearningModule() {
     }));
   }, []);
 
-  const handleQuizComplete = useCallback((algo, score) => {
+  const handleQuizComplete = useCallback((algo, resultData) => {
+    // resultData = { score, total, correct, totalQuestions, maxStreak, grade }
+    const xpEarned = resultData.score;
+
+    // Update progress (best score, XP, flags)
     setProgress(prev => {
       const existing = prev[algo] || {};
-      const bestScore = Math.max(existing.quizScore || 0, score);
-      const newXP = (existing.xp || 0) + score;
+      const bestScore = Math.max(existing.quizScore || 0, resultData.score);
+      const newXP = (existing.xp || 0) + xpEarned;
       return {
         ...prev,
         [algo]: {
@@ -65,12 +94,34 @@ export default function LearningModule() {
         },
       };
     });
+
+    // Add to history
+    setHistory(prev => [
+      {
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+        type: 'quiz',
+        algorithm: algo,
+        score: resultData.score,
+        total: resultData.total,
+        correct: resultData.correct,
+        totalQuestions: resultData.totalQuestions,
+        grade: resultData.grade,
+        maxStreak: resultData.maxStreak,
+        xpEarned,
+        date: new Date().toISOString(),
+      },
+      ...prev,
+    ]);
   }, []);
 
-  const handlePracticeComplete = useCallback((algo, score) => {
+  const handlePracticeComplete = useCallback((algo, resultData) => {
+    // resultData = { score, accuracy, correct, total, maxStreak }
+    const xpEarned = resultData.score;
+
+    // Update progress
     setProgress(prev => {
       const existing = prev[algo] || {};
-      const newXP = (existing.xp || 0) + score;
+      const newXP = (existing.xp || 0) + xpEarned;
       return {
         ...prev,
         [algo]: {
@@ -81,6 +132,23 @@ export default function LearningModule() {
         },
       };
     });
+
+    // Add to history
+    setHistory(prev => [
+      {
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+        type: 'practice',
+        algorithm: algo,
+        score: resultData.score,
+        accuracy: resultData.accuracy,
+        correct: resultData.correct,
+        total: resultData.total,
+        maxStreak: resultData.maxStreak,
+        xpEarned,
+        date: new Date().toISOString(),
+      },
+      ...prev,
+    ]);
   }, []);
 
   const renderView = () => {
@@ -124,6 +192,15 @@ export default function LearningModule() {
         return (
           <Scoreboard
             progress={progress}
+            history={history}
+            onNavigate={handleNavigate}
+          />
+        );
+
+      case 'history':
+        return (
+          <ResultsHistory
+            history={history}
             onNavigate={handleNavigate}
           />
         );

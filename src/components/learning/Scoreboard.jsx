@@ -1,9 +1,9 @@
 import { motion } from 'framer-motion';
-import { Trophy, Star, Target, Brain, Zap, CheckCircle, BarChart3 } from 'lucide-react';
+import { Trophy, Star, Target, Brain, Zap, CheckCircle, BarChart3, ChevronLeft, Clock } from 'lucide-react';
 import { ALGO_LIST } from '../../data/quizData.js';
 import s from '../../styles/mica.module.css';
 
-export default function Scoreboard({ progress, onNavigate }) {
+export default function Scoreboard({ progress, history = [], onNavigate }) {
   const totalXP = Object.values(progress).reduce((sum, p) => sum + (p.xp || 0), 0);
   const level = Math.floor(totalXP / 100) + 1;
   const levelProgress = totalXP % 100;
@@ -20,15 +20,15 @@ export default function Scoreboard({ progress, onNavigate }) {
   })();
 
   return (
-    <div className="w-full h-full overflow-y-auto px-4 pb-6">
-      <div className="max-w-4xl mx-auto">
+    <div className="w-full h-full overflow-y-auto flex justify-center px-4 pb-6">
+      <div className="w-full max-w-4xl py-6 flex flex-col">
         {/* Header */}
         <div className="flex items-center gap-3 mb-5">
           <button
             onClick={() => onNavigate('home')}
-            className={`${s.fluentBtn} px-2 py-1 rounded text-[11px] font-medium text-[var(--win-text)] cursor-pointer`}
+            className={`${s.fluentBtn} px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-[var(--win-text)] cursor-pointer flex items-center gap-1`}
           >
-            ← Back
+            <ChevronLeft size={14} /> Back
           </button>
           <div>
             <h2 className="text-lg font-bold text-white flex items-center gap-2">
@@ -118,6 +118,7 @@ export default function Scoreboard({ progress, onNavigate }) {
         <div className="flex flex-col gap-3">
           {allAlgos.map((algo, i) => {
             const p = progress[algo.key] || {};
+            const algoAttempts = history.filter(h => h.algorithm === algo.key);
             const steps = [
               { label: 'Learn', done: p.conceptDone },
               { label: 'Quiz', done: p.quizDone },
@@ -189,6 +190,18 @@ export default function Scoreboard({ progress, onNavigate }) {
             );
           })}
         </div>
+
+        {/* View Full History Button */}
+        <motion.button
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          onClick={() => onNavigate('history')}
+          className={`${s.panelGlass} rounded-xl p-4 mt-5 flex items-center justify-center gap-2 cursor-pointer hover:border-white/20 transition-all w-full`}
+        >
+          <Clock size={15} className="text-[var(--win-accent)]" />
+          <span className="text-[13px] font-semibold text-[var(--win-accent)]">View Full Results History</span>
+        </motion.button>
       </div>
     </div>
   );
