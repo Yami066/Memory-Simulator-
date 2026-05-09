@@ -173,3 +173,120 @@
 .rightCol::-webkit-scrollbar-thumb:hover {
   background: rgba(255,255,255,0.2);
 }
+
+/* ═══ Control bar responsive layout ═══ */
+.controlBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.controlGroup {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.controlDivider {
+  width: 1px;
+  height: 20px;
+  background: rgba(255,255,255,0.1);
+  flex-shrink: 0;
+}
+
+/* On narrow widths, stack groups and hide vertical dividers */
+@media (max-width: 580px) {
+  .controlBar {
+    gap: 8px;
+  }
+  .controlGroup {
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    gap: 4px;
+  }
+  .controlDivider {
+    width: 100%;
+    height: 1px;
+    background: rgba(255,255,255,0.06);
+  }
+}
+
+/* Slightly tighter on medium-small windows */
+@media (min-width: 581px) and (max-width: 800px) {
+  .controlBar {
+    gap: 4px;
+  }
+  .controlGroup {
+    gap: 3px;
+  }
+}
+
+/* ═══ Learning Module Styles ═══ */
+
+/* Learning card glow effect */
+.learningCard {
+  background: rgba(40,40,40,0.7);
+  border: 1px solid var(--win-border);
+  backdrop-filter: blur(12px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+.learningCard:hover {
+  border-color: rgba(255,255,255,0.16);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.05) inset;
+}
+.learningCard::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.4s;
+  pointer-events: none;
+  border-radius: inherit;
+  background: radial-gradient(ellipse at 50% 0%, var(--card-glow, rgba(96,205,255,0.15)) 0%, transparent 70%);
+}
+.learningCard:hover::after {
+  opacity: 1;
+}
+
+/* Clock pointer pulse */
+@keyframes clockPulse {
+  0%, 100% { filter: drop-shadow(0 0 4px rgba(96,205,255,0.3)); }
+  50% { filter: drop-shadow(0 0 12px rgba(96,205,255,0.6)); }
+}
+.clockPointer {
+  animation: clockPulse 2s infinite;
+}
+
+/* Score glow */
+@keyframes scoreGlow {
+  0%, 100% { text-shadow: 0 0 8px rgba(251,191,36,0.3); }
+  50% { text-shadow: 0 0 20px rgba(251,191,36,0.6); }
+}
+.scoreGlow {
+  animation: scoreGlow 2s infinite;
+}
+
+/* Confetti particle burst */
+@keyframes confettiFall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(-100px) rotate(720deg); opacity: 0; }
+}
+.confettiParticle {
+  animation: confettiFall 1.2s ease-out forwards;
+  pointer-events: none;
+}
+
+/* Progress ring animation */
+@keyframes progressFill {
+  from { stroke-dashoffset: var(--circumference); }
+  to { stroke-dashoffset: var(--offset); }
+}
+.progressRing circle.fill {
+  animation: progressFill 1.5s ease-out forwards;
+}

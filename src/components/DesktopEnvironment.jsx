@@ -28,8 +28,8 @@ export default function DesktopEnvironment() {
   return (
     <div className={`${s.bloom} h-screen w-screen overflow-hidden`}>
 
-      {/* Desktop mini-windows (Only show in simulator mode) */}
-      <div className="fixed inset-0 bottom-[var(--taskbar-h)] z-[20] pointer-events-none overflow-hidden">
+      {/* Desktop mini-windows (Only show in simulator mode, hidden on small screens) */}
+      <div className="fixed inset-0 bottom-[var(--taskbar-h)] z-[20] pointer-events-none overflow-hidden hidden lg:block">
         <AnimatePresence>
           {currentView === 'simulator' && state.frames.map((appId, frameIdx) =>
             appId > 0 && (
@@ -57,7 +57,7 @@ export default function DesktopEnvironment() {
           clearAnims={clearAnims}
         />
       ) : (
-        <div className="absolute top-0 left-0 w-full h-[calc(100vh-var(--taskbar-h))] z-10 pt-8 pb-4">
+        <div className="absolute inset-0 bottom-[var(--taskbar-h)] z-10 overflow-hidden">
           <LearningModule />
         </div>
       )}

@@ -36,8 +36,8 @@ export default function VirtualMemoryManager({
 
   return (
     <div
-      className={`${s.appWindow} absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
-        w-[min(1300px,96vw)] h-[min(720px,calc(100vh-var(--taskbar-h)-24px))]
+      className={`${s.appWindow} absolute left-1/2 -translate-x-1/2 top-[calc(50%-24px)] -translate-y-1/2
+        w-[min(1300px,96vw)] h-[min(720px,calc(100vh-var(--taskbar-h)-16px))]
         rounded-xl flex flex-col overflow-hidden z-10`}
     >
 
@@ -130,34 +130,49 @@ export default function VirtualMemoryManager({
           </div>
 
           {/* Controls */}
-          <div className="shrink-0 border-t border-white/[0.07] bg-black/10 px-4 py-3 flex flex-wrap gap-1.5 items-center justify-center">
-            <label className="text-[10px] text-[#8b95a5]">Frames</label>
-            <input
-              type="number"
-              value={frameCount}
-              min={1} max={6}
-              onChange={e => setFrameCount(e.target.value)}
-              className={`${s.fluentSelect} rounded-md px-1.5 py-1.5 w-[42px] font-mono text-[11px] text-center text-[var(--win-text)]`}
-            />
-            <select value={algo} onChange={e => setAlgo(e.target.value)} className={`${s.fluentSelect} rounded-md px-2 py-1.5 text-[11px] text-[var(--win-text)] cursor-pointer`}>
-              <option value="FIFO">FIFO</option>
-              <option value="LRU">LRU</option>
-              <option value="MRU">MRU</option>
-              <option value="OPT">Optimal</option>
-            </select>
-            <select value={speed} onChange={e => setSpeed(e.target.value)} className={`${s.fluentSelect} rounded-md px-2 py-1.5 text-[11px] text-[var(--win-text)] cursor-pointer`}>
-              <option value={1500}>Slow</option>
-              <option value={900}>Normal</option>
-              <option value={400}>Fast</option>
-            </select>
-            <button onClick={runSimulation} className={`${s.fluentBtnPrimary} px-3 py-1.5 rounded-md text-[11px] font-semibold text-white cursor-pointer ${running && !paused ? s.runningPulse : ''}`}>
-              {runLabel}
-            </button>
-            <button onClick={() => { if (running) return; stepOnce(); }} className={`${s.fluentBtn} px-3 py-1.5 rounded-md text-[11px] font-medium text-[var(--win-text)] cursor-pointer`}>⏭ STEP</button>
-            <button onClick={reset} className={`${s.fluentBtn} px-3 py-1.5 rounded-md text-[11px] font-medium text-[var(--win-text)] cursor-pointer hover:!border-[var(--color-miss)] hover:!text-[var(--color-miss)]`}>⟲ RESET</button>
-            <button onClick={generateRandom} className={`${s.fluentBtn} px-3 py-1.5 rounded-md text-[11px] font-medium text-[var(--win-text)] cursor-pointer`}>🎲 RANDOM</button>
-            <button onClick={() => setShowChart(true)} className={`${s.fluentBtn} px-3 py-1.5 rounded-md text-[11px] font-medium text-[var(--win-text)] cursor-pointer`}>📊 COMPARE</button>
-            <button onClick={() => setShowBelady(prev => prev + 1)} className={`${s.fluentBtn} px-3 py-1.5 rounded-md text-[11px] font-medium text-[var(--win-text)] cursor-pointer`}>⚠ BELADY'S</button>
+          <div className={`${s.controlBar} shrink-0 border-t border-white/[0.07] bg-black/10 px-3 py-2.5`}>
+            {/* ─ Config group ─ */}
+            <div className={s.controlGroup}>
+              <label className="text-[10px] text-[#8b95a5] whitespace-nowrap">Frames</label>
+              <input
+                type="number"
+                value={frameCount}
+                min={1} max={6}
+                onChange={e => setFrameCount(e.target.value)}
+                className={`${s.fluentSelect} rounded-md px-1.5 py-1.5 w-[42px] font-mono text-[11px] text-center text-[var(--win-text)]`}
+              />
+              <select value={algo} onChange={e => setAlgo(e.target.value)} className={`${s.fluentSelect} rounded-md px-2 py-1.5 text-[11px] text-[var(--win-text)] cursor-pointer`}>
+                <option value="FIFO">FIFO</option>
+                <option value="LRU">LRU</option>
+                <option value="MRU">MRU</option>
+                <option value="OPT">Optimal</option>
+              </select>
+              <select value={speed} onChange={e => setSpeed(e.target.value)} className={`${s.fluentSelect} rounded-md px-2 py-1.5 text-[11px] text-[var(--win-text)] cursor-pointer`}>
+                <option value={1500}>Slow</option>
+                <option value={900}>Normal</option>
+                <option value={400}>Fast</option>
+              </select>
+            </div>
+
+            <div className={s.controlDivider} />
+
+            {/* ─ Playback group ─ */}
+            <div className={s.controlGroup}>
+              <button onClick={runSimulation} className={`${s.fluentBtnPrimary} px-3 py-1.5 rounded-md text-[11px] font-semibold text-white cursor-pointer ${running && !paused ? s.runningPulse : ''}`}>
+                {runLabel}
+              </button>
+              <button onClick={() => { if (running) return; stepOnce(); }} className={`${s.fluentBtn} px-3 py-1.5 rounded-md text-[11px] font-medium text-[var(--win-text)] cursor-pointer`}>⏭ STEP</button>
+              <button onClick={reset} className={`${s.fluentBtn} px-3 py-1.5 rounded-md text-[11px] font-medium text-[var(--win-text)] cursor-pointer hover:!border-[var(--color-miss)] hover:!text-[var(--color-miss)]`}>⟲ RESET</button>
+              <button onClick={generateRandom} className={`${s.fluentBtn} px-3 py-1.5 rounded-md text-[11px] font-medium text-[var(--win-text)] cursor-pointer`}>🎲 RANDOM</button>
+            </div>
+
+            <div className={s.controlDivider} />
+
+            {/* ─ Analysis group ─ */}
+            <div className={s.controlGroup}>
+              <button onClick={() => setShowChart(true)} className={`${s.fluentBtn} px-3 py-1.5 rounded-md text-[11px] font-medium text-[var(--win-text)] cursor-pointer`}>📊 COMPARE</button>
+              <button onClick={() => setShowBelady(prev => prev + 1)} className={`${s.fluentBtn} px-3 py-1.5 rounded-md text-[11px] font-medium text-[var(--win-text)] cursor-pointer`}>⚠ BELADY'S</button>
+            </div>
           </div>
         </div>
 
