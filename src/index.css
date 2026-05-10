@@ -3,23 +3,27 @@
 
 /* ═══ Color tokens ═══ */
 :root {
-  --win-bg: #202020;
-  --win-surface: rgba(32,32,32,0.82);
-  --win-surface2: rgba(45,45,45,0.75);
-  --win-card: rgba(255,255,255,0.045);
-  --win-card-hover: rgba(255,255,255,0.07);
-  --win-border: rgba(255,255,255,0.08);
-  --win-border-hover: rgba(255,255,255,0.14);
-  --win-text: #e4e4e4;
-  --win-text-secondary: #9a9a9a;
-  --win-accent: #60cdff;
-  --win-accent2: #0078d4;
-  --color-hit: #6ccb5f;
-  --color-miss: #ff6b6b;
-  --taskbar-h: 48px;
+  --win-bg: #F4F1EC;
+  --win-surface: #FFFFFF;
+  --win-surface2: #F9F7F4;
+  --win-card: #FFFFFF;
+  --win-card-hover: #F4F1EC;
+  --win-border: #E2DDD6;
+  --win-border-hover: #C0B9B0;
+  --win-text: #1A1A1A;
+  --win-text-secondary: #6B6560;
+  --win-accent: #2D6A4F;
+  --win-accent2: #235a42;
+  --color-hit: #2D6A4F;
+  --color-miss: #C0392B;
+  --taskbar-h: 56px;
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
 body {
   font-family: 'Inter', system-ui, sans-serif;
@@ -31,7 +35,20 @@ body {
 }
 
 /* ─── Scrollbar ─── */
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.18); }
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.18);
+}

@@ -144,12 +144,12 @@ export default function ComparativeBenchmarkWindow({ show, refString, frameCount
       y: {
         beginAtZero: true,
         max: refString.length > 0 ? refString.length + 1 : 10,
-        ticks: { color: '#64748b', stepSize: 1, precision: 0 },
-        grid: { color: 'rgba(255,255,255,0.04)' },
+        ticks: { color: '#6B6560', stepSize: 1, precision: 0 },
+        grid: { color: '#E8E4DE' },
       },
       x: {
-        ticks: { color: '#e2e8f0', font: { family: 'Inter' } },
-        grid: { color: 'rgba(255,255,255,0.04)' },
+        ticks: { color: '#6B6560', font: { family: 'Inter', weight: 'bold' } },
+        grid: { color: '#E8E4DE' },
       },
     },
     plugins: {
@@ -169,7 +169,7 @@ export default function ComparativeBenchmarkWindow({ show, refString, frameCount
       ctx.save();
       ctx.font = 'bold 12px Inter';
       ctx.textAlign = 'center';
-      ctx.fillStyle = '#e2e8f0';
+      ctx.fillStyle = '#6B6560';
       meta.data.forEach((bar, i) => {
         ctx.fillText(chart.data.datasets[0].data[i], bar.x, bar.y - 8);
       });
@@ -180,37 +180,53 @@ export default function ComparativeBenchmarkWindow({ show, refString, frameCount
   return (
     <AnimatePresence>
       {show && (
-        <motion.div
-          initial={{ opacity: 0, y: 30, scale: 0.96 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 30, scale: 0.96 }}
-        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-        className={`${s.benchWindow} absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2
-          w-[min(1200px,96vw)] h-[min(800px,calc(100vh-var(--taskbar-h)-32px))]
-          rounded-xl flex flex-col overflow-hidden z-30`}
-      >
-        {/* Title Bar */}
-        <div className="h-10 min-h-10 flex items-center justify-between pl-4 pr-2 bg-black/40 border-b border-white/[0.06] shrink-0">
-          <div className="flex items-center gap-2">
-            <Trophy size={14} className="text-yellow-500" />
-            <span className="text-[12px] text-white/80 font-medium tracking-wide">Performance Benchmark</span>
-          </div>
-          <button onClick={onClose} className="w-8 h-8 rounded-md flex items-center justify-center text-white/50 hover:bg-white/10 hover:text-white transition-colors cursor-pointer border-none bg-transparent">
-            <X size={16} />
-          </button>
-        </div>
+        <>
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 z-40"
+            style={{ background: 'rgba(0,0,0,0.4)' }}
+          />
+
+          <motion.div
+            initial={{ opacity: 0, y: 30, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 30, scale: 0.96 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className={`fixed left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2
+              w-[min(1200px,96vw)] h-[min(800px,calc(100vh-var(--taskbar-h)-32px))]
+              flex flex-col overflow-hidden z-50`}
+            style={{ background: '#F7F4F0', border: '1px solid #DDD8D0', borderRadius: '16px', boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }}
+          >
+            {/* Title Bar */}
+            <div 
+              className="h-10 min-h-10 flex items-center justify-between pl-4 pr-2 shrink-0"
+              style={{ background: '#FFFFFF', borderBottom: '1px solid #DDD8D0' }}
+            >
+              <div className="flex items-center gap-2">
+                <Trophy size={14} className="text-yellow-500" />
+                <span className="text-[12px] font-bold tracking-wide" style={{ color: '#1A1A1A' }}>Performance Benchmark</span>
+              </div>
+              <button onClick={onClose} className="w-8 h-8 rounded-md flex items-center justify-center transition-colors cursor-pointer border-none bg-transparent hover:bg-black/5 text-[#6B6560] hover:text-[#1A1A1A]">
+                <X size={16} />
+              </button>
+            </div>
 
         {/* Action Bar */}
-        <div className="py-4 flex flex-col items-center justify-center border-b border-white/[0.04] shrink-0 gap-2">
+        <div className="py-4 flex flex-col items-center justify-center shrink-0 gap-2">
            <button
              onClick={startBenchmark}
              disabled={running || refString.length === 0}
-             className={`${s.fluentBtnPrimary} px-6 py-2 rounded-md flex items-center gap-2 font-semibold shadow-lg disabled:opacity-50 disabled:pointer-events-none transition-all cursor-pointer ${running ? s.runningPulse : ''}`}
+             className={`flex items-center gap-2 disabled:opacity-50 disabled:pointer-events-none transition-all duration-150 ease cursor-pointer hover:brightness-[0.93] active:scale-[0.98] ${running ? s.runningPulse : ''}`}
+             style={{ background: '#2D6A4F', color: '#FFFFFF', border: 'none', borderRadius: '8px', padding: '8px 20px', fontWeight: '600', boxShadow: '0 2px 8px rgba(45,106,79,0.3)' }}
            >
              <Play size={16} fill="currentColor" />
              {running ? 'BENCHMARKING...' : 'RUN BENCHMARK'}
            </button>
-           <div className="text-[11px] text-white/50 font-mono">
+           <div className="text-[11px] font-bold font-mono" style={{ color: '#3A3530' }}>
              Step: {stepIndex} / {refString.length}
            </div>
         </div>
@@ -221,16 +237,16 @@ export default function ComparativeBenchmarkWindow({ show, refString, frameCount
             const st = benchState[algo];
             const isWinner = winners.includes(algo);
             return (
-              <div key={algo} className={`${s.benchColumn} rounded-xl p-4 flex flex-col gap-4 relative overflow-hidden ${isWinner ? s.benchWinner : ''}`}>
+              <div key={algo} className={`p-4 flex flex-col gap-4 relative overflow-hidden ${isWinner ? s.benchWinner : ''}`} style={{ background: '#FFFFFF', border: '1px solid #DDD8D0', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
                 
                 {/* Header */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: ALGO_COLORS[algo] }} />
-                    <span className="font-bold text-white tracking-wide">{algo}</span>
+                    <span className="font-bold tracking-wide" style={{ color: '#1A1A1A' }}>{algo}</span>
                   </div>
                   {isWinner && (
-                    <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} className="flex items-center gap-1 bg-green-500/20 text-green-400 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border border-green-500/30">
+                    <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} className="flex items-center gap-1 bg-[#EAF4EE] text-[#2D6A4F] px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border border-[#A8D5BA]">
                       <Trophy size={10} /> Winner
                     </motion.div>
                   )}
@@ -238,8 +254,8 @@ export default function ComparativeBenchmarkWindow({ show, refString, frameCount
 
                 {/* Counters */}
                 <div className="grid grid-cols-2 gap-2">
-                  <div className="bg-white/[0.03] rounded-lg p-2 flex flex-col items-center justify-center border border-white/[0.05]">
-                    <span className="text-[10px] text-white/50 uppercase tracking-widest mb-1">Faults</span>
+                  <div className="rounded-lg p-2 flex flex-col items-center justify-center" style={{ background: '#F0EDE8' }}>
+                    <span className="text-[10px] uppercase tracking-widest mb-1 font-bold" style={{ color: '#8A8480' }}>Faults</span>
                     <div className="h-8 overflow-hidden relative w-full flex justify-center">
                       <AnimatePresence mode="popLayout">
                         <motion.span
@@ -248,15 +264,16 @@ export default function ComparativeBenchmarkWindow({ show, refString, frameCount
                           animate={{ y: 0, opacity: 1 }}
                           exit={{ y: -20, opacity: 0 }}
                           transition={{ duration: 0.2 }}
-                          className="text-xl font-mono font-bold text-[var(--color-miss)] absolute"
+                          className="text-xl font-mono absolute"
+                          style={{ color: '#C0392B', fontWeight: 700 }}
                         >
                           {st.faults}
                         </motion.span>
                       </AnimatePresence>
                     </div>
                   </div>
-                  <div className="bg-white/[0.03] rounded-lg p-2 flex flex-col items-center justify-center border border-white/[0.05]">
-                    <span className="text-[10px] text-white/50 uppercase tracking-widest mb-1">Hits</span>
+                  <div className="rounded-lg p-2 flex flex-col items-center justify-center" style={{ background: '#F0EDE8' }}>
+                    <span className="text-[10px] uppercase tracking-widest mb-1 font-bold" style={{ color: '#8A8480' }}>Hits</span>
                     <div className="h-8 overflow-hidden relative w-full flex justify-center">
                       <AnimatePresence mode="popLayout">
                         <motion.span
@@ -265,7 +282,8 @@ export default function ComparativeBenchmarkWindow({ show, refString, frameCount
                           animate={{ y: 0, opacity: 1 }}
                           exit={{ y: -20, opacity: 0 }}
                           transition={{ duration: 0.2 }}
-                          className="text-xl font-mono font-bold text-[var(--color-hit)] absolute"
+                          className="text-xl font-mono absolute"
+                          style={{ color: '#2D6A4F', fontWeight: 700 }}
                         >
                           {st.hits}
                         </motion.span>
@@ -286,21 +304,22 @@ export default function ComparativeBenchmarkWindow({ show, refString, frameCount
                         initial={false}
                         animate={anim === 'fault' ? { x: [-2, 2, -2, 0] } : {}}
                         transition={{ duration: 0.3 }}
-                        className={`${s.benchMiniSlot} h-14 rounded-md flex items-center px-3 relative overflow-hidden`}
+                        className={`h-14 flex items-center px-3 relative overflow-hidden`}
                         style={{
-                          backgroundColor: app ? app.bg : undefined,
-                          borderColor: anim === 'hit' ? 'var(--color-hit)' : anim === 'fault' ? 'var(--color-miss)' : (app ? app.border : undefined),
-                          boxShadow: anim === 'hit' ? 'inset 0 0 10px rgba(108,203,95,0.2)' : anim === 'fault' ? 'inset 0 0 10px rgba(255,107,107,0.2)' : undefined
+                          borderRadius: '6px',
+                          backgroundColor: app ? '#FFFFFF' : '#F0EDE8',
+                          border: anim === 'hit' ? '1px solid #2D6A4F' : anim === 'fault' ? '1px solid #C0392B' : `1px solid ${app ? (app.border || '#DDD8D0') : 'transparent'}`,
+                          boxShadow: anim === 'hit' ? 'inset 0 0 10px rgba(45,106,79,0.1)' : anim === 'fault' ? 'inset 0 0 10px rgba(192,57,43,0.1)' : undefined
                         }}
                       >
-                        <span className="absolute top-1 left-1.5 text-[8px] text-white/30 font-mono">F{fIdx}</span>
+                        <span className="absolute top-1 left-1.5 text-[8px] font-mono font-bold" style={{ color: '#8A8480' }}>F{fIdx}</span>
                         {app ? (
                            <div className="flex items-center gap-3 w-full ml-2">
                              <app.Icon size={20} style={{ color: app.color }} />
-                             <span className="text-[11px] font-semibold truncate" style={{ color: app.color }}>{app.name}</span>
+                             <span className="text-[11px] font-bold truncate" style={{ color: app.color }}>{app.name}</span>
                            </div>
                         ) : (
-                           <span className="text-white/10 text-sm ml-2">Empty</span>
+                           <span className="text-sm font-bold ml-2" style={{ color: '#8A8480' }}>Empty</span>
                         )}
                       </motion.div>
                     );
@@ -313,14 +332,15 @@ export default function ComparativeBenchmarkWindow({ show, refString, frameCount
         </div>
 
         {/* Live Chart Footer */}
-        <div className="h-[220px] shrink-0 p-4 pt-0 border-t border-white/[0.04] bg-black/20 flex flex-col">
-          <h3 className="text-[10px] text-white/50 uppercase tracking-[2px] mb-2 mt-3 pl-2">Live Fault Tracking</h3>
+        <div className="shrink-0 p-4 m-4 mt-0 flex flex-col" style={{ background: '#FFFFFF', border: '1px solid #DDD8D0', borderRadius: '12px', height: '220px' }}>
+          <h3 className="text-[10px] uppercase font-bold tracking-[2px] mb-2 pl-2" style={{ color: '#6B6560' }}>Live Fault Tracking</h3>
           <div className="flex-1 w-full min-h-0">
              <Bar data={chartData} options={chartOptions} plugins={plugins} />
           </div>
         </div>
 
       </motion.div>
+      </>
       )}
     </AnimatePresence>
   );

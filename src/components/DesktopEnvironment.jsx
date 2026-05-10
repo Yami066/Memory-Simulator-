@@ -26,7 +26,10 @@ export default function DesktopEnvironment() {
   }, []);
 
   return (
-    <div className={`${s.bloom} h-screen w-screen overflow-hidden`}>
+    <div
+      className="h-screen w-screen overflow-hidden"
+      style={{ background: '#F4F1EC' }}
+    >
 
       {/* Desktop mini-windows (Only show in simulator mode, hidden on small screens) */}
       <div className="fixed inset-0 bottom-[var(--taskbar-h)] z-[20] pointer-events-none overflow-hidden hidden lg:block">
@@ -63,9 +66,9 @@ export default function DesktopEnvironment() {
       )}
 
       {/* Taskbar */}
-      <Taskbar 
-        onAppClick={addToQueue} 
-        disabled={state.running || currentView !== 'simulator'} 
+      <Taskbar
+        onAppClick={addToQueue}
+        disabled={state.running || currentView !== 'simulator'}
         currentView={currentView}
         setCurrentView={setCurrentView}
       />

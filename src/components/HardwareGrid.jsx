@@ -8,30 +8,37 @@ export default function HardwareGrid({ state }) {
   const currentApp = currentReq ? getApp(currentReq) : null;
 
   return (
-    <div className="flex flex-col gap-2.5">
+    <div className="flex flex-col gap-5">
 
       {/* ── CPU / RAM / DISK row ── */}
-      <div className="grid grid-cols-3 gap-2.5">
+      <div className="grid grid-cols-3 gap-4">
 
         {/* CPU */}
-        <div className="rounded-2xl border border-white/10 bg-cyan-500/10 p-3 flex flex-col min-h-[110px]">
-          <p className="text-[10px] uppercase tracking-[0.3em] text-cyan-100/80">CPU</p>
+        <div
+          className="rounded-xl p-4 flex flex-col min-h-[130px]"
+          style={{ background: '#EAF4EE', border: '1px solid #A8D5BA' }}
+        >
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: '#2D6A4F' }}>CPU</p>
           <motion.div
-            animate={{ x: [0, 8, 0] }}
+            animate={{ x: [0, 6, 0] }}
             transition={{ duration: 2.5, repeat: Infinity }}
-            className="mt-auto rounded-xl border border-white/10 bg-slate-950/70 p-2.5 text-[12px] text-slate-200"
+            className="mt-auto rounded-lg p-3 text-sm font-medium"
+            style={{ background: '#FFFFFF', border: '1px solid #D6D1CB', color: '#1A1A1A' }}
           >
             {currentReq !== null
-              ? <span>Requests <span className="text-cyan-300 font-bold">{currentApp ? currentApp.name : `page ${currentReq}`}</span></span>
-              : <span className="text-slate-500 italic">Idle</span>
+              ? <span>Requests <span className="font-bold" style={{ color: '#2D6A4F' }}>{currentApp ? currentApp.name : `page ${currentReq}`}</span></span>
+              : <span className="italic" style={{ color: '#6B6560' }}>Idle</span>
             }
           </motion.div>
         </div>
 
         {/* RAM */}
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
-          <p className="text-[10px] uppercase tracking-[0.3em] text-slate-400">RAM</p>
-          <div className="mt-2 grid grid-cols-2 gap-1.5">
+        <div
+          className="rounded-xl p-4"
+          style={{ background: '#F4F1EC', border: '1px solid #E2DDD6' }}
+        >
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: '#6B6560' }}>RAM</p>
+          <div className="mt-3 grid grid-cols-2 gap-2">
             {frames.map((appId, index) => {
               const app = appId !== -1 ? getApp(appId) : null;
               const isActive = currentReq !== null && appId === currentReq;
@@ -40,21 +47,22 @@ export default function HardwareGrid({ state }) {
                   key={`${appId}-${index}`}
                   animate={{ scale: isActive ? [1, 1.06, 1] : 1 }}
                   transition={{ duration: 1.8, repeat: Infinity, delay: index * 0.1 }}
-                  className={`flex h-10 items-center justify-center rounded-lg border text-sm font-semibold gap-1
-                    ${appId === -1
-                      ? 'border-dashed border-white/10 text-slate-500'
-                      : 'border-cyan-300/30 bg-cyan-500/10 text-white'
-                    }`}
+                  className="flex h-12 items-center justify-center rounded-lg text-sm font-bold gap-1.5"
+                  style={{
+                    background: isActive ? '#EAF4EE' : '#FFFFFF',
+                    border: `1px solid ${isActive ? '#2D6A4F' : '#D6D1CB'}`,
+                    color: '#1A1A1A',
+                  }}
                 >
                   {appId === -1 ? (
-                    <span>·</span>
+                    <span style={{ color: '#D6D1CB' }}>·</span>
                   ) : app ? (
                     <>
-                      <app.Icon size={11} style={{ color: app.color }} />
-                      <span className="text-[9px] truncate max-w-[36px]">{app.name}</span>
+                      <app.Icon size={15} style={{ color: app.color }} />
+                      <span className="text-xs truncate max-w-[44px]" style={{ color: '#1A1A1A' }}>{app.name}</span>
                     </>
                   ) : (
-                    <span className="text-[10px]">{appId}</span>
+                    <span className="text-sm">{appId}</span>
                   )}
                 </motion.div>
               );
@@ -63,30 +71,43 @@ export default function HardwareGrid({ state }) {
         </div>
 
         {/* DISK */}
-        <div className="rounded-2xl border border-white/10 bg-violet-500/10 p-3 flex flex-col min-h-[110px]">
-          <p className="text-[10px] uppercase tracking-[0.3em] text-violet-100/80">Disk</p>
+        <div
+          className="rounded-xl p-4 flex flex-col min-h-[130px]"
+          style={{ background: '#F4F1EC', border: '1px solid #E2DDD6' }}
+        >
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: '#6B6560' }}>Disk</p>
           <motion.div
-            animate={{ opacity: [0.7, 1, 0.7] }}
+            animate={{ opacity: [0.75, 1, 0.75] }}
             transition={{ duration: 2.2, repeat: Infinity }}
-            className="mt-auto rounded-xl border border-white/10 bg-slate-950/70 p-2.5 text-[12px] text-slate-200"
+            className="mt-auto rounded-lg p-3 text-sm font-medium"
+            style={{ background: '#FFFFFF', border: '1px solid #D6D1CB', color: '#1A1A1A' }}
           >
             {faults > 0
-              ? <span><span className="text-violet-300 font-bold">{faults}</span> swap{faults !== 1 ? 's' : ''} done</span>
-              : <span className="text-slate-500 italic">Standby</span>
+              ? <span><span className="font-bold text-lg" style={{ color: '#C0392B' }}>{faults}</span> swap{faults !== 1 ? 's' : ''} done</span>
+              : <span className="italic" style={{ color: '#6B6560' }}>Standby</span>
             }
           </motion.div>
         </div>
       </div>
 
       {/* ── Live page path ── */}
-      <div className="flex flex-col gap-2 rounded-2xl border border-white/10 bg-white/5 p-3">
-        <div className="flex items-center justify-between gap-2 text-[12px] text-slate-300">
+      <div
+        className="flex flex-col gap-3 rounded-xl p-4"
+        style={{ background: '#F4F1EC', border: '1px solid #E2DDD6' }}
+      >
+        <div className="flex items-center justify-between gap-4 text-sm font-bold" style={{ color: '#1A1A1A' }}>
           <span>Live page path</span>
-          <span className="text-[10px] text-slate-500">CPU → TLB → PT → RAM → Disk</span>
+          <span className="text-xs font-mono" style={{ color: '#6B6560' }}>CPU → TLB → PT → RAM → Disk</span>
         </div>
-        <div className="flex flex-wrap gap-1.5 text-[9px] uppercase tracking-[0.25em] text-slate-200">
+        <div className="flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.22em] font-bold">
           {['Demand paging', 'Working set', 'Belady', 'Thrashing'].map((item) => (
-            <span key={item} className="rounded-full border border-white/10 bg-slate-950/70 px-2.5 py-1">{item}</span>
+            <span
+              key={item}
+              className="rounded-full px-3 py-1.5"
+              style={{ background: '#FFFFFF', border: '1px solid #D6D1CB', color: '#6B6560' }}
+            >
+              {item}
+            </span>
           ))}
         </div>
       </div>

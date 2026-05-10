@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { getApp } from '../utils/algorithms.js';
-import { Minus, Square, X, Cpu, FileText } from 'lucide-react';
+import { Minus, Square, X, Cpu, FileText, Play, Pause, SkipForward, RotateCcw, Shuffle, BarChart2, AlertTriangle, MemoryStick } from 'lucide-react';
 import ActiveRamSlot from './ActiveRamSlot.jsx';
 import EventLogTerminal from './EventLogTerminal.jsx';
 import PageTable from './PageTable.jsx';
@@ -26,72 +26,107 @@ export default function VirtualMemoryManager({
   const faultRate = accesses ? (faults / accesses * 100).toFixed(1) + '%' : '0%';
   const hasStarted = stepIndex > 0;
 
-  let runLabel = '▶ RUN';
-  if (running && !paused) runLabel = '⏸ PAUSE';
-  else if (running && paused) runLabel = '▶ RESUME';
+  // Run icon/label
+  const runIcon = running && !paused ? <Pause size={15} /> : <Play size={15} />;
+  const runText = running && !paused ? 'PAUSE' : running && paused ? 'RESUME' : 'RUN';
 
   const stats = [
-    { label: 'Accesses', value: accesses, color: 'var(--win-accent)' },
-    { label: 'Faults', value: faults, color: 'var(--color-miss)' },
-    { label: 'Hits', value: hits, color: 'var(--color-hit)' },
-    { label: 'Fault Rate', value: faultRate, color: 'var(--win-accent)' },
-    { label: 'Step', value: `${stepIndex}/${refString.length}`, color: 'var(--win-accent)' },
+    { label: 'Accesses', value: accesses,   accent: '#2D6A4F' },
+    { label: 'Faults',   value: faults,     accent: '#C0392B' },
+    { label: 'Hits',     value: hits,       accent: '#2D6A4F' },
+    { label: 'Fault Rate', value: faultRate, accent: '#C0392B' },
+    { label: 'Step',     value: `${stepIndex}/${refString.length}`, accent: '#6B6560' },
   ];
+
+  /* ─── shared button class fragments ─── */
+  const btnBase = 'flex items-center justify-center gap-2 cursor-pointer transition-all duration-150 ease hover:brightness-[0.93] active:scale-[0.98]';
+  const inputCls = 'rounded-[6px] border border-[#D6D1CB] bg-white px-3 py-2 text-sm font-medium text-[#1A1A1A] outline-none focus:border-[#2D6A4F] transition-colors';
 
   return (
     <div
-      className={`${s.appWindow} absolute left-1/2 -translate-x-1/2 top-[calc(50%-24px)] -translate-y-1/2
-        w-[min(1300px,96vw)] h-[min(720px,calc(100vh-var(--taskbar-h)-16px))]
-        rounded-xl flex flex-col overflow-hidden z-10`}
+      className="absolute left-1/2 -translate-x-1/2 top-[calc(50%-32px)] -translate-y-1/2
+        w-[min(1440px,96vw)] h-[min(880px,calc(100vh-var(--taskbar-h)-24px))]
+        rounded-2xl flex flex-col overflow-hidden z-10"
+      style={{
+        background: '#FFFFFF',
+        border: '1px solid #E2DDD6',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.06)',
+      }}
     >
 
       {/* ── Title Bar ── */}
-      <div className={`${s.titleBar} h-9 min-h-9 flex items-center justify-between pl-4 pr-0 shrink-0`}>
-        <div className="flex items-center gap-2.5">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <rect x="1" y="1" width="6" height="6" rx="1" fill="#0078D4" />
-            <rect x="9" y="1" width="6" height="6" rx="1" fill="#00B4D8" />
-            <rect x="1" y="9" width="6" height="6" rx="1" fill="#00B4D8" />
-            <rect x="9" y="9" width="6" height="6" rx="1" fill="#0078D4" />
+      <div
+        className="h-14 min-h-[56px] flex items-center justify-between pl-7 pr-0 shrink-0"
+        style={{ background: '#FFFFFF', borderBottom: '1px solid #E2DDD6' }}
+      >
+        {/* Left: logo + title */}
+        <div className="flex items-center gap-3">
+          <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
+            <rect x="1" y="1" width="6" height="6" rx="1" fill="#2D6A4F" />
+            <rect x="9" y="1" width="6" height="6" rx="1" fill="#52B788" />
+            <rect x="1" y="9" width="6" height="6" rx="1" fill="#52B788" />
+            <rect x="9" y="9" width="6" height="6" rx="1" fill="#2D6A4F" />
           </svg>
-          <span className="text-[11px] text-[var(--win-text-secondary)] tracking-widest font-medium">
+          <span className="text-base font-bold text-[#1A1A1A] tracking-tight">
             Virtual Memory Manager
           </span>
-          <span className="ml-2 text-[9px] uppercase tracking-[2px] text-[var(--win-accent)] bg-[var(--win-accent)]/10 border border-[var(--win-accent)]/20 px-2 py-0.5 rounded-full">
+          <span
+            className="ml-3 text-xs font-semibold px-3 py-1 rounded-full"
+            style={{ background: '#EAF4EE', color: '#2D6A4F', border: '1px solid #A8D5BA' }}
+          >
             {algo}
           </span>
         </div>
-        {/* Stats pills */}
-        <div className="hidden md:flex items-center gap-1 mx-auto">
+
+        {/* Center: stat pills */}
+        <div className="hidden md:flex items-center gap-2.5 mx-auto">
           {stats.map(st => (
-            <div key={st.label} className="flex items-center gap-1 rounded px-2 py-0.5 bg-white/[0.04] border border-white/[0.06]">
-              <span className="text-[8px] uppercase tracking-wider text-[var(--win-text-secondary)]">{st.label}</span>
-              <span className="text-[11px] font-bold font-mono" style={{ color: st.color }}>{st.value}</span>
+            <div
+              key={st.label}
+              className="flex items-center gap-2 rounded-lg px-3.5 py-2"
+              style={{ background: '#F4F1EC', border: '1px solid #E2DDD6' }}
+            >
+              <span className="text-[11px] uppercase tracking-widest font-semibold" style={{ color: '#6B6560' }}>
+                {st.label}
+              </span>
+              <span className="text-base font-bold font-mono leading-none" style={{ color: st.accent }}>
+                {st.value}
+              </span>
             </div>
           ))}
         </div>
+
         {/* Window controls */}
         <div className="flex h-full">
-          <button className="w-[46px] h-full bg-transparent border-none text-[var(--win-text-secondary)] cursor-pointer hover:bg-white/[0.08] transition-colors flex items-center justify-center"><Minus size={12} /></button>
-          <button className="w-[46px] h-full bg-transparent border-none text-[var(--win-text-secondary)] cursor-pointer hover:bg-white/[0.08] transition-colors flex items-center justify-center"><Square size={10} /></button>
-          <button className="w-[46px] h-full bg-transparent border-none text-[var(--win-text-secondary)] cursor-pointer hover:bg-[#c42b1c] hover:text-white transition-colors flex items-center justify-center"><X size={12} /></button>
+          <button className="w-[46px] h-full bg-transparent border-none cursor-pointer hover:bg-black/[0.04] transition-colors flex items-center justify-center text-[#6B6560]">
+            <Minus size={12} />
+          </button>
+          <button className="w-[46px] h-full bg-transparent border-none cursor-pointer hover:bg-black/[0.04] transition-colors flex items-center justify-center text-[#6B6560]">
+            <Square size={10} />
+          </button>
+          <button className="w-[46px] h-full bg-transparent border-none cursor-pointer hover:bg-[#C0392B] hover:text-white transition-colors flex items-center justify-center text-[#6B6560] rounded-tr-2xl">
+            <X size={12} />
+          </button>
         </div>
       </div>
 
-      {/* ── Two-column body (responsive) ── */}
-      <div className="flex-1 flex flex-col xl:flex-row overflow-hidden min-h-0">
+      {/* ── Two-column body ── */}
+      <div className="flex-1 flex flex-col xl:flex-row overflow-hidden min-h-0" style={{ background: '#F4F1EC' }}>
 
-        {/* ════ LEFT COLUMN — OS View ════ */}
-        <div className="flex flex-col flex-1 min-w-0 xl:border-r border-white/[0.07] overflow-hidden">
+        {/* ════ LEFT COLUMN ════ */}
+        <div
+          className="flex flex-col flex-1 min-w-0 overflow-hidden"
+          style={{ background: '#FFFFFF', borderRight: '1px solid #E2DDD6' }}
+        >
 
           {/* Activity Queue */}
-          <div className="shrink-0 px-5 pt-4 pb-3 border-b border-white/[0.06]">
-            <p className="text-[9px] uppercase tracking-[2px] text-[var(--win-text-secondary)] font-semibold mb-2">
+          <div className="shrink-0 px-10 pt-9 pb-6" style={{ borderBottom: '1px solid #E2DDD6' }}>
+            <h2 className="text-2xl font-bold tracking-tight mb-5" style={{ color: '#1A1A1A' }}>
               Activity Queue
-            </p>
-            <div className="flex gap-1 flex-wrap">
+            </h2>
+            <div className="flex gap-2 flex-wrap">
               {refString.length === 0 && (
-                <span className="text-[10px] text-[var(--win-text-secondary)] italic">
+                <span className="text-sm italic" style={{ color: '#6B6560' }}>
                   Click apps on the taskbar to queue them…
                 </span>
               )}
@@ -103,14 +138,20 @@ export default function VirtualMemoryManager({
                   <div
                     key={i}
                     title={app?.name || 'Page ' + id}
-                    className={`w-[32px] h-[28px] rounded-md flex items-center justify-center relative ${s.qChip}
-                      ${isDone ? 'opacity-25 scale-[0.82]' : ''}
-                      ${isActive ? s.qActive : ''}`}
-                    style={app ? { borderColor: app.border } : {}}
+                    className={`w-[38px] h-[34px] rounded-lg flex items-center justify-center relative transition-all duration-300
+                      ${isDone ? 'opacity-30 scale-[0.82]' : ''}`}
+                    style={{
+                      background: isActive ? '#EAF4EE' : '#FFFFFF',
+                      border: `1px solid ${isActive ? '#2D6A4F' : (app?.border || '#D6D1CB')}`,
+                      boxShadow: isActive ? '0 0 0 2px rgba(45,106,79,0.15)' : '0 1px 3px rgba(0,0,0,0.06)',
+                    }}
                   >
-                    {app && <app.Icon size={13} style={{ color: app.color }} />}
+                    {app && <app.Icon size={16} style={{ color: app.color }} />}
                     {app && (
-                      <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-black/70 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center text-[8px] text-white font-bold font-mono shadow-sm">
+                      <span
+                        className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold font-mono shadow-sm"
+                        style={{ background: '#1A1A1A', color: '#FFFFFF', border: '1px solid #E2DDD6' }}
+                      >
                         {app.id}
                       </span>
                     )}
@@ -121,11 +162,11 @@ export default function VirtualMemoryManager({
           </div>
 
           {/* Active RAM cards */}
-          <div className="flex-1 flex flex-col items-center justify-center gap-3 px-5 py-4 overflow-y-auto">
-            <p className="text-[9px] uppercase tracking-[2px] text-[var(--win-text-secondary)] font-semibold self-start">
+          <div className="flex-1 flex flex-col items-center justify-center gap-10 px-10 py-10 overflow-y-auto" style={{ background: '#FAFAF9' }}>
+            <h2 className="text-2xl font-bold tracking-tight self-start" style={{ color: '#1A1A1A' }}>
               Active RAM
-            </p>
-            <div className="flex gap-3 flex-wrap justify-center">
+            </h2>
+            <div className="flex gap-8 flex-wrap justify-center">
               {frames.map((appId, i) => (
                 <ActiveRamSlot
                   key={i}
@@ -138,100 +179,175 @@ export default function VirtualMemoryManager({
             </div>
           </div>
 
-          {/* Controls */}
-          <div className={`${s.controlBar} shrink-0 border-t border-white/[0.07] bg-black/10 px-3 py-2.5`}>
-            {/* ─ Config group ─ */}
-            <div className={s.controlGroup}>
-              <label className="text-[10px] text-[#8b95a5] whitespace-nowrap">Frames</label>
+          {/* ── Controls bar ── */}
+          <div
+            className={`${s.controlBar} shrink-0`}
+            style={{ background: '#FFFFFF', borderTop: '1px solid #DDD8D0', padding: '10px 16px', gap: '8px', alignItems: 'center' }}
+          >
+            {/* Config group */}
+            <div className={`${s.controlGroup} gap-3`}>
+              <label className="text-sm font-semibold whitespace-nowrap tracking-wide" style={{ color: '#6B6560' }}>
+                Frames
+              </label>
               <input
                 type="number"
                 value={frameCount}
                 min={1} max={6}
                 onChange={e => setFrameCount(e.target.value)}
-                className={`${s.fluentSelect} rounded-md px-1.5 py-1.5 w-[42px] font-mono text-[11px] text-center text-[var(--win-text)]`}
+                className={`${inputCls} w-[60px] text-center font-mono font-bold`}
               />
-              <select value={algo} onChange={e => setAlgo(e.target.value)} className={`${s.fluentSelect} rounded-md px-2 py-1.5 text-[11px] text-[var(--win-text)] cursor-pointer`}>
+              <select
+                value={algo}
+                onChange={e => setAlgo(e.target.value)}
+                className={`${inputCls} cursor-pointer`}
+              >
                 <option value="FIFO">FIFO</option>
                 <option value="LRU">LRU</option>
                 <option value="MRU">MRU</option>
                 <option value="OPT">Optimal</option>
               </select>
-              <select value={speed} onChange={e => setSpeed(e.target.value)} className={`${s.fluentSelect} rounded-md px-2 py-1.5 text-[11px] text-[var(--win-text)] cursor-pointer`}>
+              <select
+                value={speed}
+                onChange={e => setSpeed(e.target.value)}
+                className={`${inputCls} cursor-pointer`}
+              >
                 <option value={1500}>Slow</option>
                 <option value={900}>Normal</option>
                 <option value={400}>Fast</option>
               </select>
             </div>
 
-            <div className={s.controlDivider} />
+            {/* Hairline divider */}
+            <div className={s.controlDivider} style={{ background: '#D6D1CB' }} />
 
-            {/* ─ Playback group ─ */}
-            <div className={s.controlGroup}>
-              <button onClick={runSimulation} className={`${s.fluentBtnPrimary} px-3 py-1.5 rounded-md text-[11px] font-semibold text-white cursor-pointer ${running && !paused ? s.runningPulse : ''}`}>
-                {runLabel}
+            {/* Playback group */}
+            <div className={`${s.controlGroup} gap-2.5`}>
+              {/* RUN/PAUSE — primary green */}
+              <button
+                onClick={runSimulation}
+                className={`${btnBase} ${running && !paused ? s.runningPulse : ''}`}
+                style={{ background: '#2D6A4F', color: '#FFFFFF', border: 'none', borderRadius: '8px', padding: '6px 14px', fontWeight: '600', boxShadow: '0 2px 6px rgba(45,106,79,0.3)' }}
+              >
+                {runIcon} {runText}
               </button>
-              <button onClick={() => { if (running) return; stepOnce(); }} className={`${s.fluentBtn} px-3 py-1.5 rounded-md text-[11px] font-medium text-[var(--win-text)] cursor-pointer`}>⏭ STEP</button>
-              <button onClick={reset} className={`${s.fluentBtn} px-3 py-1.5 rounded-md text-[11px] font-medium text-[var(--win-text)] cursor-pointer hover:!border-[var(--color-miss)] hover:!text-[var(--color-miss)]`}>⟲ RESET</button>
-              <button onClick={generateRandom} className={`${s.fluentBtn} px-3 py-1.5 rounded-md text-[11px] font-medium text-[var(--win-text)] cursor-pointer`}>🎲 RANDOM</button>
+              {/* STEP */}
+              <button
+                onClick={() => { if (running) return; stepOnce(); }}
+                className={btnBase}
+                style={{ background: '#1A5C8A', color: '#FFFFFF', border: 'none', borderRadius: '8px', padding: '6px 14px', fontWeight: '600', boxShadow: '0 2px 6px rgba(26,92,138,0.3)' }}
+              >
+                <SkipForward size={15} /> STEP
+              </button>
+              {/* RESET — neutral */}
+              <button
+                onClick={reset}
+                className={btnBase}
+                style={{ background: '#F0EDE8', color: '#3A3530', border: '1px solid #C8C3BC', borderRadius: '8px', padding: '6px 14px', fontWeight: '500' }}
+              >
+                <RotateCcw size={15} /> RESET
+              </button>
+              {/* RANDOM */}
+              <button
+                onClick={generateRandom}
+                className={btnBase}
+                style={{ background: '#5B4FCF', color: '#FFFFFF', border: 'none', borderRadius: '8px', padding: '6px 14px', fontWeight: '600', boxShadow: '0 2px 6px rgba(91,79,207,0.3)' }}
+              >
+                <Shuffle size={15} /> RANDOM
+              </button>
             </div>
 
-            <div className={s.controlDivider} />
+            <div className={s.controlDivider} style={{ background: '#D6D1CB' }} />
 
-            {/* ─ Analysis group ─ */}
-            <div className={s.controlGroup}>
-              <button onClick={() => setShowChart(true)} className={`${s.fluentBtn} px-3 py-1.5 rounded-md text-[11px] font-medium text-[var(--win-text)] cursor-pointer`}>📊 COMPARE</button>
-              <button onClick={() => setShowBelady(prev => prev + 1)} className={`${s.fluentBtn} px-3 py-1.5 rounded-md text-[11px] font-medium text-[var(--win-text)] cursor-pointer`}>⚠ BELADY'S</button>
-              <button onClick={() => setShowDiagnostic(true)} className={`${s.fluentBtn} px-3 py-1.5 rounded-md text-[11px] font-medium text-[var(--win-text)] cursor-pointer flex items-center gap-1.5`}>
-                <FileText size={12} /> EXPORT LOG
+            {/* Analysis group */}
+            <div className={`${s.controlGroup} gap-2.5`}>
+              <button
+                onClick={() => setShowChart(true)}
+                className={btnBase}
+                style={{ background: '#F0EDE8', color: '#3A3530', border: '1px solid #C8C3BC', borderRadius: '8px', padding: '6px 14px', fontWeight: '500' }}
+              >
+                <BarChart2 size={15} /> COMPARE
+              </button>
+              <button
+                onClick={() => setShowBelady(prev => prev + 1)}
+                className={btnBase}
+                style={{ background: '#FFF3CD', color: '#7A4F00', border: '1px solid #E8C96A', borderRadius: '8px', padding: '6px 14px', fontWeight: '600' }}
+              >
+                <AlertTriangle size={15} /> BELADY'S
+              </button>
+              <button
+                onClick={() => setShowDiagnostic(true)}
+                className={btnBase}
+                style={{ background: '#F0EDE8', color: '#3A3530', border: '1px solid #C8C3BC', borderRadius: '8px', padding: '6px 14px', fontWeight: '500' }}
+              >
+                <FileText size={15} /> EXPORT LOG
               </button>
             </div>
           </div>
         </div>
 
-        {/* ════ RIGHT COLUMN — Hardware View (scrollable) ════ */}
-        <div className={`${s.rightCol} flex flex-col w-full xl:w-[420px] xl:min-w-[340px] xl:max-w-[44%] overflow-y-auto overflow-x-hidden`}>
-          <div className="flex flex-col gap-6 p-4 pr-2">
+        {/* ════ RIGHT COLUMN — Hardware View ════ */}
+        <div
+          className={`${s.rightCol} flex flex-col w-full xl:w-[520px] xl:min-w-[440px] xl:max-w-[40%] overflow-y-auto overflow-x-hidden`}
+          style={{ background: '#F4F1EC' }}
+        >
+          <div className="flex flex-col gap-10 p-10 pr-5">
 
             {hasStarted ? (
               <>
-                {/* Hardware Architecture grid */}
+                {/* Hardware Architecture */}
                 <div>
-                  <p className="text-[9px] uppercase tracking-[2px] text-[var(--win-text-secondary)] font-semibold mb-3">
+                  <h2
+                    className="text-xl font-bold tracking-tight mb-5 pb-3"
+                    style={{ color: '#1A1A1A', borderBottom: '1px solid #E2DDD6' }}
+                  >
                     Hardware Architecture
-                  </p>
+                  </h2>
                   <HardwareGrid state={state} />
                 </div>
 
                 {/* Page Table */}
                 <div>
-                  <p className="text-[9px] uppercase tracking-[2px] text-[var(--win-text-secondary)] font-semibold mb-2">
+                  <h2
+                    className="text-xl font-bold tracking-tight mb-5 pb-3"
+                    style={{ color: '#1A1A1A', borderBottom: '1px solid #E2DDD6' }}
+                  >
                     Page Table
-                  </p>
+                  </h2>
                   <PageTable frames={frames} pageTable={pageTable} />
                 </div>
 
-                {/* Event Log */}
+                {/* Event Log — stays dark */}
                 <div>
-                  <p className="text-[9px] uppercase tracking-[2px] text-[var(--win-text-secondary)] font-semibold mb-2">
+                  <h2
+                    className="text-xl font-bold tracking-tight mb-5 pb-3"
+                    style={{ color: '#1A1A1A', borderBottom: '1px solid #E2DDD6' }}
+                  >
                     Event Log
-                  </p>
+                  </h2>
                   <EventLogTerminal eventLog={eventLog} />
                 </div>
               </>
             ) : (
-              /* ── Placeholder state ── */
-              <div className="flex-1 flex items-center justify-center min-h-[400px]">
-                <div className="rounded-2xl border-2 border-dashed border-white/[0.08] bg-white/[0.02] p-10 text-center max-w-[320px]">
-                  <Cpu size={36} className="mx-auto mb-4 text-[var(--win-text-secondary)] opacity-30" />
-                  <p className="text-[13px] text-[var(--win-text-secondary)] font-medium mb-1.5">
+              /* ── Placeholder ── */
+              <div className="flex-1 flex items-center justify-center min-h-[500px]">
+                <div
+                  className="rounded-3xl p-14 text-center max-w-[420px]"
+                  style={{
+                    background: '#FFFFFF',
+                    border: '2px dashed #D6D1CB',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+                  }}
+                >
+                  <Cpu size={56} className="mx-auto mb-8" style={{ color: '#D6D1CB' }} />
+                  <p className="text-xl font-bold mb-4 tracking-tight" style={{ color: '#1A1A1A' }}>
                     Awaiting Activity Queue…
                   </p>
-                  <p className="text-[10px] text-[var(--win-text-secondary)] opacity-60 leading-relaxed">
-                    Click apps on the taskbar below to build a reference string, then press
-                    <span className="text-[var(--win-accent)] font-semibold"> RUN </span>
-                    or
-                    <span className="text-[var(--win-accent)] font-semibold"> STEP </span>
-                    to initialize the hardware architecture view.
+                  <p className="text-base leading-relaxed" style={{ color: '#6B6560' }}>
+                    Click apps on the taskbar below to build a reference string, then press{' '}
+                    <span className="font-bold" style={{ color: '#2D6A4F' }}>RUN</span>
+                    {' '}or{' '}
+                    <span className="font-bold" style={{ color: '#2D6A4F' }}>STEP</span>
+                    {' '}to initialize the hardware architecture view.
                   </p>
                 </div>
               </div>
@@ -242,10 +358,10 @@ export default function VirtualMemoryManager({
 
       </div>
 
-      <SystemDiagnosticModal 
-        show={showDiagnostic} 
-        state={state} 
-        onClose={() => setShowDiagnostic(false)} 
+      <SystemDiagnosticModal
+        show={showDiagnostic}
+        state={state}
+        onClose={() => setShowDiagnostic(false)}
       />
     </div>
   );

@@ -156,25 +156,25 @@ export default function LearningModule() {
     switch (view) {
       case 'hub':
         return (
-          <div className="w-full h-full flex flex-col items-center justify-center p-6 bg-black/40">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
-              <h1 className="text-3xl font-bold text-white tracking-tight mb-3">System Architecture Study Tools</h1>
-              <p className="text-slate-400 text-sm">Select a toolset to begin your learning session.</p>
+          <div className="w-full h-full flex flex-col items-center justify-center p-12">
+            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-16">
+              <h1 className="text-5xl font-bold text-[#1A1A1A] tracking-tight mb-4 drop-shadow-sm">System Architecture Study Tools</h1>
+              <p className="text-[#6B6560] text-lg font-medium">Select a toolset to begin your learning session.</p>
             </motion.div>
 
-            <div className="flex flex-col md:flex-row gap-6 w-full max-w-3xl">
+            <div className="flex flex-col md:flex-row items-center justify-center gap-12 w-full max-w-6xl">
               {/* Button 1 */}
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => handleNavigate('theory')}
-                className="flex-1 bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 hover:border-white/20 rounded-2xl p-8 flex flex-col items-center text-center transition-all cursor-pointer group"
+                className="w-96 h-80 bg-[#FFFFFF] border border-[#DDD8D0] shadow-[0_2px_12px_rgba(0,0,0,0.07)] hover:border-[#C8C3BC] hover:shadow-[0_4px_20px_rgba(0,0,0,0.1)] rounded-[2rem] p-10 flex flex-col items-center justify-center text-center transition-all cursor-pointer group"
               >
-                <div className="w-16 h-16 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                  <BookOpen size={32} className="text-blue-400" />
+                <div className="mb-8 group-hover:scale-110 transition-transform duration-500">
+                  <BookOpen size={80} className="text-blue-500 drop-shadow-sm" />
                 </div>
-                <h2 className="text-xl font-bold text-white mb-2">Theory & Quizzes</h2>
-                <p className="text-xs text-slate-400 leading-relaxed">
+                <h2 className="text-3xl font-bold text-[#1A1A1A] mb-4 tracking-tight">Theory & Quizzes</h2>
+                <p className="text-base text-[#6B6560] leading-relaxed font-medium">
                   Master the 4 algorithms through interactive MCQs and 3D visualizers.
                 </p>
               </motion.button>
@@ -184,13 +184,13 @@ export default function LearningModule() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => handleNavigate('sandbox')}
-                className="flex-1 bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 hover:border-white/20 rounded-2xl p-8 flex flex-col items-center text-center transition-all cursor-pointer group"
+                className="w-96 h-80 bg-[#FFFFFF] border border-[#DDD8D0] shadow-[0_2px_12px_rgba(0,0,0,0.07)] hover:border-[#C8C3BC] hover:shadow-[0_4px_20px_rgba(0,0,0,0.1)] rounded-[2rem] p-10 flex flex-col items-center justify-center text-center transition-all cursor-pointer group"
               >
-                <div className="w-16 h-16 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                  <TableProperties size={32} className="text-purple-400" />
+                <div className="mb-8 group-hover:scale-110 transition-transform duration-500">
+                  <TableProperties size={80} className="text-purple-500 drop-shadow-sm" />
                 </div>
-                <h2 className="text-xl font-bold text-white mb-2">2D Exam Sandbox</h2>
-                <p className="text-xs text-slate-400 leading-relaxed">
+                <h2 className="text-3xl font-bold text-[#1A1A1A] mb-4 tracking-tight">2D Exam Sandbox</h2>
+                <p className="text-base text-[#6B6560] leading-relaxed font-medium">
                   Input custom reference strings and generate textbook-style 2D matrices.
                 </p>
               </motion.button>
@@ -204,7 +204,7 @@ export default function LearningModule() {
             <div className="w-full max-w-6xl mx-auto px-4 pt-6">
               <button
                 onClick={() => handleNavigate('hub')}
-                className="flex items-center gap-2 text-[11px] font-semibold text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-lg transition-colors cursor-pointer w-fit border border-white/5"
+                className="flex items-center gap-2 text-[11px] font-semibold text-[#2D6A4F] hover:bg-[#F0EDE8] bg-transparent border border-transparent px-3 py-1.5 rounded-lg transition-colors cursor-pointer w-fit"
               >
                 <ChevronLeft size={14} /> Back to Hub
               </button>
@@ -224,7 +224,7 @@ export default function LearningModule() {
             <div className="w-full max-w-[1400px] mx-auto px-4 pt-6">
               <button
                 onClick={() => handleNavigate('hub')}
-                className="flex items-center gap-2 text-[11px] font-semibold text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-lg transition-colors cursor-pointer w-fit border border-white/5"
+                className="flex items-center gap-2 text-[11px] font-semibold text-[#2D6A4F] hover:bg-[#F0EDE8] bg-transparent border border-transparent px-3 py-1.5 rounded-lg transition-colors cursor-pointer w-fit"
               >
                 <ChevronLeft size={14} /> Back to Hub
               </button>
@@ -289,7 +289,7 @@ export default function LearningModule() {
   };
 
   return (
-    <div className="w-full h-full overflow-hidden text-slate-200">
+    <div className="w-full h-full overflow-hidden text-[#1A1A1A]">
       <AnimatePresence mode="wait">
         <motion.div
           key={view + (selectedAlgo || '')}

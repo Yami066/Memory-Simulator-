@@ -12,41 +12,45 @@ export default function LearningHome({ onNavigate, progress }) {
       <div className="w-full max-w-6xl px-4 sm:px-6 lg:px-8 py-6 flex flex-col">
 
         {/* Hero Header */}
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="text-center mb-6">
-          <div className="flex items-center justify-center gap-2.5 mb-2">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--win-accent)]/20 to-purple-500/20 border border-[var(--win-accent)]/20 flex items-center justify-center">
-              <GraduationCap size={20} className="text-[var(--win-accent)]" />
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="text-center mb-10">
+          <div className="flex items-center justify-center gap-3 mb-3">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--win-accent)]/20 to-purple-500/20 border border-[var(--win-accent)]/20 flex items-center justify-center shadow-lg">
+              <GraduationCap size={24} className="text-[var(--win-accent)] drop-shadow-md" />
             </div>
-            <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">Learn Page Replacement</h1>
+            <h1 className="text-3xl md:text-4xl font-bold text-[#1A1A1A] tracking-tight">Learn Page Replacement</h1>
           </div>
-          <p className="text-[13px] text-[var(--win-text-secondary)] max-w-lg mx-auto leading-relaxed">
+          <p className="text-base text-[#6B6560] max-w-2xl mx-auto leading-relaxed font-medium">
             Master memory management algorithms through interactive lessons, quizzes, and hands-on practice.
           </p>
         </motion.div>
 
         {/* Stats Dashboard Strip */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
-          <StatCard icon={Trophy} iconColor="text-amber-400" bg="bg-amber-500/15" border="border-amber-500/20" label="Total XP" value={totalXP} valueColor="text-amber-400" />
-          <StatCard icon={Layers} iconColor="text-[var(--win-accent)]" bg="bg-[var(--win-accent)]/15" border="border-[var(--win-accent)]/20" label="Mastered" value={`${totalCompleted}/${ALGO_LIST.length}`} valueColor="text-[var(--win-accent)]" />
-          <StatCard icon={Sparkles} iconColor="text-green-400" bg="bg-green-500/15" border="border-green-500/20" label="Progress" value={`${Math.round((totalCompleted / ALGO_LIST.length) * 100)}%`} valueColor="text-green-400" />
-          <button onClick={() => onNavigate('scoreboard')} className={`${s.panelGlass} rounded-xl p-4 flex items-center gap-3 cursor-pointer hover:border-white/20 transition-all group text-left`}>
-            <div className="w-9 h-9 rounded-lg bg-purple-500/15 border border-purple-500/20 flex items-center justify-center shrink-0">
-              <Trophy size={16} className="text-purple-400" />
-            </div>
-            <div>
-              <p className="text-[9px] uppercase tracking-wider text-[var(--win-text-secondary)]">Scoreboard</p>
-              <p className="text-sm font-semibold text-purple-300">View →</p>
-            </div>
-          </button>
-          <button onClick={() => onNavigate('history')} className={`${s.panelGlass} rounded-xl p-4 flex items-center gap-3 cursor-pointer hover:border-white/20 transition-all group text-left`}>
-            <div className="w-9 h-9 rounded-lg bg-cyan-500/15 border border-cyan-500/20 flex items-center justify-center shrink-0">
-              <Clock size={16} className="text-cyan-400" />
-            </div>
-            <div>
-              <p className="text-[9px] uppercase tracking-wider text-[var(--win-text-secondary)]">Results</p>
-              <p className="text-sm font-semibold text-cyan-300">History →</p>
-            </div>
-          </button>
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mb-12">
+          <div className={`bg-[#FFFFFF] border border-[#DDD8D0] shadow-[0_2px_12px_rgba(0,0,0,0.07)] rounded-[2rem] flex flex-col md:flex-row overflow-hidden divide-y md:divide-y-0 md:divide-x divide-[#DDD8D0]`}>
+            <StatItem icon={Trophy} iconColor="text-amber-500" bg="bg-amber-500/15" label="Total XP" value={totalXP} valueColor="text-[#1A1A1A]" />
+            <StatItem icon={Layers} iconColor="text-sky-500" bg="bg-sky-500/15" label="Mastered" value={`${totalCompleted}/${ALGO_LIST.length}`} valueColor="text-[#1A1A1A]" />
+            <StatItem icon={Sparkles} iconColor="text-green-500" bg="bg-green-500/15" label="Progress" value={`${Math.round((totalCompleted / ALGO_LIST.length) * 100)}%`} valueColor="text-[#1A1A1A]" />
+            
+            <button onClick={() => onNavigate('scoreboard')} className="flex-1 p-5 flex items-center justify-center gap-4 cursor-pointer hover:bg-[#F7F4F0] transition-colors group">
+              <div className="w-12 h-12 rounded-2xl bg-purple-500/15 border border-purple-500/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                <Trophy size={20} className="text-purple-500" />
+              </div>
+              <div className="text-left">
+                <p className="text-[10px] uppercase tracking-widest text-[#6B6560] font-bold mb-0.5">Scoreboard</p>
+                <p className="text-lg font-bold text-[#1A1A1A] group-hover:text-purple-600 transition-colors">View Ranking</p>
+              </div>
+            </button>
+            
+            <button onClick={() => onNavigate('history')} className="flex-1 p-5 flex items-center justify-center gap-4 cursor-pointer hover:bg-[#F7F4F0] transition-colors group">
+              <div className="w-12 h-12 rounded-2xl bg-cyan-500/15 border border-cyan-500/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                <Clock size={20} className="text-cyan-600" />
+              </div>
+              <div className="text-left">
+                <p className="text-[10px] uppercase tracking-widest text-[#6B6560] font-bold mb-0.5">Results</p>
+                <p className="text-lg font-bold text-[#1A1A1A] group-hover:text-cyan-700 transition-colors">Past Quizzes</p>
+              </div>
+            </button>
+          </div>
         </motion.div>
 
         {/* Algorithm Cards Grid */}
@@ -58,63 +62,68 @@ export default function LearningHome({ onNavigate, progress }) {
 
             return (
               <motion.div key={algo.key} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 + idx * 0.08, duration: 0.4 }}
-                className={`${s.panelGlass} rounded-xl p-5 flex flex-col gap-4 group cursor-default hover:border-white/20 transition-all duration-300 relative overflow-hidden`}
+                className={`bg-[#FFFFFF] border border-[#DDD8D0] shadow-[0_2px_12px_rgba(0,0,0,0.07)] rounded-[2rem] p-8 flex flex-col gap-6 group cursor-default hover:border-[#C8C3BC] transition-all duration-300 relative overflow-hidden`}
                 style={{ '--card-glow': algo.glow }}>
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
                   style={{ background: `radial-gradient(ellipse at 50% 0%, ${algo.glow} 0%, transparent 70%)` }} />
 
                 {/* Header */}
                 <div className="flex items-start justify-between relative z-[1]">
-                  <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: `${algo.color}18`, border: `1px solid ${algo.color}35` }}>
-                      <Cpu size={20} style={{ color: algo.color }} />
+                  <div className="flex items-center gap-5">
+                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg shrink-0" style={{ background: `${algo.color}15`, border: `1px solid ${algo.color}30` }}>
+                      <Cpu size={32} style={{ color: algo.color }} className="drop-shadow-md" />
                     </div>
                     <div>
-                      <h3 className="text-[15px] font-bold text-white">{algo.name}</h3>
-                      <p className="text-[10px] text-[var(--win-text-secondary)]">{algo.fullName}</p>
+                      <h3 className="text-3xl font-bold text-[#1A1A1A] tracking-tight">{algo.name}</h3>
+                      <p className="text-[11px] text-[#8A8480] font-bold uppercase tracking-widest mt-1">{algo.fullName}</p>
                     </div>
                   </div>
-                  <span className={`text-[9px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full border ${algo.difficulty === 'Easy' ? 'text-green-300 bg-green-500/10 border-green-500/20' : algo.difficulty === 'Medium' ? 'text-amber-300 bg-amber-500/10 border-amber-500/20' : 'text-red-300 bg-red-500/10 border-red-500/20'}`}>
+                  <span className={`shrink-0 text-[10px] uppercase tracking-widest font-bold px-4 py-1.5 rounded-full border shadow-sm ${algo.difficulty === 'Easy' ? 'text-green-700 bg-green-500/10 border-green-500/20' : algo.difficulty === 'Medium' ? 'text-amber-700 bg-amber-500/10 border-amber-500/20' : 'text-red-700 bg-red-500/10 border-red-500/20'}`}>
                     {algo.difficulty}
                   </span>
                 </div>
 
-                <p className="text-[12px] text-[var(--win-text-secondary)] leading-relaxed relative z-[1]">{algo.description}</p>
+                <p className="text-base text-[#3A3530] leading-relaxed relative z-[1] font-medium min-h-[48px]">{algo.description}</p>
 
-                {/* Efficiency + Progress */}
-                <div className="flex items-center justify-between relative z-[1]">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[9px] uppercase tracking-wider text-[var(--win-text-secondary)]">Efficiency</span>
-                    <div className="flex gap-0.5">
-                      {[1,2,3,4,5].map(n => <Star key={n} size={12} className={n <= algo.efficiency ? 'text-amber-400' : 'text-white/10'} fill={n <= algo.efficiency ? '#fbbf24' : 'transparent'} />)}
+                {/* Efficiency + Progress Container */}
+                <div className="relative z-[1] bg-[#F7F4F0] rounded-2xl p-5 border border-[#DDD8D0]">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <span className="text-[10px] uppercase tracking-widest text-[#6B6560] font-bold">Efficiency</span>
+                      <div className="flex gap-1">
+                        {[1,2,3,4,5].map(n => <Star key={n} size={14} className={n <= algo.efficiency ? 'text-amber-500' : 'text-black/5'} fill={n <= algo.efficiency ? '#f59e0b' : 'transparent'} />)}
+                      </div>
                     </div>
+                    {isStarted && <span className="text-[11px] font-bold tracking-widest uppercase text-[#8A8480]">{done}/3 Modules</span>}
                   </div>
-                  {isStarted && <span className="text-[10px] font-mono text-[var(--win-text-secondary)]">{done}/3</span>}
+
+                  {isStarted && (
+                    <div>
+                      <div className="w-full h-1.5 bg-[#E2DDD6] rounded-full overflow-hidden mb-3">
+                        <motion.div className="h-full rounded-full" style={{ background: algo.color }} initial={{ width: 0 }} animate={{ width: `${(done/3)*100}%` }} transition={{ duration: 0.8 }} />
+                      </div>
+                      <div className="flex gap-4">
+                        {[['Theory', ap.conceptDone], ['Quiz', ap.quizDone], ['Practice', ap.practiceDone]].map(([l, d]) => (
+                          <div key={l} className="flex items-center gap-1.5">
+                            <div className={`w-2 h-2 rounded-full ${d ? 'bg-green-500 shadow-sm' : 'bg-[#E2DDD6]'}`} />
+                            <span className={`text-[11px] font-bold tracking-wide ${d ? 'text-[#1A1A1A]' : 'text-[#8A8480]'}`}>{l}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
-                {isStarted && (
-                  <div className="relative z-[1]">
-                    <div className="w-full h-1 bg-white/[0.06] rounded-full overflow-hidden mb-2">
-                      <motion.div className="h-full rounded-full" style={{ background: algo.color }} initial={{ width: 0 }} animate={{ width: `${(done/3)*100}%` }} transition={{ duration: 0.8 }} />
-                    </div>
-                    <div className="flex gap-2">
-                      {[['Learned', ap.conceptDone], ['Quiz', ap.quizDone], ['Practice', ap.practiceDone]].map(([l, d]) => (
-                        <span key={l} className={`text-[8px] uppercase tracking-wider px-1.5 py-0.5 rounded ${d ? 'bg-green-500/15 text-green-300' : 'bg-white/5 text-white/30'}`}>✓ {l}</span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
                 {/* Actions */}
-                <div className="flex flex-wrap gap-2 relative z-[1] mt-auto pt-1">
-                  <button onClick={() => onNavigate('learn', algo.key)} className={`${s.fluentBtnPrimary} flex-1 min-w-[80px] px-3 py-2.5 rounded-lg text-[11px] font-semibold text-white cursor-pointer flex items-center justify-center gap-1.5`} style={{ background: algo.color, borderColor: `${algo.color}80` }}>
-                    <BookOpen size={12} /> Learn
+                <div className="grid grid-cols-3 gap-4 relative z-[1] mt-auto pt-2">
+                  <button onClick={() => onNavigate('learn', algo.key)} className={`px-4 py-3.5 rounded-xl text-sm font-bold text-white cursor-pointer flex items-center justify-center gap-2 hover:scale-[1.02] transition-transform shadow-sm border`} style={{ background: algo.color, borderColor: `${algo.color}80` }}>
+                    <BookOpen size={18} /> Learn
                   </button>
-                  <button onClick={() => onNavigate('quiz', algo.key)} className={`${s.fluentBtn} flex-1 min-w-[80px] px-3 py-2.5 rounded-lg text-[11px] font-medium text-[var(--win-text)] cursor-pointer flex items-center justify-center gap-1.5`}>
-                    <Brain size={12} /> Quiz
+                  <button onClick={() => onNavigate('quiz', algo.key)} className={`bg-[#F0EDE8] text-[#3A3530] border border-[#DDD8D0] px-4 py-3.5 rounded-xl text-sm font-bold cursor-pointer flex items-center justify-center gap-2 hover:scale-[1.02] transition-transform shadow-sm`}>
+                    <Brain size={18} /> Quiz
                   </button>
-                  <button onClick={() => onNavigate('practice', algo.key)} className={`${s.fluentBtn} flex-1 min-w-[80px] px-3 py-2.5 rounded-lg text-[11px] font-medium text-[var(--win-text)] cursor-pointer flex items-center justify-center gap-1.5`}>
-                    <Gamepad2 size={12} /> Practice
+                  <button onClick={() => onNavigate('practice', algo.key)} className={`bg-[#F0EDE8] text-[#3A3530] border border-[#DDD8D0] px-4 py-3.5 rounded-xl text-sm font-bold cursor-pointer flex items-center justify-center gap-2 hover:scale-[1.02] transition-transform shadow-sm`}>
+                    <Gamepad2 size={18} /> Practice
                   </button>
                 </div>
               </motion.div>
@@ -126,15 +135,15 @@ export default function LearningHome({ onNavigate, progress }) {
   );
 }
 
-function StatCard({ icon: Icon, iconColor, bg, border, label, value, valueColor }) {
+function StatItem({ icon: Icon, iconColor, bg, label, value, valueColor }) {
   return (
-    <div className={`${s.panelGlass} rounded-xl p-4 flex items-center gap-3`}>
-      <div className={`w-9 h-9 rounded-lg ${bg} ${border} flex items-center justify-center shrink-0`}>
-        <Icon size={16} className={iconColor} />
+    <div className="flex-1 p-5 flex items-center justify-center gap-4 border-[#DDD8D0]">
+      <div className={`w-12 h-12 rounded-2xl ${bg} flex items-center justify-center shrink-0`}>
+        <Icon size={20} className={iconColor} />
       </div>
-      <div>
-        <p className="text-[9px] uppercase tracking-wider text-[var(--win-text-secondary)]">{label}</p>
-        <p className={`text-xl font-bold font-mono ${valueColor} leading-tight`}>{value}</p>
+      <div className="text-left">
+        <p className="text-[10px] uppercase tracking-widest text-[#6B6560] font-bold mb-0.5">{label}</p>
+        <p className={`text-2xl font-bold font-mono ${valueColor} leading-tight drop-shadow-sm`}>{value}</p>
       </div>
     </div>
   );
