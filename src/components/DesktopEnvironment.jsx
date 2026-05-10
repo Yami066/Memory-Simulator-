@@ -5,7 +5,7 @@ import Taskbar from './Taskbar.jsx';
 import VirtualMemoryManager from './VirtualMemoryManager.jsx';
 import LearningModule from './LearningModule.jsx';
 import MiniAppWindow from './MiniAppWindow.jsx';
-import CompareChart from './CompareChart.jsx';
+import ComparativeBenchmarkWindow from './ComparativeBenchmarkWindow.jsx';
 import BeladyBanner from './BeladyBanner.jsx';
 import s from '../styles/mica.module.css';
 
@@ -71,7 +71,7 @@ export default function DesktopEnvironment() {
       />
 
       {/* Overlays */}
-      <CompareChart
+      <ComparativeBenchmarkWindow
         show={showChart}
         refString={state.refString}
         frameCount={state.frameCount}
