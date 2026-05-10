@@ -50,8 +50,11 @@ export default function ActiveRamSlot({ frameIdx, appId, animType, onAnimEnd }) 
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 28 }}
           transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
-          className="flex flex-col items-center gap-1.5"
+          className="flex flex-col items-center gap-1.5 relative w-full h-full justify-center"
         >
+          <span className="absolute top-1 right-2 w-4 h-4 bg-black/60 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center text-[9px] text-white font-bold font-mono shadow-sm">
+            {app.id}
+          </span>
           <app.Icon size={30} style={{ color: app.color }} />
           <span className="text-[10px] font-semibold tracking-wide" style={{ color: app.color }}>
             {app.name}

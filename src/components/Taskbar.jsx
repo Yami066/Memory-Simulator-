@@ -57,7 +57,12 @@ export default function Taskbar({ onAppClick, disabled, currentView, setCurrentV
                 hover:bg-white/[0.07] hover:border-white/[0.05] active:scale-95
                 disabled:opacity-30 disabled:pointer-events-none`}
             >
-              <Icon size={20} style={{ color: app.color }} />
+              <div className="relative">
+                <Icon size={20} style={{ color: app.color }} />
+                <span className="absolute -top-1.5 -right-2 w-3.5 h-3.5 bg-black/80 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center text-[8px] text-white font-bold font-mono shadow-sm">
+                  {app.id}
+                </span>
+              </div>
               <span className="text-[8px] text-[var(--win-text-secondary)] font-medium tracking-wide">{app.name}</span>
             </button>
           );

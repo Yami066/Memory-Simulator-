@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { BookOpen, TableProperties, ChevronLeft } from 'lucide-react';
 import LearningHome from './learning/LearningHome.jsx';
 import ConceptCards from './learning/ConceptCards.jsx';
-import QuizMode from './learning/QuizMode.jsx';
-import PredictionMode from './learning/PredictionMode.jsx';
+import LearningActivityWindow from './learning/LearningActivityWindow.jsx';
+import AcademicMatrixViewer from './learning/AcademicMatrixViewer.jsx';
 import Scoreboard from './learning/Scoreboard.jsx';
 import ResultsHistory from './learning/ResultsHistory.jsx';
 
@@ -45,7 +46,7 @@ function saveHistory(history) {
 }
 
 export default function LearningModule() {
-  const [view, setView] = useState('home'); // home | learn | quiz | practice | scoreboard | history
+  const [view, setView] = useState('hub'); // hub | theory | sandbox | quiz | practice | scoreboard | history
   const [selectedAlgo, setSelectedAlgo] = useState(null);
   const [progress, setProgress] = useState(loadProgress);
   const [history, setHistory] = useState(loadHistory);
@@ -62,7 +63,7 @@ export default function LearningModule() {
 
   // Navigation handler
   const handleNavigate = useCallback((targetView, algo = null) => {
-    setView(targetView);
+    setView(targetView === 'home' ? 'theory' : targetView);
     if (algo) setSelectedAlgo(algo);
   }, []);
 
@@ -153,12 +154,83 @@ export default function LearningModule() {
 
   const renderView = () => {
     switch (view) {
-      case 'home':
+      case 'hub':
         return (
-          <LearningHome
-            onNavigate={handleNavigate}
-            progress={progress}
-          />
+          <div className="w-full h-full flex flex-col items-center justify-center p-6 bg-black/40">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
+              <h1 className="text-3xl font-bold text-white tracking-tight mb-3">System Architecture Study Tools</h1>
+              <p className="text-slate-400 text-sm">Select a toolset to begin your learning session.</p>
+            </motion.div>
+
+            <div className="flex flex-col md:flex-row gap-6 w-full max-w-3xl">
+              {/* Button 1 */}
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => handleNavigate('theory')}
+                className="flex-1 bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 hover:border-white/20 rounded-2xl p-8 flex flex-col items-center text-center transition-all cursor-pointer group"
+              >
+                <div className="w-16 h-16 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                  <BookOpen size={32} className="text-blue-400" />
+                </div>
+                <h2 className="text-xl font-bold text-white mb-2">Theory & Quizzes</h2>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Master the 4 algorithms through interactive MCQs and 3D visualizers.
+                </p>
+              </motion.button>
+
+              {/* Button 2 */}
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => handleNavigate('sandbox')}
+                className="flex-1 bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 hover:border-white/20 rounded-2xl p-8 flex flex-col items-center text-center transition-all cursor-pointer group"
+              >
+                <div className="w-16 h-16 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                  <TableProperties size={32} className="text-purple-400" />
+                </div>
+                <h2 className="text-xl font-bold text-white mb-2">2D Exam Sandbox</h2>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Input custom reference strings and generate textbook-style 2D matrices.
+                </p>
+              </motion.button>
+            </div>
+          </div>
+        );
+
+      case 'theory':
+        return (
+          <div className="w-full h-full flex flex-col overflow-y-auto custom-scrollbar">
+            <div className="w-full max-w-6xl mx-auto px-4 pt-6">
+              <button
+                onClick={() => handleNavigate('hub')}
+                className="flex items-center gap-2 text-[11px] font-semibold text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-lg transition-colors cursor-pointer w-fit border border-white/5"
+              >
+                <ChevronLeft size={14} /> Back to Hub
+              </button>
+            </div>
+            <div className="flex-1">
+              <LearningHome
+                onNavigate={handleNavigate}
+                progress={progress}
+              />
+            </div>
+          </div>
+        );
+
+      case 'sandbox':
+        return (
+          <div className="w-full h-full flex flex-col overflow-y-auto custom-scrollbar">
+            <div className="w-full max-w-[1400px] mx-auto px-4 pt-6">
+              <button
+                onClick={() => handleNavigate('hub')}
+                className="flex items-center gap-2 text-[11px] font-semibold text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-lg transition-colors cursor-pointer w-fit border border-white/5"
+              >
+                <ChevronLeft size={14} /> Back to Hub
+              </button>
+              <AcademicMatrixViewer />
+            </div>
+          </div>
         );
 
       case 'learn':
@@ -172,7 +244,8 @@ export default function LearningModule() {
 
       case 'quiz':
         return (
-          <QuizMode
+          <LearningActivityWindow
+            activityType="quiz"
             algorithm={selectedAlgo}
             onNavigate={handleNavigate}
             onComplete={handleQuizComplete}
@@ -181,7 +254,8 @@ export default function LearningModule() {
 
       case 'practice':
         return (
-          <PredictionMode
+          <LearningActivityWindow
+            activityType="practice"
             algorithm={selectedAlgo}
             onNavigate={handleNavigate}
             onComplete={handlePracticeComplete}
@@ -207,10 +281,9 @@ export default function LearningModule() {
 
       default:
         return (
-          <LearningHome
-            onNavigate={handleNavigate}
-            progress={progress}
-          />
+          <div className="w-full h-full flex items-center justify-center">
+            <button onClick={() => handleNavigate('hub')} className="text-white">Return to Hub</button>
+          </div>
         );
     }
   };

@@ -4,7 +4,7 @@ import { Brain, ArrowRight, Trophy, Zap, RotateCcw, CheckCircle, XCircle, Chevro
 import { getQuizQuestions, ALGO_LIST } from '../../data/quizData.js';
 import s from '../../styles/mica.module.css';
 
-export default function QuizMode({ algorithm, onNavigate, onComplete }) {
+export default function QuizMode({ algorithm, onNavigate, onComplete, isEmbedded }) {
   const algoMeta = ALGO_LIST.find(a => a.key === algorithm);
   const [questions, setQuestions] = useState([]);
   const [currentQ, setCurrentQ] = useState(0);
@@ -103,8 +103,8 @@ export default function QuizMode({ algorithm, onNavigate, onComplete }) {
     const gradeColor = pct >= 90 ? '#fbbf24' : pct >= 70 ? '#6ccb5f' : pct >= 50 ? '#60cdff' : pct >= 30 ? '#f59e0b' : '#ff6b6b';
 
     return (
-      <div className="w-full h-full overflow-y-auto flex justify-center">
-        <div className="w-full max-w-2xl px-5 py-6 flex flex-col items-center justify-center min-h-full">
+      <div className={`w-full ${!isEmbedded ? 'h-full overflow-y-auto' : ''} flex justify-center`}>
+        <div className={`w-full max-w-2xl px-5 ${!isEmbedded ? 'py-6' : 'py-2'} flex flex-col items-center justify-center ${!isEmbedded ? 'min-h-full' : ''}`}>
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -202,8 +202,8 @@ export default function QuizMode({ algorithm, onNavigate, onComplete }) {
   const q = questions[currentQ];
 
   return (
-    <div className="w-full h-full overflow-y-auto flex justify-center">
-      <div className="w-full max-w-2xl px-5 py-8 flex flex-col justify-center min-h-full">
+    <div className={`w-full ${!isEmbedded ? 'h-full overflow-y-auto' : ''} flex justify-center`}>
+      <div className={`w-full max-w-2xl px-5 ${!isEmbedded ? 'py-8' : 'py-2'} flex flex-col justify-center ${!isEmbedded ? 'min-h-full' : ''}`}>
         {/* Confetti Layer */}
         <AnimatePresence>
           {confettiParticles.map(p => (
@@ -231,34 +231,36 @@ export default function QuizMode({ algorithm, onNavigate, onComplete }) {
         </AnimatePresence>
 
         {/* Header */}
-        <div className="flex items-center gap-3 mb-4">
-          <button
-            onClick={() => onNavigate('home')}
-            className={`${s.fluentBtn} px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-[var(--win-text)] cursor-pointer flex items-center gap-1`}
-          >
-            <ChevronLeft size={14} /> Back
-          </button>
-          <div className="flex-1">
-            <h2 className="text-base font-bold text-white flex items-center gap-2">
-              <Brain size={16} style={{ color: algoMeta?.color }} />
-              {algoMeta?.name} Quiz
-            </h2>
+        {!isEmbedded && (
+          <div className="flex items-center gap-3 mb-4">
+            <button
+              onClick={() => onNavigate('home')}
+              className={`${s.fluentBtn} px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-[var(--win-text)] cursor-pointer flex items-center gap-1`}
+            >
+              <ChevronLeft size={14} /> Back
+            </button>
+            <div className="flex-1">
+              <h2 className="text-base font-bold text-white flex items-center gap-2">
+                <Brain size={16} style={{ color: algoMeta?.color }} />
+                {algoMeta?.name} Quiz
+              </h2>
+            </div>
+            <div className="flex items-center gap-3">
+              {streak >= 3 && (
+                <motion.span
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="text-[11px] font-bold text-amber-400"
+                >
+                  <Flame size={13} className="inline" /> {streak} streak!
+                </motion.span>
+              )}
+              <span className="text-[11px] font-semibold font-mono text-[var(--win-accent)] bg-[var(--win-accent)]/10 px-2 py-0.5 rounded-md border border-[var(--win-accent)]/20">
+                {score} XP
+              </span>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            {streak >= 3 && (
-              <motion.span
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                className="text-[11px] font-bold text-amber-400"
-              >
-                <Flame size={13} className="inline" /> {streak} streak!
-              </motion.span>
-            )}
-            <span className="text-[11px] font-semibold font-mono text-[var(--win-accent)] bg-[var(--win-accent)]/10 px-2 py-0.5 rounded-md border border-[var(--win-accent)]/20">
-              {score} XP
-            </span>
-          </div>
-        </div>
+        )}
 
         {/* Progress Bar */}
         <div className="w-full h-1.5 bg-white/[0.06] rounded-full mb-5 overflow-hidden">

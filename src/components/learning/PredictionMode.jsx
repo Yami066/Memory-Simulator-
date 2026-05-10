@@ -17,7 +17,7 @@ function mapAlgoKey(key) {
   return key;
 }
 
-export default function PredictionMode({ algorithm, onNavigate, onComplete }) {
+export default function PredictionMode({ algorithm, onNavigate, onComplete, isEmbedded }) {
   const algoMeta = ALGO_LIST.find(a => a.key === algorithm);
   const simAlgo = mapAlgoKey(algorithm);
   const frameCount = 3;
@@ -198,8 +198,8 @@ export default function PredictionMode({ algorithm, onNavigate, onComplete }) {
   if (phase === 'done') {
     const accuracy = totalPredictions > 0 ? Math.round((correctPredictions / totalPredictions) * 100) : 0;
     return (
-      <div className="w-full h-full overflow-y-auto flex justify-center px-4 pb-6">
-        <div className="w-full max-w-lg flex flex-col items-center justify-center min-h-full">
+      <div className={`w-full ${!isEmbedded ? 'h-full overflow-y-auto' : ''} flex justify-center px-4 ${!isEmbedded ? 'pb-6' : 'pb-2'}`}>
+        <div className={`w-full max-w-lg flex flex-col items-center justify-center ${!isEmbedded ? 'min-h-full' : ''}`}>
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -272,7 +272,7 @@ export default function PredictionMode({ algorithm, onNavigate, onComplete }) {
 
   // ═══ GAME SCREEN ═══
   return (
-    <div className="w-full h-full overflow-y-auto flex justify-center px-4 pb-6">
+    <div className={`w-full ${!isEmbedded ? 'h-full overflow-y-auto' : ''} flex justify-center px-4 ${!isEmbedded ? 'pb-6' : 'pb-2'}`}>
       {/* Confetti */}
       <AnimatePresence>
         {confetti.map(p => (
@@ -288,27 +288,29 @@ export default function PredictionMode({ algorithm, onNavigate, onComplete }) {
         ))}
       </AnimatePresence>
 
-      <div className="w-full max-w-2xl flex flex-col justify-center min-h-full py-4">
+      <div className={`w-full max-w-2xl flex flex-col justify-center ${!isEmbedded ? 'min-h-full py-4' : 'py-2'}`}>
         {/* Header */}
-        <div className="flex items-center gap-3 mb-3">
-          <button onClick={() => onNavigate('home')} className={`${s.fluentBtn} px-2 py-1 rounded text-[11px] font-medium text-[var(--win-text)] cursor-pointer`}>
-            ← Back
-          </button>
-          <div className="flex-1">
-            <h2 className="text-base font-bold text-white flex items-center gap-2">
-              <Gamepad2 size={16} style={{ color: algoMeta?.color }} />
-              {algoMeta?.name} — Predict Mode
-            </h2>
+        {!isEmbedded && (
+          <div className="flex items-center gap-3 mb-3">
+            <button onClick={() => onNavigate('home')} className={`${s.fluentBtn} px-2 py-1 rounded text-[11px] font-medium text-[var(--win-text)] cursor-pointer`}>
+              ← Back
+            </button>
+            <div className="flex-1">
+              <h2 className="text-base font-bold text-white flex items-center gap-2">
+                <Gamepad2 size={16} style={{ color: algoMeta?.color }} />
+                {algoMeta?.name} — Predict Mode
+              </h2>
+            </div>
+            <div className="flex items-center gap-3">
+              {streak >= 3 && (
+                <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} className="text-[11px] font-bold text-amber-400">
+                  🔥{streak}
+                </motion.span>
+              )}
+              <span className="text-[11px] font-mono text-[var(--win-accent)]">{score} XP</span>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            {streak >= 3 && (
-              <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} className="text-[11px] font-bold text-amber-400">
-                🔥{streak}
-              </motion.span>
-            )}
-            <span className="text-[11px] font-mono text-[var(--win-accent)]">{score} XP</span>
-          </div>
-        </div>
+        )}
 
         {/* Progress */}
         <div className="w-full h-1.5 bg-white/[0.06] rounded-full mb-4 overflow-hidden">

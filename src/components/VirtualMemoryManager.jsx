@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { getApp } from '../utils/algorithms.js';
-import { Minus, Square, X, Cpu } from 'lucide-react';
+import { Minus, Square, X, Cpu, FileText } from 'lucide-react';
 import ActiveRamSlot from './ActiveRamSlot.jsx';
 import EventLogTerminal from './EventLogTerminal.jsx';
 import PageTable from './PageTable.jsx';
 import HardwareGrid from './HardwareGrid.jsx';
+import SystemDiagnosticModal from './SystemDiagnosticModal.jsx';
 import s from '../styles/mica.module.css';
 
 export default function VirtualMemoryManager({
@@ -17,6 +19,8 @@ export default function VirtualMemoryManager({
     faults, hits, stepIndex, running, paused,
     eventLog, pageTable, slotAnims
   } = state;
+
+  const [showDiagnostic, setShowDiagnostic] = useState(false);
 
   const accesses = faults + hits;
   const faultRate = accesses ? (faults / accesses * 100).toFixed(1) + '%' : '0%';
@@ -99,12 +103,17 @@ export default function VirtualMemoryManager({
                   <div
                     key={i}
                     title={app?.name || 'Page ' + id}
-                    className={`w-[32px] h-[28px] rounded-md flex items-center justify-center ${s.qChip}
+                    className={`w-[32px] h-[28px] rounded-md flex items-center justify-center relative ${s.qChip}
                       ${isDone ? 'opacity-25 scale-[0.82]' : ''}
                       ${isActive ? s.qActive : ''}`}
                     style={app ? { borderColor: app.border } : {}}
                   >
                     {app && <app.Icon size={13} style={{ color: app.color }} />}
+                    {app && (
+                      <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-black/70 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center text-[8px] text-white font-bold font-mono shadow-sm">
+                        {app.id}
+                      </span>
+                    )}
                   </div>
                 );
               })}
@@ -172,6 +181,9 @@ export default function VirtualMemoryManager({
             <div className={s.controlGroup}>
               <button onClick={() => setShowChart(true)} className={`${s.fluentBtn} px-3 py-1.5 rounded-md text-[11px] font-medium text-[var(--win-text)] cursor-pointer`}>📊 COMPARE</button>
               <button onClick={() => setShowBelady(prev => prev + 1)} className={`${s.fluentBtn} px-3 py-1.5 rounded-md text-[11px] font-medium text-[var(--win-text)] cursor-pointer`}>⚠ BELADY'S</button>
+              <button onClick={() => setShowDiagnostic(true)} className={`${s.fluentBtn} px-3 py-1.5 rounded-md text-[11px] font-medium text-[var(--win-text)] cursor-pointer flex items-center gap-1.5`}>
+                <FileText size={12} /> EXPORT LOG
+              </button>
             </div>
           </div>
         </div>
@@ -229,6 +241,12 @@ export default function VirtualMemoryManager({
         </div>
 
       </div>
+
+      <SystemDiagnosticModal 
+        show={showDiagnostic} 
+        state={state} 
+        onClose={() => setShowDiagnostic(false)} 
+      />
     </div>
   );
 }
