@@ -135,44 +135,44 @@ export default function AcademicMatrixViewer({ defaultAlgorithm = 'FIFO' }) {
   return (
     <div className="w-full max-w-6xl mx-auto pt-12 flex flex-col gap-8 pb-20">
       {/* Header */}
-      <div className="flex items-center gap-4 border-b border-[#DDD8D0] pb-6 px-2">
-        <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-500 shadow-sm">
+      <div className="flex items-center gap-4 border-b border-[#2a3a50] pb-6 px-2">
+        <div className="w-14 h-14 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-300 shadow-sm">
           <TableProperties size={28} className="drop-shadow-sm" />
         </div>
         <div>
-          <h2 className="text-3xl font-bold text-[#1A1A1A] tracking-tight">📝 Academic 2D Matrix (Exam Mode)</h2>
-          <p className="text-base text-[#6B6560] mt-1 font-medium">Verify your manual calculations with the classic textbook table visualization.</p>
+          <h2 className="text-3xl font-bold text-[#ffffff] tracking-tight">📝 Academic 2D Matrix (Exam Mode)</h2>
+          <p className="text-base text-[#8899aa] mt-1 font-medium">Verify your manual calculations with the classic textbook table visualization.</p>
         </div>
       </div>
 
       {/* Controls */}
-      <div className={`bg-[#FFFFFF] border border-[#DDD8D0] shadow-[0_2px_12px_rgba(0,0,0,0.07)] flex flex-wrap items-end gap-6 p-8 rounded-[2rem]`}>
+      <div className={`bg-[#141c2e] border border-[#2a3a50] shadow-[0_2px_12px_rgba(0,0,0,0.35)] flex flex-wrap items-end gap-6 p-8 rounded-[2rem]`}>
         <div className="flex-1 min-w-[240px] flex flex-col gap-2">
-          <label className="text-xs uppercase tracking-widest text-[#6B6560] font-bold pl-1">Reference String</label>
+          <label className="text-xs uppercase tracking-widest text-[#8899aa] font-bold pl-1">Reference String</label>
           <input 
             type="text" 
             value={refStringInput}
             onChange={(e) => setRefStringInput(e.target.value)}
-            className={`bg-[#FFFFFF] border border-[#C8C3BC] text-[#1A1A1A] w-full rounded-xl px-4 h-12 text-lg font-mono placeholder:text-[#8A8480] font-semibold outline-none focus:border-[#2D6A4F] transition-colors`}
+            className={`bg-[#1a2236] border border-[#2a3a50] text-[#ffffff] w-full rounded-xl px-4 h-12 text-lg font-mono placeholder:text-[#8899aa] font-semibold outline-none focus:border-[#00e5ff] transition-colors`}
             placeholder="e.g., 7 0 1 2 0 3 0 4 2 3"
           />
         </div>
         <div className="w-[120px] flex flex-col gap-2">
-          <label className="text-xs uppercase tracking-widest text-[#6B6560] font-bold pl-1">Frames</label>
+          <label className="text-xs uppercase tracking-widest text-[#8899aa] font-bold pl-1">Frames</label>
           <input 
             type="number" 
             min={1} max={7}
             value={framesInput}
             onChange={(e) => setFramesInput(e.target.value)}
-            className={`bg-[#FFFFFF] border border-[#C8C3BC] text-[#1A1A1A] w-full rounded-xl px-4 h-12 text-lg font-mono text-center font-semibold outline-none focus:border-[#2D6A4F] transition-colors`}
+            className={`bg-[#1a2236] border border-[#2a3a50] text-[#ffffff] w-full rounded-xl px-4 h-12 text-lg font-mono text-center font-semibold outline-none focus:border-[#00e5ff] transition-colors`}
           />
         </div>
         <div className="w-[200px] flex flex-col gap-2">
-          <label className="text-xs uppercase tracking-widest text-[#6B6560] font-bold pl-1">Algorithm</label>
+          <label className="text-xs uppercase tracking-widest text-[#8899aa] font-bold pl-1">Algorithm</label>
           <select 
             value={algoInput}
             onChange={(e) => setAlgoInput(e.target.value)}
-            className={`bg-[#FFFFFF] border border-[#C8C3BC] text-[#1A1A1A] w-full rounded-xl px-4 h-12 text-lg cursor-pointer font-semibold outline-none focus:border-[#2D6A4F] transition-colors`}
+            className={`bg-[#1a2236] border border-[#2a3a50] text-[#ffffff] w-full rounded-xl px-4 h-12 text-lg cursor-pointer font-semibold outline-none focus:border-[#00e5ff] transition-colors`}
           >
             <option value="FIFO">FIFO</option>
             <option value="LRU">LRU</option>
@@ -182,7 +182,7 @@ export default function AcademicMatrixViewer({ defaultAlgorithm = 'FIFO' }) {
         </div>
         <button 
           onClick={handleGenerate}
-          className={`bg-[#2D6A4F] text-[#FFFFFF] px-8 h-12 rounded-xl text-lg font-bold cursor-pointer flex items-center gap-3 shadow-md hover:scale-[1.02] transition-transform border-none`}
+          className={`bg-[#00e5ff] text-[#0a0f1a] px-8 h-12 rounded-xl text-lg font-bold cursor-pointer flex items-center gap-3 shadow-md hover:scale-[1.02] transition-transform border-none`}
         >
           <Play size={20} fill="currentColor" /> Generate Matrix
         </button>
@@ -195,18 +195,18 @@ export default function AcademicMatrixViewer({ defaultAlgorithm = 'FIFO' }) {
             key={`${matrixData.algorithm}-${matrixData.total}-${matrixData.faults}`}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className={`bg-[#FFFFFF] border border-[#DDD8D0] shadow-[0_2px_12px_rgba(0,0,0,0.07)] rounded-[2rem] p-8 flex flex-col gap-8`}
+            className={`bg-[#141c2e] border border-[#2a3a50] shadow-[0_2px_12px_rgba(0,0,0,0.35)] rounded-[2rem] p-8 flex flex-col gap-8`}
           >
             <div className="w-full overflow-x-auto custom-scrollbar pb-6">
-              <div className="inline-flex flex-col gap-2 p-6 bg-[#F7F4F0] rounded-2xl border border-[#DDD8D0] shadow-inner">
+              <div className="inline-flex flex-col gap-2 p-6 bg-[#1a2236] rounded-2xl border border-[#2a3a50] shadow-inner">
                 
                 {/* Reference String Row */}
                 <div className="flex gap-2 mb-4">
-                  <div className="w-[100px] shrink-0 text-right pr-6 text-sm uppercase tracking-widest text-[#6B6560] font-bold flex items-center justify-end">
+                  <div className="w-[100px] shrink-0 text-right pr-6 text-sm uppercase tracking-widest text-[#8899aa] font-bold flex items-center justify-end">
                     Ref String
                   </div>
                   {matrixData.history.map((step, idx) => (
-                    <div key={`ref-${idx}`} className={`${s.matrixCell} ${s.matrixHeaderCell} text-[#1A1A1A] bg-[#FFFFFF] border border-[#C8C3BC] rounded-t-xl shadow-sm`}>
+                    <div key={`ref-${idx}`} className={`${s.matrixCell} ${s.matrixHeaderCell} text-[#ffffff] bg-[#1e2d3d] border border-[#2a3a50] rounded-t-xl shadow-sm`}>
                       {step.page}
                     </div>
                   ))}
@@ -215,7 +215,7 @@ export default function AcademicMatrixViewer({ defaultAlgorithm = 'FIFO' }) {
                 {/* Frames Rows */}
                 {Array.from({ length: matrixData.numFrames }).map((_, fIdx) => (
                   <div key={`frame-${fIdx}`} className="flex gap-2">
-                    <div className="w-[100px] shrink-0 text-right pr-6 text-base text-[#1A1A1A] font-bold flex items-center justify-end">
+                    <div className="w-[100px] shrink-0 text-right pr-6 text-base text-[#ffffff] font-bold flex items-center justify-end">
                       Frame {fIdx}
                     </div>
                     {matrixData.history.map((step, idx) => {
@@ -224,7 +224,7 @@ export default function AcademicMatrixViewer({ defaultAlgorithm = 'FIFO' }) {
                       return (
                         <div 
                           key={`f${fIdx}-s${idx}`} 
-                          className={`${s.matrixCell} ${isTarget ? s.matrixCellFaultTarget : 'bg-[#FFFFFF]'} text-[#1A1A1A] border border-[#C8C3BC] font-bold shadow-sm`}
+                          className={`${s.matrixCell} ${isTarget ? s.matrixCellFaultTarget : 'bg-[#1a2236]'} text-[#ffffff] border border-[#2a3a50] font-bold shadow-sm`}
                         >
                           {val === -1 ? '' : val}
                         </div>
@@ -235,11 +235,11 @@ export default function AcademicMatrixViewer({ defaultAlgorithm = 'FIFO' }) {
 
                 {/* Result Row */}
                 <div className="flex gap-2 mt-4">
-                  <div className="w-[100px] shrink-0 text-right pr-6 text-sm uppercase tracking-widest text-[#6B6560] font-bold flex items-center justify-end">
+                  <div className="w-[100px] shrink-0 text-right pr-6 text-sm uppercase tracking-widest text-[#8899aa] font-bold flex items-center justify-end">
                     Result
                   </div>
                   {matrixData.history.map((step, idx) => (
-                    <div key={`res-${idx}`} className={`${s.matrixCell} ${s.matrixResultCell} bg-[#FFFFFF] border border-[#C8C3BC] rounded-b-xl shadow-sm ${step.hit ? 'text-green-600' : 'text-red-600'}`}>
+                    <div key={`res-${idx}`} className={`${s.matrixCell} ${s.matrixResultCell} bg-[#1a2236] border border-[#2a3a50] rounded-b-xl shadow-sm ${step.hit ? 'text-[#00e5ff]' : 'text-red-400'}`}>
                       {step.hit ? 'H' : 'F'}
                     </div>
                   ))}
@@ -250,21 +250,21 @@ export default function AcademicMatrixViewer({ defaultAlgorithm = 'FIFO' }) {
 
             {/* Summary Row */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
-              <div className="bg-[#FFFFFF] border border-[#DDD8D0] shadow-sm rounded-2xl p-6 flex flex-col items-center">
-                <span className="text-xs text-[#6B6560] uppercase tracking-widest font-bold mb-2">Total Accesses</span>
-                <span className="text-3xl font-mono font-bold text-[#1A1A1A]">{matrixData.total}</span>
+              <div className="bg-[#141c2e] border border-[#2a3a50] shadow-sm rounded-2xl p-6 flex flex-col items-center">
+                <span className="text-xs text-[#8899aa] uppercase tracking-widest font-bold mb-2">Total Accesses</span>
+                <span className="text-3xl font-mono font-bold text-[#ffffff]">{matrixData.total}</span>
               </div>
-              <div className="bg-[#FFFFFF] border border-[#DDD8D0] shadow-sm rounded-2xl p-6 flex flex-col items-center">
-                <span className="text-xs text-[#6B6560] uppercase tracking-widest font-bold mb-2">Page Faults</span>
-                <span className="text-3xl font-mono font-bold text-red-600">{matrixData.faults}</span>
+              <div className="bg-[#1a2236] border border-[#2a3a50] shadow-sm rounded-2xl p-6 flex flex-col items-center">
+                <span className="text-xs text-[#8899aa] uppercase tracking-widest font-bold mb-2">Page Faults</span>
+                <span className="text-3xl font-mono font-bold text-red-400">{matrixData.faults}</span>
               </div>
-              <div className="bg-[#FFFFFF] border border-[#DDD8D0] shadow-sm rounded-2xl p-6 flex flex-col items-center">
-                <span className="text-xs text-[#6B6560] uppercase tracking-widest font-bold mb-2">Page Hits</span>
-                <span className="text-3xl font-mono font-bold text-green-600">{matrixData.hits}</span>
+              <div className="bg-[#1a2236] border border-[#2a3a50] shadow-sm rounded-2xl p-6 flex flex-col items-center">
+                <span className="text-xs text-[#8899aa] uppercase tracking-widest font-bold mb-2">Page Hits</span>
+                <span className="text-3xl font-mono font-bold text-[#00e5ff]">{matrixData.hits}</span>
               </div>
-              <div className="bg-[#FFFFFF] border border-[#DDD8D0] shadow-sm rounded-2xl p-6 flex flex-col items-center">
-                <span className="text-xs text-[#6B6560] uppercase tracking-widest font-bold mb-2">Fault Rate</span>
-                <span className="text-3xl font-mono font-bold text-[#2D6A4F]">
+              <div className="bg-[#1a2236] border border-[#2a3a50] shadow-sm rounded-2xl p-6 flex flex-col items-center">
+                <span className="text-xs text-[#8899aa] uppercase tracking-widest font-bold mb-2">Fault Rate</span>
+                <span className="text-3xl font-mono font-bold text-[#00d4e8]">
                   {((matrixData.faults / matrixData.total) * 100).toFixed(1)}%
                 </span>
               </div>

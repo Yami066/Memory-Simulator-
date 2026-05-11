@@ -15,8 +15,8 @@ export default function ActiveRamSlot({ frameIdx, appId, animType, onAnimEnd }) 
 
   // Border/glow per animation type
   const hitStyle = animType === 'hit' ? {
-    borderColor: '#2D6A4F',
-    boxShadow: '0 0 16px rgba(45,106,79,0.20)',
+    borderColor: 'var(--win-accent)',
+    boxShadow: '0 0 16px rgba(0,229,255,0.20)',
   } : {};
 
   const missStyle = animType === 'fault' ? {
@@ -25,9 +25,9 @@ export default function ActiveRamSlot({ frameIdx, appId, animType, onAnimEnd }) 
   } : {};
 
   const baseStyle = {
-    background: isEmpty ? '#FAFAF9' : '#FFFFFF',
-    border: `1px solid ${isEmpty ? '#D6D1CB' : (app?.border || '#D6D1CB')}`,
-    boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+    background: isEmpty ? 'var(--win-surface2)' : 'var(--win-surface)',
+    border: `1px solid ${isEmpty ? 'var(--win-border)' : (app?.border || 'var(--win-border)')}`,
+    boxShadow: '0 2px 8px rgba(0,0,0,0.35)',
     ...hitStyle,
     ...missStyle,
   };
@@ -42,7 +42,7 @@ export default function ActiveRamSlot({ frameIdx, appId, animType, onAnimEnd }) 
       transition={animType === 'fault' ? { duration: 0.4 } : {}}
     >
       {/* Frame label */}
-      <span className="absolute top-2.5 right-3 text-xs font-mono font-bold tracking-wider" style={{ color: '#6B6560' }}>
+      <span className="absolute top-2.5 right-3 text-xs font-mono font-bold tracking-wider" style={{ color: 'var(--win-text-secondary)' }}>
         F{frameIdx}
       </span>
 
@@ -58,7 +58,7 @@ export default function ActiveRamSlot({ frameIdx, appId, animType, onAnimEnd }) 
           {/* Page ID badge */}
           <span
             className="absolute top-2 right-3 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold font-mono shadow"
-            style={{ background: '#1A1A1A', color: '#FFFFFF', border: '1px solid #D6D1CB' }}
+            style={{ background: 'var(--win-nav-active)', color: 'var(--win-text)', border: '1px solid var(--win-border)' }}
           >
             {app.id}
           </span>
@@ -69,7 +69,7 @@ export default function ActiveRamSlot({ frameIdx, appId, animType, onAnimEnd }) 
         </motion.div>
       ) : (
         /* Empty slot indicator */
-        <span className="text-[#D6D1CB] text-4xl select-none">—</span>
+        <span className="text-[var(--win-text-secondary)] text-4xl select-none">—</span>
       )}
     </motion.div>
   );

@@ -28,7 +28,7 @@ export default function DesktopEnvironment() {
   return (
     <div
       className="h-screen w-screen overflow-hidden"
-      style={{ background: '#F4F1EC' }}
+      style={{ background: 'var(--win-bg)' }}
     >
 
       {/* Desktop mini-windows (Only show in simulator mode, hidden on small screens) */}
@@ -71,6 +71,7 @@ export default function DesktopEnvironment() {
         disabled={state.running || currentView !== 'simulator'}
         currentView={currentView}
         setCurrentView={setCurrentView}
+        appClickCounts={state.appClickCounts}
       />
 
       {/* Overlays */}
