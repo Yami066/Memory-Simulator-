@@ -53,18 +53,20 @@ export default function HardwareGrid({ state }) {
             <p className="text-[10px] font-bold uppercase tracking-[0.28em]" style={{ color: 'var(--win-text-secondary)' }}>RAM</p>
             <span className="text-[9px] uppercase tracking-[0.3em]" style={{ color: 'var(--win-text-secondary)' }}>{frames.length} slots</span>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="flex flex-col gap-3">
             {frames.map((appId, index) => {
               const app = appId !== -1 ? getApp(appId) : null;
               const isActive = currentReq !== null && appId === currentReq;
               return (
                 <div
                   key={`${appId}-${index}`}
-                  className={`flex h-16 items-center justify-center rounded-none text-sm font-bold gap-2 px-3 text-center ${s.hardwareSlot}`}
+                  className={`flex h-14 items-center justify-center rounded-none text-sm font-bold gap-2 px-3 text-center ${s.hardwareSlot} ${isActive ? s.hardwareSlotActive : ''} ${appId === -1 ? s.hardwareSlotEmpty : ''}`}
                   style={{
                     background: isActive
-                      ? 'linear-gradient(180deg, rgba(30,45,61,0.98), rgba(20,28,46,0.98))'
-                      : 'rgba(20,28,46,0.88)',
+                      ? 'linear-gradient(180deg, rgba(0,229,255,0.18), rgba(20,28,46,0.98))'
+                      : appId === -1
+                      ? 'linear-gradient(180deg, rgba(10,14,18,0.92), rgba(8,10,14,0.96))'
+                      : 'linear-gradient(180deg, rgba(34,45,58,0.88), rgba(18,24,34,0.94))',
                     border: `1px solid ${isActive ? 'var(--win-accent)' : 'var(--win-border)'}`,
                     color: 'var(--win-text)',
                     boxShadow: isActive ? '0 0 0 1px rgba(0,229,255,0.12), inset 0 1px 0 rgba(255,255,255,0.04)' : 'inset 0 1px 0 rgba(255,255,255,0.02)',
