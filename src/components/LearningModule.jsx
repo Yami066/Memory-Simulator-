@@ -204,9 +204,9 @@ export default function LearningModule() {
             <div className="w-full max-w-6xl mx-auto px-4 pt-6 pb-2">
               <button
                 onClick={() => handleNavigate('hub')}
-                className="flex items-center gap-3 text-base font-bold text-[#00e5ff] bg-[#141c2e] border border-[#2a3a50] shadow-sm hover:bg-[#1e2d3d] hover:border-[#00e5ff]/50 hover:shadow-[0_0_15px_rgba(0,229,255,0.15)] px-6 py-3 rounded-xl transition-all cursor-pointer w-fit"
+                className="flex items-center gap-1.5 text-sm font-semibold text-[#8899aa] hover:text-[#ffffff] hover:bg-[#1e2d3d] bg-transparent border border-transparent px-3 py-2 rounded-lg transition-all cursor-pointer w-fit group"
               >
-                <ChevronLeft size={20} /> Back to Hub
+                <ChevronLeft size={18} className="group-hover:scale-110 transition-transform" /> Hub
               </button>
             </div>
             <div className="flex-1">
@@ -225,9 +225,9 @@ export default function LearningModule() {
             <div className="shrink-0 px-6 pt-5 pb-3 w-full">
               <button
                 onClick={() => handleNavigate('hub')}
-                className="flex items-center gap-3 text-base font-bold text-[#00e5ff] bg-[#141c2e] border border-[#2a3a50] shadow-sm hover:bg-[#1e2d3d] hover:border-[#00e5ff]/50 hover:shadow-[0_0_15px_rgba(0,229,255,0.15)] px-6 py-3 rounded-xl transition-all cursor-pointer w-fit"
+                className="flex items-center gap-1.5 text-sm font-semibold text-[#8899aa] hover:text-[#ffffff] hover:bg-[#1e2d3d] bg-transparent border border-transparent px-3 py-2 rounded-lg transition-all cursor-pointer w-fit group"
               >
-                <ChevronLeft size={20} /> Back to Hub
+                <ChevronLeft size={18} className="group-hover:scale-110 transition-transform" /> Hub
               </button>
             </div>
             {/* Scrollable content */}

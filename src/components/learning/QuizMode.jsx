@@ -202,8 +202,8 @@ export default function QuizMode({ algorithm, onNavigate, onComplete, isEmbedded
   const q = questions[currentQ];
 
   return (
-    <div className={`w-full ${!isEmbedded ? 'h-full overflow-y-auto' : ''} flex justify-center`}>
-      <div className={`w-full max-w-2xl px-5 ${!isEmbedded ? 'py-8' : 'py-2'} flex flex-col justify-center ${!isEmbedded ? 'min-h-full' : ''}`}>
+    <div className={`w-full ${!isEmbedded ? 'h-full overflow-y-auto' : 'flex items-center justify-center min-h-screen'}`}>
+      <div className={`w-full max-w-3xl px-5 ${!isEmbedded ? 'py-8' : 'py-8'} flex flex-col justify-center ${!isEmbedded ? 'min-h-full' : ''}`}>
         {/* Confetti Layer */}
         <AnimatePresence>
           {confettiParticles.map(p => (
@@ -280,7 +280,7 @@ export default function QuizMode({ algorithm, onNavigate, onComplete, isEmbedded
             animate={{ opacity: 1, x: 0, ...(shakeWrong ? { x: [-8, 8, -8, 8, 0] } : {}) }}
             exit={{ opacity: 0, x: -30 }}
             transition={{ duration: 0.3 }}
-            className={`${s.panelGlass} rounded-xl p-6 flex flex-col gap-5`}
+            className={`${s.panelGlass} rounded-xl p-8 flex flex-col gap-6`}
           >
             {/* Question Number & Difficulty */}
             <div className="flex items-center justify-between">
@@ -299,7 +299,7 @@ export default function QuizMode({ algorithm, onNavigate, onComplete, isEmbedded
             </div>
 
             {/* Question Text */}
-            <p className="text-[15px] font-semibold text-white leading-relaxed">
+            <p className="text-xl md:text-2xl font-semibold text-white leading-relaxed text-center">
               {q.question}
             </p>
 
@@ -327,13 +327,13 @@ export default function QuizMode({ algorithm, onNavigate, onComplete, isEmbedded
                     disabled={answered}
                     whileHover={!answered ? { scale: 1.01 } : {}}
                     whileTap={!answered ? { scale: 0.98 } : {}}
-                    className={`flex items-center justify-between text-left px-4 py-3 rounded-xl border transition-all duration-200 ${optClass}`}
+                    className={`flex items-center justify-between text-left px-5 py-4 rounded-xl border transition-all duration-200 ${optClass}`}
                   >
                     <div className="flex items-center gap-3">
                       <span className="w-6 h-6 rounded-md bg-white/[0.06] border border-white/10 flex items-center justify-center text-[10px] font-bold text-white/40 shrink-0">
                         {String.fromCharCode(65 + i)}
                       </span>
-                      <span className="text-[13px] leading-relaxed">{opt}</span>
+                      <span className="text-lg md:text-xl leading-relaxed">{opt}</span>
                     </div>
                     {answered && isCorrect && <CheckCircle size={16} className="text-green-400 shrink-0" />}
                     {answered && isSelected && !isCorrect && <XCircle size={16} className="text-red-400 shrink-0" />}
@@ -349,7 +349,7 @@ export default function QuizMode({ algorithm, onNavigate, onComplete, isEmbedded
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
-                  className={`p-4 rounded-xl border text-[13px] leading-relaxed ${
+                  className={`p-4 rounded-xl border text-base leading-relaxed ${
                     selected === q.correctAnswer
                       ? 'bg-green-500/[0.06] border-green-500/20 text-green-200'
                       : 'bg-amber-500/[0.06] border-amber-500/20 text-amber-200'
