@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { getApp } from '../utils/algorithms.js';
 
 export default function HardwareGrid({ state }) {
@@ -8,63 +7,81 @@ export default function HardwareGrid({ state }) {
   const currentApp = currentReq ? getApp(currentReq) : null;
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-8">
 
       {/* ── CPU / RAM / DISK row ── */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-6">
 
         {/* CPU */}
         <div
-          className="rounded-xl p-4 flex flex-col min-h-[130px]"
-          style={{ background: '#EAF4EE', border: '1px solid #A8D5BA' }}
+          className="rounded-none p-5 flex flex-col min-h-[150px]"
+          style={{
+            background: 'linear-gradient(180deg, rgba(26,34,54,0.98) 0%, rgba(15,21,36,0.98) 100%)',
+            border: '1px solid rgba(42,58,80,0.95)',
+            boxShadow: '0 16px 40px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.03)',
+          }}
         >
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: '#2D6A4F' }}>CPU</p>
-          <motion.div
-            animate={{ x: [0, 6, 0] }}
-            transition={{ duration: 2.5, repeat: Infinity }}
-            className="mt-auto rounded-lg p-3 text-sm font-medium"
-            style={{ background: '#FFFFFF', border: '1px solid #D6D1CB', color: '#1A1A1A' }}
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-[10px] font-bold uppercase tracking-[0.28em]" style={{ color: 'var(--win-accent)' }}>CPU</p>
+            <span className="text-[9px] uppercase tracking-[0.3em]" style={{ color: 'var(--win-text-secondary)' }}>Active</span>
+          </div>
+          <div
+            className="mt-auto rounded-none p-4 text-sm font-medium min-h-[72px] flex items-center"
+            style={{
+              background: 'linear-gradient(180deg, rgba(30,45,61,0.95), rgba(20,28,46,0.98))',
+              border: '1px solid var(--win-border)',
+              color: 'var(--win-text)',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03)',
+            }}
           >
             {currentReq !== null
-              ? <span>Requests <span className="font-bold" style={{ color: '#2D6A4F' }}>{currentApp ? currentApp.name : `page ${currentReq}`}</span></span>
-              : <span className="italic" style={{ color: '#6B6560' }}>Idle</span>
+              ? <span>Requests <span className="font-bold" style={{ color: 'var(--win-accent)' }}>{currentApp ? currentApp.name : `page ${currentReq}`}</span></span>
+              : <span className="italic" style={{ color: 'var(--win-text-secondary)' }}>Idle</span>
             }
-          </motion.div>
+          </div>
         </div>
 
         {/* RAM */}
         <div
-          className="rounded-xl p-4"
-          style={{ background: '#F4F1EC', border: '1px solid #E2DDD6' }}
+          className="rounded-none p-5"
+          style={{
+            background: 'linear-gradient(180deg, rgba(26,34,54,0.95) 0%, rgba(20,28,46,0.98) 100%)',
+            border: '1px solid rgba(42,58,80,0.95)',
+            boxShadow: '0 16px 40px rgba(0,0,0,0.24), inset 0 1px 0 rgba(255,255,255,0.03)',
+          }}
         >
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: '#6B6560' }}>RAM</p>
-          <div className="mt-3 grid grid-cols-2 gap-2">
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-[10px] font-bold uppercase tracking-[0.28em]" style={{ color: 'var(--win-text-secondary)' }}>RAM</p>
+            <span className="text-[9px] uppercase tracking-[0.3em]" style={{ color: 'var(--win-text-secondary)' }}>{frames.length} slots</span>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
             {frames.map((appId, index) => {
               const app = appId !== -1 ? getApp(appId) : null;
               const isActive = currentReq !== null && appId === currentReq;
               return (
-                <motion.div
+                <div
                   key={`${appId}-${index}`}
-                  animate={{ scale: isActive ? [1, 1.06, 1] : 1 }}
-                  transition={{ duration: 1.8, repeat: Infinity, delay: index * 0.1 }}
-                  className="flex h-12 items-center justify-center rounded-lg text-sm font-bold gap-1.5"
+                  className="flex h-16 items-center justify-center rounded-none text-sm font-bold gap-2 px-3 text-center"
                   style={{
-                    background: isActive ? '#EAF4EE' : '#FFFFFF',
-                    border: `1px solid ${isActive ? '#2D6A4F' : '#D6D1CB'}`,
-                    color: '#1A1A1A',
+                    background: isActive
+                      ? 'linear-gradient(180deg, rgba(30,45,61,0.98), rgba(20,28,46,0.98))'
+                      : 'rgba(20,28,46,0.88)',
+                    border: `1px solid ${isActive ? 'var(--win-accent)' : 'var(--win-border)'}`,
+                    color: 'var(--win-text)',
+                    boxShadow: isActive ? '0 0 0 1px rgba(0,229,255,0.12), inset 0 1px 0 rgba(255,255,255,0.04)' : 'inset 0 1px 0 rgba(255,255,255,0.02)',
                   }}
                 >
                   {appId === -1 ? (
-                    <span style={{ color: '#D6D1CB' }}>·</span>
+                    <span style={{ color: 'var(--win-text-secondary)' }}>·</span>
                   ) : app ? (
                     <>
-                      <app.Icon size={15} style={{ color: app.color }} />
-                      <span className="text-xs truncate max-w-[44px]" style={{ color: '#1A1A1A' }}>{app.name}</span>
+                      <app.Icon size={14} style={{ color: app.color }} />
+                      <span className="text-xs truncate max-w-[58px] leading-tight" style={{ color: 'var(--win-text)' }}>{app.name}</span>
                     </>
                   ) : (
                     <span className="text-sm">{appId}</span>
                   )}
-                </motion.div>
+                </div>
               );
             })}
           </div>
@@ -72,43 +89,31 @@ export default function HardwareGrid({ state }) {
 
         {/* DISK */}
         <div
-          className="rounded-xl p-4 flex flex-col min-h-[130px]"
-          style={{ background: '#F4F1EC', border: '1px solid #E2DDD6' }}
+          className="rounded-none p-5 flex flex-col min-h-[150px]"
+          style={{
+            background: 'linear-gradient(180deg, rgba(58,38,96,0.98) 0%, rgba(45,31,78,0.98) 100%)',
+            border: '1px solid var(--win-purple-2)',
+            boxShadow: '0 16px 40px rgba(0,0,0,0.24), inset 0 1px 0 rgba(255,255,255,0.03)',
+          }}
         >
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: '#6B6560' }}>Disk</p>
-          <motion.div
-            animate={{ opacity: [0.75, 1, 0.75] }}
-            transition={{ duration: 2.2, repeat: Infinity }}
-            className="mt-auto rounded-lg p-3 text-sm font-medium"
-            style={{ background: '#FFFFFF', border: '1px solid #D6D1CB', color: '#1A1A1A' }}
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-[10px] font-bold uppercase tracking-[0.28em]" style={{ color: 'var(--win-text-secondary)' }}>Disk</p>
+            <span className="text-[9px] uppercase tracking-[0.3em]" style={{ color: 'var(--win-text-secondary)' }}>Storage</span>
+          </div>
+          <div
+            className="mt-auto rounded-none p-4 text-sm font-medium min-h-[72px] flex items-center"
+            style={{
+              background: 'linear-gradient(180deg, rgba(30,45,61,0.95), rgba(20,28,46,0.98))',
+              border: '1px solid var(--win-border)',
+              color: 'var(--win-text)',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03)',
+            }}
           >
             {faults > 0
-              ? <span><span className="font-bold text-lg" style={{ color: '#C0392B' }}>{faults}</span> swap{faults !== 1 ? 's' : ''} done</span>
-              : <span className="italic" style={{ color: '#6B6560' }}>Standby</span>
+              ? <span><span className="font-bold text-lg" style={{ color: '#ff6b6b' }}>{faults}</span> swap{faults !== 1 ? 's' : ''} done</span>
+              : <span className="italic" style={{ color: 'var(--win-text-secondary)' }}>Standby</span>
             }
-          </motion.div>
-        </div>
-      </div>
-
-      {/* ── Live page path ── */}
-      <div
-        className="flex flex-col gap-3 rounded-xl p-4"
-        style={{ background: '#F4F1EC', border: '1px solid #E2DDD6' }}
-      >
-        <div className="flex items-center justify-between gap-4 text-sm font-bold" style={{ color: '#1A1A1A' }}>
-          <span>Live page path</span>
-          <span className="text-xs font-mono" style={{ color: '#6B6560' }}>CPU → TLB → PT → RAM → Disk</span>
-        </div>
-        <div className="flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.22em] font-bold">
-          {['Demand paging', 'Working set', 'Belady', 'Thrashing'].map((item) => (
-            <span
-              key={item}
-              className="rounded-full px-3 py-1.5"
-              style={{ background: '#FFFFFF', border: '1px solid #D6D1CB', color: '#6B6560' }}
-            >
-              {item}
-            </span>
-          ))}
+          </div>
         </div>
       </div>
 

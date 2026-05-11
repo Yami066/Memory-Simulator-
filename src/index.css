@@ -3,18 +3,21 @@
 
 /* ═══ Color tokens ═══ */
 :root {
-  --win-bg: #F4F1EC;
-  --win-surface: #FFFFFF;
-  --win-surface2: #F9F7F4;
-  --win-card: #FFFFFF;
-  --win-card-hover: #F4F1EC;
-  --win-border: #E2DDD6;
-  --win-border-hover: #C0B9B0;
-  --win-text: #1A1A1A;
-  --win-text-secondary: #6B6560;
-  --win-accent: #2D6A4F;
-  --win-accent2: #235a42;
-  --color-hit: #2D6A4F;
+  --win-bg: #0a0f1a;
+  --win-surface: #141c2e;
+  --win-surface2: #1a2236;
+  --win-card: #1a2236;
+  --win-card-hover: #1e2d3d;
+  --win-border: #2a3a50;
+  --win-border-hover: #3a4d69;
+  --win-text: #ffffff;
+  --win-text-secondary: #8899aa;
+  --win-accent: #00e5ff;
+  --win-accent2: #00d4e8;
+  --win-nav-active: #1e2d3d;
+  --win-purple: #2d1f4e;
+  --win-purple-2: #3a2660;
+  --color-hit: #00d4e8;
   --color-miss: #C0392B;
   --taskbar-h: 56px;
 }
@@ -28,6 +31,7 @@
 body {
   font-family: 'Inter', system-ui, sans-serif;
   color: var(--win-text);
+  background: var(--win-bg);
   height: 100vh;
   width: 100vw;
   overflow: hidden;
@@ -45,10 +49,10 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.16);
   border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(0, 212, 232, 0.35);
 }

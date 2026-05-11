@@ -158,8 +158,8 @@ export default function LearningModule() {
         return (
           <div className="w-full h-full flex flex-col items-center justify-center p-12">
             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-16">
-              <h1 className="text-5xl font-bold text-[#1A1A1A] tracking-tight mb-4 drop-shadow-sm">System Architecture Study Tools</h1>
-              <p className="text-[#6B6560] text-lg font-medium">Select a toolset to begin your learning session.</p>
+              <h1 className="text-5xl font-bold text-[#ffffff] tracking-tight mb-4 drop-shadow-sm">System Architecture Study Tools</h1>
+              <p className="text-[#8899aa] text-lg font-medium">Select a toolset to begin your learning session.</p>
             </motion.div>
 
             <div className="flex flex-col md:flex-row items-center justify-center gap-12 w-full max-w-6xl">
@@ -168,13 +168,13 @@ export default function LearningModule() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => handleNavigate('theory')}
-                className="w-96 h-80 bg-[#FFFFFF] border border-[#DDD8D0] shadow-[0_2px_12px_rgba(0,0,0,0.07)] hover:border-[#C8C3BC] hover:shadow-[0_4px_20px_rgba(0,0,0,0.1)] rounded-[2rem] p-10 flex flex-col items-center justify-center text-center transition-all cursor-pointer group"
+                className="w-96 h-80 bg-[#141c2e] border border-[#2a3a50] shadow-[0_2px_12px_rgba(0,0,0,0.35)] hover:border-[#00e5ff] hover:shadow-[0_4px_20px_rgba(0,229,255,0.12)] rounded-[2rem] p-10 flex flex-col items-center justify-center text-center transition-all cursor-pointer group"
               >
                 <div className="mb-8 group-hover:scale-110 transition-transform duration-500">
-                  <BookOpen size={80} className="text-blue-500 drop-shadow-sm" />
+                  <BookOpen size={80} className="text-[#00e5ff] drop-shadow-sm" />
                 </div>
-                <h2 className="text-3xl font-bold text-[#1A1A1A] mb-4 tracking-tight">Theory & Quizzes</h2>
-                <p className="text-base text-[#6B6560] leading-relaxed font-medium">
+                <h2 className="text-3xl font-bold text-[#ffffff] mb-4 tracking-tight">Theory & Quizzes</h2>
+                <p className="text-base text-[#8899aa] leading-relaxed font-medium">
                   Master the 4 algorithms through interactive MCQs and 3D visualizers.
                 </p>
               </motion.button>
@@ -184,13 +184,13 @@ export default function LearningModule() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => handleNavigate('sandbox')}
-                className="w-96 h-80 bg-[#FFFFFF] border border-[#DDD8D0] shadow-[0_2px_12px_rgba(0,0,0,0.07)] hover:border-[#C8C3BC] hover:shadow-[0_4px_20px_rgba(0,0,0,0.1)] rounded-[2rem] p-10 flex flex-col items-center justify-center text-center transition-all cursor-pointer group"
+                className="w-96 h-80 bg-[#1a2236] border border-[#2a3a50] shadow-[0_2px_12px_rgba(0,0,0,0.35)] hover:border-[#00d4e8] hover:shadow-[0_4px_20px_rgba(0,212,232,0.12)] rounded-[2rem] p-10 flex flex-col items-center justify-center text-center transition-all cursor-pointer group"
               >
                 <div className="mb-8 group-hover:scale-110 transition-transform duration-500">
-                  <TableProperties size={80} className="text-purple-500 drop-shadow-sm" />
+                  <TableProperties size={80} className="text-[#8c6cff] drop-shadow-sm" />
                 </div>
-                <h2 className="text-3xl font-bold text-[#1A1A1A] mb-4 tracking-tight">2D Exam Sandbox</h2>
-                <p className="text-base text-[#6B6560] leading-relaxed font-medium">
+                <h2 className="text-3xl font-bold text-[#ffffff] mb-4 tracking-tight">2D Exam Sandbox</h2>
+                <p className="text-base text-[#8899aa] leading-relaxed font-medium">
                   Input custom reference strings and generate textbook-style 2D matrices.
                 </p>
               </motion.button>
@@ -204,7 +204,7 @@ export default function LearningModule() {
             <div className="w-full max-w-6xl mx-auto px-4 pt-6">
               <button
                 onClick={() => handleNavigate('hub')}
-                className="flex items-center gap-2 text-[11px] font-semibold text-[#2D6A4F] hover:bg-[#F0EDE8] bg-transparent border border-transparent px-3 py-1.5 rounded-lg transition-colors cursor-pointer w-fit"
+                className="flex items-center gap-2 text-[11px] font-semibold text-[#00e5ff] hover:bg-[#1e2d3d] bg-transparent border border-transparent px-3 py-1.5 rounded-lg transition-colors cursor-pointer w-fit"
               >
                 <ChevronLeft size={14} /> Back to Hub
               </button>
@@ -224,7 +224,7 @@ export default function LearningModule() {
             <div className="w-full max-w-[1400px] mx-auto px-4 pt-6">
               <button
                 onClick={() => handleNavigate('hub')}
-                className="flex items-center gap-2 text-[11px] font-semibold text-[#2D6A4F] hover:bg-[#F0EDE8] bg-transparent border border-transparent px-3 py-1.5 rounded-lg transition-colors cursor-pointer w-fit"
+                className="flex items-center gap-2 text-[11px] font-semibold text-[#00e5ff] hover:bg-[#1e2d3d] bg-transparent border border-transparent px-3 py-1.5 rounded-lg transition-colors cursor-pointer w-fit"
               >
                 <ChevronLeft size={14} /> Back to Hub
               </button>
@@ -289,7 +289,7 @@ export default function LearningModule() {
   };
 
   return (
-    <div className="w-full h-full overflow-hidden text-[#1A1A1A]">
+    <div className="w-full h-full overflow-hidden text-[#ffffff]">
       <AnimatePresence mode="wait">
         <motion.div
           key={view + (selectedAlgo || '')}

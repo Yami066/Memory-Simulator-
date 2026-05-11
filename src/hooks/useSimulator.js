@@ -4,6 +4,7 @@ import { runAlgoStep, getApp, APPS } from '../utils/algorithms.js';
 /* ═══ Initial State ═══ */
 const createInitialState = () => ({
   refString: [],
+  appClickCounts: {},
   frames: Array(3).fill(-1),
   frameCount: 3,
   algo: 'FIFO',
@@ -32,7 +33,11 @@ function reducer(state, action) {
     case 'ADD_TO_QUEUE': {
       if (state.running) return state;
       const newRef = [...state.refString, action.appId];
-      return { ...state, refString: newRef, simStarted: false };
+      const appClickCounts = {
+        ...state.appClickCounts,
+        [action.appId]: (state.appClickCounts[action.appId] || 0) + 1,
+      };
+      return { ...state, refString: newRef, appClickCounts, simStarted: false };
     }
 
     case 'SET_ALGO':
