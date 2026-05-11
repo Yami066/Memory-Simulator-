@@ -31,7 +31,7 @@ export default function LearningActivityWindow({ activityType, algorithm, onNavi
 
       {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto custom-scrollbar flex justify-center">
-        <div className="w-full max-w-4xl px-4 py-8 flex flex-col gap-12">
+        <div className={`w-full ${activityType === 'quiz' ? 'max-w-2xl' : 'max-w-4xl'} px-4 py-8 flex flex-col gap-12`}>
           
           {/* Top Widget: Dynamic based on Activity Type */}
           <section className="w-full flex flex-col">
@@ -52,13 +52,17 @@ export default function LearningActivityWindow({ activityType, algorithm, onNavi
             )}
           </section>
 
-          {/* Divider */}
-          <div className="w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+          {activityType !== 'quiz' && (
+            <>
+              {/* Divider */}
+              <div className="w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
-          {/* Bottom Widget: Persistent Sandbox */}
-          <section className="w-full flex flex-col items-center">
-            <AcademicMatrixViewer defaultAlgorithm={algoMeta?.name || 'FIFO'} />
-          </section>
+              {/* Bottom Widget: Persistent Sandbox */}
+              <section className="w-full flex flex-col items-center">
+                <AcademicMatrixViewer defaultAlgorithm={algoMeta?.name || 'FIFO'} />
+              </section>
+            </>
+          )}
           
         </div>
       </div>

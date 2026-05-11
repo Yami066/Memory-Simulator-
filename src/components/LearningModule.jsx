@@ -204,9 +204,9 @@ export default function LearningModule() {
             <div className="w-full max-w-6xl mx-auto px-4 pt-6">
               <button
                 onClick={() => handleNavigate('hub')}
-                className="flex items-center gap-2 text-[11px] font-semibold text-[#00e5ff] hover:bg-[#1e2d3d] bg-transparent border border-transparent px-3 py-1.5 rounded-lg transition-colors cursor-pointer w-fit"
+                className="flex items-center gap-1.5 text-sm font-semibold text-[#8899aa] hover:text-[#ffffff] hover:bg-[#1e2d3d] bg-transparent border border-transparent px-3 py-2 rounded-lg transition-all cursor-pointer w-fit group"
               >
-                <ChevronLeft size={14} /> Back to Hub
+                <ChevronLeft size={18} className="group-hover:scale-110 transition-transform" /> Hub
               </button>
             </div>
             <div className="flex-1">
@@ -224,9 +224,9 @@ export default function LearningModule() {
             <div className="w-full max-w-[1400px] mx-auto px-4 pt-6">
               <button
                 onClick={() => handleNavigate('hub')}
-                className="flex items-center gap-2 text-[11px] font-semibold text-[#00e5ff] hover:bg-[#1e2d3d] bg-transparent border border-transparent px-3 py-1.5 rounded-lg transition-colors cursor-pointer w-fit"
+                className="flex items-center gap-1.5 text-sm font-semibold text-[#8899aa] hover:text-[#ffffff] hover:bg-[#1e2d3d] bg-transparent border border-transparent px-3 py-2 rounded-lg transition-all cursor-pointer w-fit group"
               >
-                <ChevronLeft size={14} /> Back to Hub
+                <ChevronLeft size={18} className="group-hover:scale-110 transition-transform" /> Hub
               </button>
               <AcademicMatrixViewer />
             </div>
