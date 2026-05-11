@@ -83,6 +83,37 @@
   background: var(--win-card-hover);
 }
 
+/* Shared card token for consistent padding and spacing */
+.card {
+  padding: var(--card-p);
+  background: var(--win-surface);
+  border: 1px solid var(--win-border);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.24), inset 0 1px 0 rgba(255,255,255,0.02);
+}
+
+/* Hardware-themed variant (hardwary / metallic look) - isolated */
+.hardwareTheme {
+  --metal-sheen: linear-gradient(180deg, rgba(220,220,225,0.03), rgba(255,255,255,0.01));
+  background: linear-gradient(180deg, #0f1114 0%, #0b0d10 100%);
+  border: 1px solid rgba(150,150,160,0.06);
+  box-shadow: 0 18px 48px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.02);
+  padding: calc(var(--card-p) + 6px);
+}
+
+.hardwareTheme .hw-header {
+  color: var(--win-accent2);
+  letter-spacing: 0.08em;
+  font-weight: 700;
+}
+
+.hardwareSlot {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.06));
+  border: 1px solid rgba(255,255,255,0.02);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.hardwareSlot:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.45); }
+
 /* RAM slot card */
 .ramSlot {
   background: rgba(15, 23, 42, 0.6);

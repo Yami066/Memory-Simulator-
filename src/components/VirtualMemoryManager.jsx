@@ -331,11 +331,12 @@ export default function VirtualMemoryManager({
               /* ── Placeholder ── */
               <div className="flex-1 flex items-center justify-center min-h-[500px]">
                 <div
-                  className="rounded-3xl p-14 text-center max-w-[420px]"
+                  className={`${s.card} rounded-3xl text-center max-w-[420px]`}
                   style={{
                     background: 'var(--win-surface)',
                     border: '2px dashed var(--win-border)',
                     boxShadow: '0 8px 30px rgba(0,0,0,0.35)',
+                    padding: '3.5rem'
                   }}
                 >
                   <Cpu size={40} className="mx-auto mb-8" style={{ color: 'var(--win-accent)' }} />

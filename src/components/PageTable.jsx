@@ -1,4 +1,5 @@
 import { getApp } from '../utils/algorithms.js';
+import s from '../styles/mica.module.css';
 
 export default function PageTable({ frames, pageTable }) {
   const entries = Object.entries(pageTable).map(([pageStr, frameIdx]) => {
@@ -9,7 +10,14 @@ export default function PageTable({ frames, pageTable }) {
   });
 
   return (
-    <div className="rounded-none overflow-hidden border border-[var(--win-border)] bg-[linear-gradient(180deg,rgba(26,34,54,0.96),rgba(20,28,46,0.98))] shadow-[0_16px_40px_rgba(0,0,0,0.24)]">
+    <div
+      className={`${s.card} rounded-none overflow-hidden shadow-[0_16px_40px_rgba(0,0,0,0.24)]`}
+      style={{
+        padding: 'calc(var(--card-p) + 3px)',
+        background: 'linear-gradient(180deg, #0f1114 0%, #0b0d10 100%)',
+        border: '1px solid rgba(150,150,160,0.06)',
+      }}
+    >
       <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--win-border)]">
         <div>
           <p className="text-[10px] uppercase tracking-[0.28em] text-[var(--win-text-secondary)] font-bold">Page table</p>

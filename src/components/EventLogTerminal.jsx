@@ -12,7 +12,14 @@ export default function EventLogTerminal({ eventLog }) {
   }, [eventLog]);
 
   return (
-    <div className="overflow-hidden rounded-none border border-[var(--win-border)] bg-[linear-gradient(180deg,rgba(26,34,54,0.98),rgba(13,18,30,0.98))] shadow-[0_16px_40px_rgba(0,0,0,0.28)]">
+    <div
+      className={`${s.card} rounded-none overflow-hidden shadow-[0_16px_40px_rgba(0,0,0,0.28)]`}
+      style={{
+        padding: 'calc(var(--card-p) + 3px)',
+        background: 'linear-gradient(180deg, #0f1114 0%, #0b0d10 100%)',
+        border: '1px solid rgba(150,150,160,0.06)',
+      }}
+    >
       <div className={`${s.terminalTitlebar} flex items-center justify-between gap-3 px-4 py-3 border-b border-[var(--win-border)]`}>
         <div className="flex items-center gap-3 min-w-0">
           <span className="w-2.5 h-2.5 rounded-full bg-[#00e5ff] shadow-[0_0_14px_rgba(0,229,255,0.8)]" />
