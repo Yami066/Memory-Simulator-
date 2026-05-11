@@ -20,6 +20,7 @@
   --color-hit: #00d4e8;
   --color-miss: #C0392B;
   --taskbar-h: 56px;
+  --card-p: 20px;
 }
 
 * {
