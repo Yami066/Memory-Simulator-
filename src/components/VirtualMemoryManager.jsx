@@ -111,7 +111,7 @@ export default function VirtualMemoryManager({
       </div>
 
       {/* ── Two-column body ── */}
-      <div className="flex-1 flex flex-col xl:flex-row overflow-hidden min-h-0" style={{ background: '#F4F1EC' }}>
+      <div className="flex-1 flex flex-col xl:flex-row overflow-hidden min-h-0" style={{ background: '#D9D3CA' }}>
 
         {/* ════ LEFT COLUMN ════ */}
         <div
@@ -120,11 +120,11 @@ export default function VirtualMemoryManager({
         >
 
           {/* Activity Queue */}
-          <div className="shrink-0 px-10 pt-9 pb-6" style={{ borderBottom: '1px solid #E2DDD6' }}>
+          <div className="shrink-0 px-10 pt-9 pb-6 flex flex-col items-center" style={{ borderBottom: '1px solid #E2DDD6' }}>
             <h2 className="text-2xl font-bold tracking-tight mb-5" style={{ color: '#1A1A1A' }}>
               Activity Queue
             </h2>
-            <div className="flex gap-2 flex-wrap">
+            <div className="flex gap-2 flex-wrap justify-center">
               {refString.length === 0 && (
                 <span className="text-sm italic" style={{ color: '#6B6560' }}>
                   Click apps on the taskbar to queue them…
@@ -163,7 +163,7 @@ export default function VirtualMemoryManager({
 
           {/* Active RAM cards */}
           <div className="flex-1 flex flex-col items-center justify-center gap-10 px-10 py-10 overflow-y-auto" style={{ background: '#FAFAF9' }}>
-            <h2 className="text-2xl font-bold tracking-tight self-start" style={{ color: '#1A1A1A' }}>
+            <h2 className="text-2xl font-bold tracking-tight" style={{ color: '#1A1A1A' }}>
               Active RAM
             </h2>
             <div className="flex gap-8 flex-wrap justify-center">
@@ -288,7 +288,7 @@ export default function VirtualMemoryManager({
         {/* ════ RIGHT COLUMN — Hardware View ════ */}
         <div
           className={`${s.rightCol} flex flex-col w-full xl:w-[520px] xl:min-w-[440px] xl:max-w-[40%] overflow-y-auto overflow-x-hidden`}
-          style={{ background: '#F4F1EC' }}
+          style={{ background: '#D9D3CA' }}
         >
           <div className="flex flex-col gap-10 p-10 pr-5">
 
