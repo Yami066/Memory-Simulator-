@@ -32,22 +32,22 @@ export default function LearningActivityWindow({ activityType, algorithm, onNavi
       {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto custom-scrollbar flex justify-center">
         <div className="w-full max-w-4xl px-4 py-8 flex flex-col gap-12">
-          
+
           {/* Top Widget: Dynamic based on Activity Type */}
           <section className="w-full flex flex-col">
             {activityType === 'quiz' ? (
-              <QuizMode 
-                algorithm={algorithm} 
-                onNavigate={onNavigate} 
-                onComplete={onComplete} 
-                isEmbedded={true} 
+              <QuizMode
+                algorithm={algorithm}
+                onNavigate={onNavigate}
+                onComplete={onComplete}
+                isEmbedded={true}
               />
             ) : (
-              <PredictionMode 
-                algorithm={algorithm} 
-                onNavigate={onNavigate} 
-                onComplete={onComplete} 
-                isEmbedded={true} 
+              <PredictionMode
+                algorithm={algorithm}
+                onNavigate={onNavigate}
+                onComplete={onComplete}
+                isEmbedded={true}
               />
             )}
           </section>
@@ -59,7 +59,7 @@ export default function LearningActivityWindow({ activityType, algorithm, onNavi
           <section className="w-full flex flex-col items-center">
             <AcademicMatrixViewer defaultAlgorithm={algoMeta?.name || 'FIFO'} />
           </section>
-          
+
         </div>
       </div>
     </div>

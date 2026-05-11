@@ -201,12 +201,12 @@ export default function LearningModule() {
       case 'theory':
         return (
           <div className="w-full h-full flex flex-col overflow-y-auto custom-scrollbar">
-            <div className="w-full max-w-6xl mx-auto px-4 pt-6">
+            <div className="w-full max-w-6xl mx-auto px-4 pt-6 pb-2">
               <button
                 onClick={() => handleNavigate('hub')}
-                className="flex items-center gap-2 text-[11px] font-semibold text-[#00e5ff] hover:bg-[#1e2d3d] bg-transparent border border-transparent px-3 py-1.5 rounded-lg transition-colors cursor-pointer w-fit"
+                className="flex items-center gap-2 text-sm font-bold text-[#00e5ff] bg-[#00e5ff]/10 border border-[#00e5ff]/20 hover:bg-[#00e5ff]/20 hover:shadow-[0_0_15px_rgba(0,229,255,0.15)] px-4 py-2.5 rounded-xl transition-all cursor-pointer w-fit"
               >
-                <ChevronLeft size={14} /> Back to Hub
+                <ChevronLeft size={16} /> Back to Hub
               </button>
             </div>
             <div className="flex-1">
@@ -220,15 +220,21 @@ export default function LearningModule() {
 
       case 'sandbox':
         return (
-          <div className="w-full h-full flex flex-col overflow-y-auto custom-scrollbar">
-            <div className="w-full max-w-[1400px] mx-auto px-4 pt-6">
+          <div className="w-full h-full flex flex-col overflow-hidden">
+            {/* Sticky Back Bar */}
+            <div className="shrink-0 px-6 pt-5 pb-3 w-full">
               <button
                 onClick={() => handleNavigate('hub')}
-                className="flex items-center gap-2 text-[11px] font-semibold text-[#00e5ff] hover:bg-[#1e2d3d] bg-transparent border border-transparent px-3 py-1.5 rounded-lg transition-colors cursor-pointer w-fit"
+                className="flex items-center gap-3 text-base font-bold text-[#00e5ff] bg-[#00e5ff]/10 border border-[#00e5ff]/25 hover:bg-[#00e5ff]/20 hover:shadow-[0_0_24px_rgba(0,229,255,0.25)] px-6 py-3.5 rounded-xl transition-all cursor-pointer"
               >
-                <ChevronLeft size={14} /> Back to Hub
+                <ChevronLeft size={20} /> Back to Hub
               </button>
-              <AcademicMatrixViewer />
+            </div>
+            {/* Scrollable content */}
+            <div className="flex-1 overflow-y-auto overflow-x-auto custom-scrollbar">
+              <div className="w-full px-6 pb-10 min-w-fit">
+                <AcademicMatrixViewer />
+              </div>
             </div>
           </div>
         );
