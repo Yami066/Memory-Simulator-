@@ -36,18 +36,18 @@ export default function LearningActivityWindow({ activityType, algorithm, onNavi
           {/* Top Widget: Dynamic based on Activity Type */}
           <section className="w-full flex flex-col">
             {activityType === 'quiz' ? (
-              <QuizMode 
-                algorithm={algorithm} 
-                onNavigate={onNavigate} 
-                onComplete={onComplete} 
-                isEmbedded={true} 
+              <QuizMode
+                algorithm={algorithm}
+                onNavigate={onNavigate}
+                onComplete={onComplete}
+                isEmbedded={true}
               />
             ) : (
-              <PredictionMode 
-                algorithm={algorithm} 
-                onNavigate={onNavigate} 
-                onComplete={onComplete} 
-                isEmbedded={true} 
+              <PredictionMode
+                algorithm={algorithm}
+                onNavigate={onNavigate}
+                onComplete={onComplete}
+                isEmbedded={true}
               />
             )}
           </section>
