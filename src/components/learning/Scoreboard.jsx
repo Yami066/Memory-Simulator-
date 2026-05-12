@@ -12,7 +12,6 @@ export default function Scoreboard({ progress, history = [], onNavigate }) {
 
   // Calculate overall stats
   const totalQuizzes = Object.values(progress).filter(p => p.quizDone).length;
-  const totalPractice = Object.values(progress).filter(p => p.practiceDone).length;
   const totalConcepts = Object.values(progress).filter(p => p.conceptDone).length;
   const avgQuizScore = (() => {
     const scores = Object.values(progress).filter(p => p.quizScore != null).map(p => p.quizScore);
@@ -93,7 +92,7 @@ export default function Scoreboard({ progress, history = [], onNavigate }) {
           {[
             { label: 'Concepts Read', value: totalConcepts, icon: CheckCircle, color: '#6ccb5f' },
             { label: 'Quizzes Passed', value: totalQuizzes, icon: Brain, color: '#60cdff' },
-            { label: 'Practices Done', value: totalPractice, icon: Target, color: '#a855f7' },
+
             { label: 'Avg Quiz Score', value: `${avgQuizScore}%`, icon: BarChart3, color: '#f59e0b' },
           ].map((stat, i) => (
             <motion.div

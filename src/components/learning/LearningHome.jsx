@@ -20,7 +20,7 @@ export default function LearningHome({ onNavigate, progress }) {
             <h1 className="text-2xl md:text-3xl font-bold text-[#ffffff] tracking-tight">Learn Page Replacement</h1>
           </div>
           <p className="text-sm md:text-base text-[#8899aa] max-w-2xl mx-auto leading-relaxed font-medium">
-            Master memory management algorithms through interactive lessons, quizzes, and hands-on practice.
+            Master memory management algorithms through interactive lessons and quizzes.
           </p>
         </motion.div>
 
@@ -57,8 +57,8 @@ export default function LearningHome({ onNavigate, progress }) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {ALGO_LIST.map((algo, idx) => {
             const ap = progress[algo.key] || {};
-            const isStarted = ap.conceptDone || ap.quizDone || ap.practiceDone;
-            const done = [ap.conceptDone, ap.quizDone, ap.practiceDone].filter(Boolean).length;
+            const isStarted = ap.conceptDone || ap.quizDone;
+            const done = [ap.conceptDone, ap.quizDone].filter(Boolean).length;
 
             return (
               <motion.div key={algo.key} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 + idx * 0.08, duration: 0.4 }}
@@ -107,7 +107,7 @@ export default function LearningHome({ onNavigate, progress }) {
                       </div>
                     </div>
                     <span className={`text-[10px] font-bold tracking-widest uppercase ${isStarted ? 'text-[#ffffff]' : 'text-[#8899aa]'}`}>
-                      {done}/3 Modules
+                      {done}/2 Modules
                     </span>
                   </div>
 
@@ -117,12 +117,12 @@ export default function LearningHome({ onNavigate, progress }) {
                         className="h-full rounded-none"
                         style={{ background: isStarted ? algo.color : '#2a3a50' }}
                         initial={{ width: 0 }}
-                        animate={{ width: `${(done / 3) * 100}%` }}
+                        animate={{ width: `${(done / 2) * 100}%` }}
                         transition={{ duration: 0.8 }}
                       />
                     </div>
                     <div className="flex gap-4">
-                      {[['Theory', ap.conceptDone], ['Quiz', ap.quizDone], ['Practice', ap.practiceDone]].map(([l, d]) => (
+                      {[['Theory', ap.conceptDone], ['Quiz', ap.quizDone]].map(([l, d]) => (
                         <div key={l} className="flex items-center gap-1.5">
                           <div className={`w-2 h-2 rounded-none ${d ? 'bg-[#00e5ff] shadow-sm' : 'bg-[#2a3a50]'}`} />
                           <span className={`text-[10px] font-bold tracking-wide ${d ? 'text-[#ffffff]' : 'text-[#8899aa]'}`}>{l}</span>

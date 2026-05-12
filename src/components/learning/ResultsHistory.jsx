@@ -145,7 +145,7 @@ export default function ResultsHistory({ history = [], onNavigate }) {
             </div>
             <h3 className="text-[15px] font-semibold text-white/60">No Results Yet</h3>
             <p className="text-[12px] text-[var(--win-text-secondary)] max-w-xs">
-              Complete a quiz or practice session to see your results here. Your progress is saved automatically.
+              Complete a quiz to see your results here. Your progress is saved automatically.
             </p>
             <button
               onClick={() => onNavigate('home')}

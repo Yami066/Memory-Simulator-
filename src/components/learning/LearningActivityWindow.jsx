@@ -1,15 +1,13 @@
 import { motion } from 'framer-motion';
-import { ChevronLeft, Brain, Gamepad2 } from 'lucide-react';
+import { ChevronLeft, Brain } from 'lucide-react';
 import QuizMode from './QuizMode.jsx';
-import PredictionMode from './PredictionMode.jsx';
-import AcademicMatrixViewer from './AcademicMatrixViewer.jsx';
 import { ALGO_LIST } from '../../data/quizData.js';
 import s from '../../styles/mica.module.css';
 
 export default function LearningActivityWindow({ activityType, algorithm, onNavigate, onComplete }) {
   const algoMeta = ALGO_LIST.find(a => a.key === algorithm);
-  const title = activityType === 'quiz' ? `Knowledge Checkpoint: ${algoMeta?.name}` : `Interactive Practice: ${algoMeta?.name}`;
-  const Icon = activityType === 'quiz' ? Brain : Gamepad2;
+  const title = `Knowledge Checkpoint: ${algoMeta?.name}`;
+  const Icon = Brain;
 
   return (
     <div className="w-full h-full flex flex-col overflow-hidden bg-black/40">
@@ -31,38 +29,17 @@ export default function LearningActivityWindow({ activityType, algorithm, onNavi
 
       {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto custom-scrollbar flex justify-center">
-        <div className={`w-full ${activityType === 'quiz' ? 'max-w-2xl' : 'max-w-4xl'} px-4 py-8 flex flex-col gap-12`}>
+        <div className="w-full max-w-2xl px-4 py-8 flex flex-col gap-12">
           
-          {/* Top Widget: Dynamic based on Activity Type */}
+          {/* Quiz Activity */}
           <section className="w-full flex flex-col">
-            {activityType === 'quiz' ? (
-              <QuizMode
-                algorithm={algorithm}
-                onNavigate={onNavigate}
-                onComplete={onComplete}
-                isEmbedded={true}
-              />
-            ) : (
-              <PredictionMode
-                algorithm={algorithm}
-                onNavigate={onNavigate}
-                onComplete={onComplete}
-                isEmbedded={true}
-              />
-            )}
+            <QuizMode
+              algorithm={algorithm}
+              onNavigate={onNavigate}
+              onComplete={onComplete}
+              isEmbedded={true}
+            />
           </section>
-
-          {activityType !== 'quiz' && (
-            <>
-              {/* Divider */}
-              <div className="w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-
-              {/* Bottom Widget: Persistent Sandbox */}
-              <section className="w-full flex flex-col items-center">
-                <AcademicMatrixViewer defaultAlgorithm={algoMeta?.name || 'FIFO'} />
-              </section>
-            </>
-          )}
           
         </div>
       </div>
