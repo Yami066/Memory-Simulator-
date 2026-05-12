@@ -32,7 +32,7 @@ export default function LearningHome({ onNavigate, progress }) {
             <StatItem icon={Sparkles} iconColor="text-[#8c6cff]" bg="bg-purple-500/15" label="Progress" value={`${Math.round((totalCompleted / ALGO_LIST.length) * 100)}%`} valueColor="text-[#ffffff]" />
 
             <button onClick={() => onNavigate('scoreboard')} className="flex-1 p-5 flex items-center justify-center gap-4 cursor-pointer hover:bg-[#1e2d3d] transition-colors group">
-              <div className="w-12 h-12 rounded-2xl bg-[#2d1f4e] border border-[#3a2660] flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+              <div className="w-12 h-12 rounded-none bg-[#2d1f4e] border border-[#3a2660] flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
                 <Trophy size={20} className="text-[#8c6cff]" />
               </div>
               <div className="text-left">
@@ -42,7 +42,7 @@ export default function LearningHome({ onNavigate, progress }) {
             </button>
 
             <button onClick={() => onNavigate('history')} className="flex-1 p-5 flex items-center justify-center gap-4 cursor-pointer hover:bg-[#1e2d3d] transition-colors group">
-              <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+              <div className="w-12 h-12 rounded-none bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
                 <Clock size={20} className="text-[#00d4e8]" />
               </div>
               <div className="text-left">
@@ -83,7 +83,7 @@ export default function LearningHome({ onNavigate, progress }) {
                       <p className="text-[10px] text-[#8899aa] font-bold uppercase tracking-widest mt-1">{algo.fullName}</p>
                     </div>
                   </div>
-                  <span className={`shrink-0 text-[10px] uppercase tracking-widest font-bold px-4 py-1.5 rounded-full border shadow-sm ${algo.difficulty === 'Easy' ? 'text-green-700 bg-green-500/10 border-green-500/20' : algo.difficulty === 'Medium' ? 'text-amber-700 bg-amber-500/10 border-amber-500/20' : 'text-red-700 bg-red-500/10 border-red-500/20'}`}>
+                  <span className={`shrink-0 text-[10px] uppercase tracking-widest font-bold px-4 py-1.5 rounded-none border shadow-sm ${algo.difficulty === 'Easy' ? 'text-green-700 bg-green-500/10 border-green-500/20' : algo.difficulty === 'Medium' ? 'text-amber-700 bg-amber-500/10 border-amber-500/20' : 'text-red-700 bg-red-500/10 border-red-500/20'}`}>
                     {algo.difficulty}
                   </span>
                 </div>
@@ -112,9 +112,9 @@ export default function LearningHome({ onNavigate, progress }) {
                   </div>
 
                   <div className="flex flex-col gap-3">
-                    <div className="w-full h-1.5 bg-[#2a3a50] rounded-full overflow-hidden">
+                    <div className="w-full h-1.5 bg-[#2a3a50] rounded-none overflow-hidden">
                       <motion.div
-                        className="h-full rounded-full"
+                        className="h-full rounded-none"
                         style={{ background: isStarted ? algo.color : '#2a3a50' }}
                         initial={{ width: 0 }}
                         animate={{ width: `${(done / 3) * 100}%` }}
@@ -124,7 +124,7 @@ export default function LearningHome({ onNavigate, progress }) {
                     <div className="flex gap-4">
                       {[['Theory', ap.conceptDone], ['Quiz', ap.quizDone], ['Practice', ap.practiceDone]].map(([l, d]) => (
                         <div key={l} className="flex items-center gap-1.5">
-                          <div className={`w-2 h-2 rounded-full ${d ? 'bg-[#00e5ff] shadow-sm' : 'bg-[#2a3a50]'}`} />
+                          <div className={`w-2 h-2 rounded-none ${d ? 'bg-[#00e5ff] shadow-sm' : 'bg-[#2a3a50]'}`} />
                           <span className={`text-[10px] font-bold tracking-wide ${d ? 'text-[#ffffff]' : 'text-[#8899aa]'}`}>{l}</span>
                         </div>
                       ))}
@@ -133,15 +133,12 @@ export default function LearningHome({ onNavigate, progress }) {
                 </div>
 
                 {/* Actions */}
-                <div className="grid grid-cols-3 gap-4 relative z-[1] mt-auto pt-2">
+                <div className="grid grid-cols-2 gap-4 relative z-[1] mt-auto pt-2">
                   <button onClick={() => onNavigate('learn', algo.key)} className={`px-4 py-3 rounded-none text-xs md:text-sm font-bold text-white cursor-pointer flex items-center justify-center gap-2 hover:scale-[1.02] transition-transform shadow-sm border`} style={{ background: algo.color, borderColor: `${algo.color}80` }}>
                     <BookOpen size={16} /> Learn
                   </button>
                   <button onClick={() => onNavigate('quiz', algo.key)} className={`bg-[#1e2d3d] text-[#ffffff] border border-[#2a3a50] px-4 py-3 rounded-none text-xs md:text-sm font-bold cursor-pointer flex items-center justify-center gap-2 hover:scale-[1.02] transition-transform shadow-sm`}>
                     <Brain size={16} /> Quiz
-                  </button>
-                  <button onClick={() => onNavigate('practice', algo.key)} className={`bg-[#1e2d3d] text-[#ffffff] border border-[#2a3a50] px-4 py-3 rounded-none text-xs md:text-sm font-bold cursor-pointer flex items-center justify-center gap-2 hover:scale-[1.02] transition-transform shadow-sm`}>
-                    <Gamepad2 size={16} /> Practice
                   </button>
                 </div>
               </motion.div>
@@ -156,7 +153,7 @@ export default function LearningHome({ onNavigate, progress }) {
 function StatItem({ icon: Icon, iconColor, bg, label, value, valueColor }) {
   return (
     <div className="flex-1 p-5 flex items-center justify-center gap-4 border-[#2a3a50]">
-      <div className={`w-12 h-12 rounded-2xl ${bg} flex items-center justify-center shrink-0`}>
+      <div className={`w-12 h-12 rounded-none ${bg} flex items-center justify-center shrink-0`}>
         <Icon size={20} className={iconColor} />
       </div>
       <div className="text-left">

@@ -43,7 +43,7 @@ export default function Scoreboard({ progress, history = [], onNavigate }) {
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          className={`${s.panelGlass} rounded-xl p-6 mb-5 relative overflow-hidden`}
+          className={`${s.panelGlass} rounded-none p-6 mb-5 relative overflow-hidden`}
         >
           <div className="absolute inset-0 opacity-20 pointer-events-none"
             style={{ background: 'radial-gradient(ellipse at 30% 50%, rgba(251,191,36,0.3) 0%, transparent 60%)' }} />
@@ -73,9 +73,9 @@ export default function Scoreboard({ progress, history = [], onNavigate }) {
             <div className="flex-1 min-w-[200px]">
               <p className="text-sm text-[var(--win-text-secondary)] mb-1">Total Experience</p>
               <p className="text-3xl font-bold font-mono text-amber-400 mb-2">{totalXP} XP</p>
-              <div className="w-full h-2 bg-white/[0.06] rounded-full overflow-hidden">
+              <div className="w-full h-2 bg-white/[0.06] rounded-none overflow-hidden">
                 <motion.div
-                  className="h-full rounded-full bg-gradient-to-r from-amber-500 to-amber-300"
+                  className="h-full rounded-none bg-gradient-to-r from-amber-500 to-amber-300"
                   initial={{ width: 0 }}
                   animate={{ width: `${levelProgress}%` }}
                   transition={{ duration: 1, ease: 'easeOut' }}
@@ -101,7 +101,7 @@ export default function Scoreboard({ progress, history = [], onNavigate }) {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 + i * 0.05 }}
-              className={`${s.panelGlass} rounded-xl p-4 flex flex-col gap-2`}
+              className={`${s.panelGlass} rounded-none p-4 flex flex-col gap-2`}
             >
               <stat.icon size={18} style={{ color: stat.color }} />
               <p className="text-[9px] uppercase tracking-wider text-[var(--win-text-secondary)]">{stat.label}</p>
@@ -122,10 +122,9 @@ export default function Scoreboard({ progress, history = [], onNavigate }) {
             const steps = [
               { label: 'Learn', done: p.conceptDone },
               { label: 'Quiz', done: p.quizDone },
-              { label: 'Practice', done: p.practiceDone },
             ];
             const completedSteps = steps.filter(st => st.done).length;
-            const pct = Math.round((completedSteps / 3) * 100);
+            const pct = Math.round((completedSteps / 2) * 100);
 
             return (
               <motion.div
@@ -133,11 +132,11 @@ export default function Scoreboard({ progress, history = [], onNavigate }) {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.15 + i * 0.05 }}
-                className={`${s.panelGlass} rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3`}
+                className={`${s.panelGlass} rounded-none p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3`}
               >
                 {/* Algo icon */}
                 <div
-                  className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
+                  className="w-10 h-10 rounded-none flex items-center justify-center shrink-0"
                   style={{ background: `${algo.color}20`, border: `1px solid ${algo.color}40` }}
                 >
                   <span className="text-lg font-bold" style={{ color: algo.color }}>
@@ -149,16 +148,16 @@ export default function Scoreboard({ progress, history = [], onNavigate }) {
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-sm font-bold text-white">{algo.name}</span>
                     {pct === 100 && (
-                      <span className="text-[8px] uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-green-500/15 text-green-300 border border-green-500/20 font-bold">
+                      <span className="text-[8px] uppercase tracking-wider px-1.5 py-0.5 rounded-none bg-green-500/15 text-green-300 border border-green-500/20 font-bold">
                         ✓ Mastered
                       </span>
                     )}
                   </div>
 
                   {/* Progress bar */}
-                  <div className="w-full h-1.5 bg-white/[0.06] rounded-full overflow-hidden mb-1.5">
+                  <div className="w-full h-1.5 bg-white/[0.06] rounded-none overflow-hidden mb-1.5">
                     <motion.div
-                      className="h-full rounded-full"
+                      className="h-full rounded-none"
                       style={{ background: algo.color }}
                       initial={{ width: 0 }}
                       animate={{ width: `${pct}%` }}
@@ -197,7 +196,7 @@ export default function Scoreboard({ progress, history = [], onNavigate }) {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
           onClick={() => onNavigate('history')}
-          className={`${s.panelGlass} rounded-xl p-4 mt-5 flex items-center justify-center gap-2 cursor-pointer hover:border-white/20 transition-all w-full`}
+          className={`${s.panelGlass} rounded-none p-4 mt-5 flex items-center justify-center gap-2 cursor-pointer hover:border-white/20 transition-all w-full`}
         >
           <Clock size={15} className="text-[var(--win-accent)]" />
           <span className="text-[13px] font-semibold text-[var(--win-accent)]">View Full Results History</span>

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  ChevronLeft, Brain, Target, Clock, Flame, Zap, Trophy,
+  ChevronLeft, Brain, Clock, Flame, Zap, Trophy,
   Filter, Calendar, TrendingUp, Award, CheckCircle, BarChart3
 } from 'lucide-react';
 import { ALGO_LIST } from '../../data/quizData.js';
@@ -35,29 +35,28 @@ function getAlgoMeta(key) {
 }
 
 export default function ResultsHistory({ history = [], onNavigate }) {
-  const [filter, setFilter] = useState('all'); // all | quiz | practice
+  const [filter, setFilter] = useState('all'); // all | quiz
   const [algoFilter, setAlgoFilter] = useState('all');
 
-  const filtered = history.filter(item => {
+  const quizOnly = history.filter(item => item.type === 'quiz');
+  const filtered = quizOnly.filter(item => {
     if (filter !== 'all' && item.type !== filter) return false;
     if (algoFilter !== 'all' && item.algorithm !== algoFilter) return false;
     return true;
   });
 
   // Summary stats
-  const totalAttempts = history.length;
-  const quizAttempts = history.filter(h => h.type === 'quiz');
-  const practiceAttempts = history.filter(h => h.type === 'practice');
+  const quizAttempts = quizOnly;
+  const totalAttempts = quizAttempts.length;
   const avgQuizScore = quizAttempts.length > 0
     ? Math.round(quizAttempts.reduce((sum, h) => sum + (h.score / h.total) * 100, 0) / quizAttempts.length)
     : 0;
-  const bestStreak = history.reduce((max, h) => Math.max(max, h.maxStreak || 0), 0);
-  const totalXPEarned = history.reduce((sum, h) => sum + (h.xpEarned || 0), 0);
+  const bestStreak = quizAttempts.reduce((max, h) => Math.max(max, h.maxStreak || 0), 0);
+  const totalXPEarned = quizAttempts.reduce((sum, h) => sum + (h.xpEarned || 0), 0);
 
   const filterTabs = [
-    { key: 'all', label: 'All', count: history.length },
+    { key: 'all', label: 'All', count: quizAttempts.length },
     { key: 'quiz', label: 'Quizzes', count: quizAttempts.length },
-    { key: 'practice', label: 'Practice', count: practiceAttempts.length },
   ];
 
   // Get unique algorithms that have history
@@ -105,7 +104,7 @@ export default function ResultsHistory({ history = [], onNavigate }) {
             <button
               key={tab.key}
               onClick={() => setFilter(tab.key)}
-              className={`px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all cursor-pointer border ${
+              className={`px-3 py-1.5 rounded-none text-[11px] font-medium transition-all cursor-pointer border ${
                 filter === tab.key
                   ? 'bg-[var(--win-accent)]/15 border-[var(--win-accent)]/30 text-[var(--win-accent)]'
                   : 'bg-white/[0.03] border-white/[0.06] text-[var(--win-text-secondary)] hover:bg-white/[0.06]'
@@ -123,7 +122,7 @@ export default function ResultsHistory({ history = [], onNavigate }) {
               <select
                 value={algoFilter}
                 onChange={e => setAlgoFilter(e.target.value)}
-                className="px-2 py-1 rounded-lg text-[11px] bg-white/[0.04] border border-white/[0.08] text-[var(--win-text-secondary)] cursor-pointer outline-none"
+                className="px-2 py-1 rounded-none text-[11px] bg-white/[0.04] border border-white/[0.08] text-[var(--win-text-secondary)] cursor-pointer outline-none"
               >
                 <option value="all">All Algorithms</option>
                 {usedAlgos.map(key => (
@@ -139,9 +138,9 @@ export default function ResultsHistory({ history = [], onNavigate }) {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className={`${s.panelGlass} rounded-xl p-10 flex flex-col items-center justify-center gap-3 text-center`}
+            className={`${s.panelGlass} rounded-none p-10 flex flex-col items-center justify-center gap-3 text-center`}
           >
-            <div className="w-14 h-14 rounded-2xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center">
+            <div className="w-14 h-14 rounded-none bg-white/[0.04] border border-white/[0.08] flex items-center justify-center">
               <Clock size={24} className="text-white/20" />
             </div>
             <h3 className="text-[15px] font-semibold text-white/60">No Results Yet</h3>
@@ -150,7 +149,7 @@ export default function ResultsHistory({ history = [], onNavigate }) {
             </p>
             <button
               onClick={() => onNavigate('home')}
-              className={`${s.fluentBtnPrimary} mt-2 px-4 py-2 rounded-lg text-[11px] font-semibold text-white cursor-pointer`}
+              className={`${s.fluentBtnPrimary} mt-2 px-4 py-2 rounded-none text-[11px] font-semibold text-white cursor-pointer`}
             >
               Start Learning
             </button>
@@ -172,9 +171,9 @@ export default function ResultsHistory({ history = [], onNavigate }) {
 /* ═══ SUMMARY CARD ═══ */
 function SummaryCard({ icon: Icon, color, label, value }) {
   return (
-    <div className={`${s.panelGlass} rounded-xl p-4 flex items-center gap-3`}>
+    <div className={`${s.panelGlass} rounded-none p-4 flex items-center gap-3`}>
       <div
-        className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+        className="w-9 h-9 rounded-none flex items-center justify-center shrink-0"
         style={{ background: `${color}15`, border: `1px solid ${color}25` }}
       >
         <Icon size={16} style={{ color }} />
@@ -190,7 +189,6 @@ function SummaryCard({ icon: Icon, color, label, value }) {
 /* ═══ HISTORY CARD ═══ */
 function HistoryCard({ item, index }) {
   const algo = getAlgoMeta(item.algorithm);
-  const isQuiz = item.type === 'quiz';
 
   return (
     <motion.div
@@ -198,55 +196,36 @@ function HistoryCard({ item, index }) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ delay: index * 0.03, duration: 0.3 }}
-      className={`${s.panelGlass} rounded-xl p-4 flex items-center gap-4 group hover:border-white/15 transition-all`}
+      className={`${s.panelGlass} rounded-none p-4 flex items-center gap-4 group hover:border-white/15 transition-all`}
     >
       {/* Type Icon */}
       <div
-        className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+        className="w-10 h-10 rounded-none flex items-center justify-center shrink-0"
         style={{ background: `${algo.color}15`, border: `1px solid ${algo.color}30` }}
       >
-        {isQuiz
-          ? <Brain size={18} style={{ color: algo.color }} />
-          : <Target size={18} style={{ color: algo.color }} />
-        }
+        <Brain size={18} style={{ color: algo.color }} />
       </div>
 
       {/* Main Info */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-0.5">
           <span className="text-[13px] font-bold text-white">{algo.name}</span>
-          <span className={`text-[8px] uppercase tracking-wider px-1.5 py-0.5 rounded-full border font-semibold ${
-            isQuiz
-              ? 'text-blue-300 bg-blue-500/10 border-blue-500/20'
-              : 'text-purple-300 bg-purple-500/10 border-purple-500/20'
-          }`}>
-            {isQuiz ? 'Quiz' : 'Practice'}
+          <span className="text-[8px] uppercase tracking-wider px-1.5 py-0.5 rounded-none border font-semibold text-blue-300 bg-blue-500/10 border-blue-500/20">
+            Quiz
           </span>
         </div>
 
         {/* Details row */}
         <div className="flex items-center gap-3 text-[11px] text-[var(--win-text-secondary)]">
-          {isQuiz ? (
-            <>
-              <span className="flex items-center gap-1">
-                <CheckCircle size={10} className="text-green-400" />
-                {item.correct}/{item.totalQuestions} correct
-              </span>
-              {item.maxStreak > 0 && (
-                <span className="flex items-center gap-1">
-                  <Flame size={10} className="text-amber-400" />
-                  {item.maxStreak} streak
-                </span>
-              )}
-            </>
-          ) : (
-            <>
-              <span className="flex items-center gap-1">
-                <Target size={10} className="text-purple-400" />
-                {item.accuracy}% accuracy
-              </span>
-              <span>{item.correct}/{item.total} predictions</span>
-            </>
+          <span className="flex items-center gap-1">
+            <CheckCircle size={10} className="text-green-400" />
+            {item.correct}/{item.totalQuestions} correct
+          </span>
+          {item.maxStreak > 0 && (
+            <span className="flex items-center gap-1">
+              <Flame size={10} className="text-amber-400" />
+              {item.maxStreak} streak
+            </span>
           )}
           <span className="flex items-center gap-1 text-[10px] text-white/30">
             <Calendar size={9} />
@@ -257,9 +236,9 @@ function HistoryCard({ item, index }) {
 
       {/* Score / Grade */}
       <div className="flex items-center gap-3 shrink-0">
-        {isQuiz && item.grade && (
+        {item.grade && (
           <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-[14px] font-black"
+            className="w-8 h-8 rounded-none flex items-center justify-center text-[14px] font-black"
             style={{
               background: `${getGradeColor(item.grade)}15`,
               border: `1px solid ${getGradeColor(item.grade)}30`,
@@ -271,7 +250,7 @@ function HistoryCard({ item, index }) {
         )}
         <div className="text-right">
           <p className="text-[14px] font-bold font-mono" style={{ color: algo.color }}>
-            {isQuiz ? `${Math.round((item.score / item.total) * 100)}%` : `${item.accuracy}%`}
+            {Math.round((item.score / item.total) * 100)}%
           </p>
           <p className="text-[9px] text-amber-400 font-semibold flex items-center justify-end gap-0.5">
             <Zap size={8} /> +{item.xpEarned} XP
