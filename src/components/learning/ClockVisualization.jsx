@@ -24,6 +24,8 @@ export default function ClockVisualization({ compact = false }) {
   const [log, setLog] = useState([]);
   const [animatingSlot, setAnimatingSlot] = useState(null);
   const [animType, setAnimType] = useState(null); // 'hit' | 'evict' | 'skip'
+  const [isScanning, setIsScanning] = useState(false);
+  const [scanPos, setScanPos] = useState(0);
 
   const radius = compact ? 90 : 120;
   const cx = compact ? 130 : 160;
@@ -43,6 +45,49 @@ export default function ClockVisualization({ compact = false }) {
   };
 
   const doStep = useCallback(() => {
+    // If in scanning phase, continue scanning
+    if (isScanning) {
+      const requestedPage = refString[refIdx];
+      let newScanPos = scanPos;
+      let slotsClone = [...slots.map(sl => ({ ...sl }))];
+
+      // Check current position for ref bit 0
+      if (slotsClone[newScanPos].refBit === 0) {
+        // EVICT - found a victim
+        const evictedPage = slotsClone[newScanPos].page;
+        slotsClone[newScanPos] = { page: requestedPage, refBit: 1 };
+        setSlots(slotsClone);
+        setPointer((newScanPos + 1) % frameCount);
+        setAnimatingSlot(newScanPos);
+        setAnimType('evict');
+        setLog(prev => [...prev.slice(-8), {
+          msg: `Page ${requestedPage} → FAULT (evicted page ${evictedPage} at slot ${newScanPos})`,
+          type: 'fault'
+        }]);
+        setRefIdx(prev => prev + 1);
+        setIsScanning(false);
+        setScanPos(0);
+        setTimeout(() => { setAnimatingSlot(null); setAnimType(null); }, 600);
+        return;
+      } else {
+        // Second chance - reset ref bit and move to next
+        slotsClone[newScanPos].refBit = 0;
+        setSlots(slotsClone);
+        setPointer(newScanPos);
+        setAnimatingSlot(newScanPos);
+        setAnimType('skip');
+        setLog(prev => [...prev.slice(-8), {
+          msg: `Pointer at slot ${newScanPos}: ref bit 1 → reset to 0 (second chance)`,
+          type: 'skip'
+        }]);
+        const nextPos = (newScanPos + 1) % frameCount;
+        setScanPos(nextPos);
+        setTimeout(() => { setAnimatingSlot(null); setAnimType(null); }, 600);
+        return;
+      }
+    }
+
+    // Normal step (not scanning)
     if (refIdx >= refString.length) return;
 
     const requestedPage = refString[refIdx];
@@ -59,49 +104,17 @@ export default function ClockVisualization({ compact = false }) {
       return;
     }
 
-    // FAULT — scan for ref bit 0
-    let p = pointer;
-    let slotsClone = [...slots.map(sl => ({ ...sl }))];
-    let scanned = 0;
-
-    while (scanned < frameCount * 2) {
-      if (slotsClone[p].refBit === 0) {
-        // Evict this slot
-        const evictedPage = slotsClone[p].page;
-        slotsClone[p] = { page: requestedPage, refBit: 1 };
-        setSlots(slotsClone);
-        setPointer((p + 1) % frameCount);
-        setAnimatingSlot(p);
-        setAnimType('evict');
-        setLog(prev => [...prev.slice(-8), {
-          msg: `Page ${requestedPage} → FAULT (evicted page ${evictedPage} at slot ${p})`,
-          type: 'fault'
-        }]);
-        setRefIdx(prev => prev + 1);
-        setTimeout(() => { setAnimatingSlot(null); setAnimType(null); }, 600);
-        return;
-      } else {
-        // Second chance — reset ref bit
-        slotsClone[p].refBit = 0;
-        setLog(prev => [...prev.slice(-8), {
-          msg: `Pointer at slot ${p}: ref bit 1 → reset to 0 (second chance)`,
-          type: 'skip'
-        }]);
-        p = (p + 1) % frameCount;
-        scanned++;
-      }
-    }
-    // Fallback — should not reach
-    setSlots(slotsClone);
-    setPointer(p);
-  }, [refIdx, refString, slots, pointer, frameCount]);
+    // FAULT — start scanning for ref bit 0
+    setIsScanning(true);
+    setScanPos(pointer);
+  }, [refIdx, refString, slots, pointer, frameCount, isScanning, scanPos]);
 
   useEffect(() => {
     if (!running) return;
-    if (refIdx >= refString.length) { setRunning(false); return; }
+    if (refIdx >= refString.length && !isScanning) { setRunning(false); return; }
     const timer = setTimeout(doStep, 1200);
     return () => clearTimeout(timer);
-  }, [running, refIdx, doStep, refString.length]);
+  }, [running, refIdx, doStep, refString.length, isScanning]);
 
   const handleReset = () => {
     setRunning(false);
@@ -111,6 +124,8 @@ export default function ClockVisualization({ compact = false }) {
     setLog([]);
     setAnimatingSlot(null);
     setAnimType(null);
+    setIsScanning(false);
+    setScanPos(0);
   };
 
   return (
@@ -163,14 +178,14 @@ export default function ClockVisualization({ compact = false }) {
         <motion.line
           x1={cx}
           y1={cy}
-          x2={getSlotPos(pointer).x}
-          y2={getSlotPos(pointer).y}
+          x2={getSlotPos(isScanning ? scanPos : pointer).x}
+          y2={getSlotPos(isScanning ? scanPos : pointer).y}
           stroke="var(--win-accent)"
           strokeWidth="2"
           strokeLinecap="round"
           animate={{
-            x2: getSlotPos(pointer).x,
-            y2: getSlotPos(pointer).y,
+            x2: getSlotPos(isScanning ? scanPos : pointer).x,
+            y2: getSlotPos(isScanning ? scanPos : pointer).y,
           }}
           transition={{ type: 'spring', stiffness: 200, damping: 20 }}
           style={{ filter: 'drop-shadow(0 0 6px rgba(96,205,255,0.5))' }}
@@ -181,8 +196,8 @@ export default function ClockVisualization({ compact = false }) {
           r="5"
           fill="var(--win-accent)"
           animate={{
-            cx: getSlotPos(pointer).x,
-            cy: getSlotPos(pointer).y,
+            cx: getSlotPos(isScanning ? scanPos : pointer).x,
+            cy: getSlotPos(isScanning ? scanPos : pointer).y,
           }}
           transition={{ type: 'spring', stiffness: 200, damping: 20 }}
           style={{ filter: 'drop-shadow(0 0 8px rgba(96,205,255,0.6))' }}
@@ -192,7 +207,8 @@ export default function ClockVisualization({ compact = false }) {
         {slots.map((slot, i) => {
           const pos = getSlotPos(i);
           const isAnimating = animatingSlot === i;
-          const isPointer = pointer === i;
+          const currentPointerPos = isScanning ? scanPos : pointer;
+          const isPointer = currentPointerPos === i;
           let fillColor = 'rgba(40,40,40,0.8)';
           let strokeColor = 'rgba(255,255,255,0.1)';
 
@@ -268,7 +284,7 @@ export default function ClockVisualization({ compact = false }) {
       <div className="flex gap-2">
         <button
           onClick={() => setRunning(r => !r)}
-          disabled={refIdx >= refString.length}
+          disabled={refIdx >= refString.length && !isScanning}
           className={`${s.fluentBtnPrimary} px-3 py-1.5 rounded-md text-[11px] font-semibold text-white cursor-pointer flex items-center gap-1.5 disabled:opacity-40`}
         >
           {running ? <Pause size={12} /> : <Play size={12} />}
@@ -276,7 +292,7 @@ export default function ClockVisualization({ compact = false }) {
         </button>
         <button
           onClick={doStep}
-          disabled={running || refIdx >= refString.length}
+          disabled={running || (refIdx >= refString.length && !isScanning)}
           className={`${s.fluentBtn} px-3 py-1.5 rounded-md text-[11px] font-medium text-[var(--win-text)] cursor-pointer flex items-center gap-1.5 disabled:opacity-40`}
         >
           <SkipForward size={12} /> Step

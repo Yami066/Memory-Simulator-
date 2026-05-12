@@ -178,12 +178,6 @@ export default function QuizMode({ algorithm, onNavigate, onComplete, isEmbedded
               >
                 <RotateCcw size={12} /> Retry
               </button>
-              <button
-                onClick={() => onNavigate('practice', algorithm)}
-                className={`${s.fluentBtnPrimary} px-4 py-2 rounded-lg text-[11px] font-semibold text-white cursor-pointer flex items-center gap-1.5`}
-              >
-                Practice Mode <ArrowRight size={12} />
-              </button>
             </div>
 
             <button
